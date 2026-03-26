@@ -70,14 +70,13 @@ export default function BuscarInstituicoes() {
         {/* FILTROS */}
         <div className="bg-white p-6 rounded-3xl shadow-sm border mb-10 flex flex-col md:flex-row gap-4 items-end">
 
-          <div className="flex-1 w-full">
-            <InputTexto
-              label="Nome ou CNPJ"
-              placeholder="Ex: Instituto..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-            />
-          </div>
+          <InputTexto
+  label="Nome ou CNPJ"
+  placeholder="Ex: Instituto..."
+  aria-label="Buscar instituição por nome ou CNPJ"
+  value={busca}
+  onChange={(e) => setBusca(e.target.value)}
+/>
 
           <div className="w-full md:w-48">
             <SelectUF value={uf} onChange={(e) => setUf(e.target.value)} />
