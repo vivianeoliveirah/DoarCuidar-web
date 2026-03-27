@@ -1,54 +1,90 @@
-// src/services/api.js
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL || "https://backend-doarcuidar.onrender.com";
 
 export const api = {
-  // Reutilizando sua lógica de busca
   async getInstituicoes(query = "", uf = "") {
     const params = new URLSearchParams();
+
     if (query) params.append("q", query);
     if (uf) params.append("estado", uf);
 
-    const response = await fetch(`${BASE_URL}/api/instituicoes?${params.toString()}`);
-    if (!response.ok) throw new Error("Erro ao buscar instituições");
-    return response.json();
+    const res = await fetch(`${BASE_URL}/api/instituicoes?${params.toString()}`);
+
+    if (!res.ok) throw new Error("Erro ao buscar instituições");
+
+    return res.json();
   },
 
   async getInstituicaoById(id) {
-    const response = await fetch(`${BASE_URL}/api/instituicoes/${id}`);
-    if (!response.ok) throw new Error("Instituição não encontrada");
-    return response.json();
+    const res = await fetch(`${BASE_URL}/api/instituicoes/${id}`);
+
+    if (!res.ok) throw new Error("Instituição não encontrada");
+
+    return res.json();
   },
 
-  // NOVO: Cadastro de Instituição (Refatorado do seu form antigo)
-  async cadastrarInstituicao(dados) {
-    const response = await fetch(`${BASE_URL}/api/instituicoes`, {
+  async cadastrarInstituicao(data) {
+    const res = await fetch(`${BASE_URL}/api/instituicoes`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dados),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error("Erro ao cadastrar instituição");
-    return response.json();
+
+    if (!res.ok) throw new Error("Erro ao cadastrar");
+
+    return res.json();
   },
 
-  // NOVO: Cadastro de Usuário
-  async criarUsuario(dados) {
-    const response = await fetch(`${BASE_URL}/api/usuarios`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dados),
+  async atualizarStatus(id, status) {
+    const res = await fetch(`${BASE_URL}/api/instituicoes/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
     });
-    if (!response.ok) throw new Error("Erro ao criar usuário");
-    return response.json();
+
+    if (!res.ok) throw new Error("Erro ao atualizar");
+
+    return res.json();
   },
 
-  // Criar uma nova doação
-  async postDoacao(dadosDoacao) {
-    const response = await fetch(`${BASE_URL}/api/doacoes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dadosDoacao),
+  async deletarInstituicao(id) {
+    const res = await fetch(`${BASE_URL}/api/instituicoes/${id}`, {
+      method: "DELETE",
     });
-    if (!response.ok) throw new Error("Erro ao processar doação");
-    return response.json();
-  }
+
+    if (!res.ok) throw new Error("Erro ao deletar");
+
+    return res.json();
+  },
+
+  async criarUsuario(data) {
+    const res = await fetch(`${BASE_URL}/api/usuarios`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) throw new Error("Erro ao criar usuário");
+
+    return res.json();
+  },
+
+  async postDoacao(data) {
+    const res = await fetch(`${BASE_URL}/api/doacoes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) throw new Error("Erro ao doar");
+
+    return res.json();
+  },
 };

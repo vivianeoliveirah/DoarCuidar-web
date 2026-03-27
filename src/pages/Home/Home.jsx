@@ -4,22 +4,22 @@ import DonationGallery from "../../components/home/DonationGallery";
 import ComoFunciona from "../../components/home/ComoFunciona";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../../services/supabase";
+import { api } from "../../services/api"; // 🔥 NOVO
 
 export default function Home() {
   const [instituicoes, setInstituicoes] = useState([]);
 
   useEffect(() => {
     async function carregar() {
-      const { data, error } = await supabase
-        .from("instituicoes")
-        .select("*")
-        .limit(3);
+      try {
+        const data = await api.getInstituicoes();
 
-      if (error) {
+        // 🔥 pegando só 3 (igual antes)
+        setInstituicoes(data.slice(0, 3));
+
+      } catch (error) {
         console.error("Erro ao carregar Home:", error);
-      } else {
-        setInstituicoes(data);
+        setInstituicoes([]);
       }
     }
 
@@ -31,7 +31,7 @@ export default function Home() {
 
       <HeroSection />
 
-      {/* 🔥 AGORA SIM DINÂMICO */}
+      {/* 🔥 continua igual, só mudou a fonte de dados */}
       <DonationGallery instituicoes={instituicoes} />
 
       <ComoFunciona />

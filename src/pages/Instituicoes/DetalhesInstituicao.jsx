@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Layout from "../../components/layout/Layout";
 import Button from "../../components/ui/Button";
-import { supabase } from "../../services/supabase";
+import { api } from "../../services/api"; // 🔥 NOVO
 
 import {
   MapPin,
@@ -24,28 +24,25 @@ export default function DetalhesInstituicao() {
 
   useEffect(() => {
     async function carregar() {
-      setLoading(true);
+      try {
+        setLoading(true);
 
-      const { data, error } = await supabase
-        .from("instituicoes")
-        .select("*")
-        .eq("id", id)
-        .single();
+        const data = await api.getInstituicaoById(id);
 
-      if (error) {
+        setInstituicao(data);
+
+      } catch (error) {
         console.error("Erro ao carregar instituição:", error);
         setInstituicao(null);
-      } else {
-        setInstituicao(data);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
     carregar();
   }, [id]);
 
-  // 🔄 Loading melhor
+  // 🔄 Loading
   if (loading) {
     return (
       <Layout>
@@ -56,7 +53,7 @@ export default function DetalhesInstituicao() {
     );
   }
 
-  // ❌ Caso não encontre
+  // ❌ Não encontrada
   if (!instituicao) {
     return (
       <Layout>
@@ -136,7 +133,7 @@ export default function DetalhesInstituicao() {
                   </p>
                 </div>
 
-                {/* TELEFONE (AGORA DINÂMICO) */}
+                {/* TELEFONE */}
                 <div className="p-4 bg-slate-50 rounded-xl">
                   <p className="text-xs text-slate-400">Telefone</p>
                   <p className="flex items-center gap-2">

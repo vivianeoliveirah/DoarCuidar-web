@@ -7,7 +7,7 @@ import SelectUF from "../../components/ui/SelectUF";
 import Button from "../../components/ui/Button";
 
 import { Search, MapPin } from "lucide-react";
-import { supabase } from "../../services/supabase";
+import { api } from "../../services/api"; // 🔥 NOVO
 
 export default function BuscarInstituicoes() {
   const [busca, setBusca] = useState("");
@@ -15,30 +15,49 @@ export default function BuscarInstituicoes() {
   const [instituicoes, setInstituicoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
+  // 🔥 carregar inicial
   useEffect(() => {
-    async function carregarDados() {
-      setCarregando(true);
-
-      const { data, error } = await supabase
-        .from("instituicoes")
-        .select("*")
-        .eq("status", "aprovado") // 🔥 só ONGs aprovadas
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Erro ao buscar instituições:", error);
-        setInstituicoes([]);
-      } else {
-        setInstituicoes(data);
-      }
-
-      setCarregando(false);
-    }
-
     carregarDados();
   }, []);
 
-  // 🔍 filtro
+  async function carregarDados() {
+    try {
+      setCarregando(true);
+
+      const data = await api.getInstituicoes();
+
+      // 🔥 só aprovadas (mantendo regra)
+      const aprovadas = data.filter((i) => i.status === "aprovado");
+
+      setInstituicoes(aprovadas);
+
+    } catch (error) {
+      console.error("Erro ao buscar instituições:", error);
+      setInstituicoes([]);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  // 🔍 busca com botão
+  async function handleBuscar() {
+    try {
+      setCarregando(true);
+
+      const data = await api.getInstituicoes(busca, uf);
+
+      const aprovadas = data.filter((i) => i.status === "aprovado");
+
+      setInstituicoes(aprovadas);
+
+    } catch (error) {
+      console.error("Erro na busca:", error);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  // 🔍 filtro local (mantido)
   const instituicoesFiltradas = instituicoes.filter((inst) => {
     const nome = inst.nome || "";
     const cnpj = inst.cnpj || "";
@@ -71,18 +90,22 @@ export default function BuscarInstituicoes() {
         <div className="bg-white p-6 rounded-3xl shadow-sm border mb-10 flex flex-col md:flex-row gap-4 items-end">
 
           <InputTexto
-  label="Nome ou CNPJ"
-  placeholder="Ex: Instituto..."
-  aria-label="Buscar instituição por nome ou CNPJ"
-  value={busca}
-  onChange={(e) => setBusca(e.target.value)}
-/>
+            label="Nome ou CNPJ"
+            placeholder="Ex: Instituto..."
+            aria-label="Buscar instituição por nome ou CNPJ"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
 
           <div className="w-full md:w-48">
             <SelectUF value={uf} onChange={(e) => setUf(e.target.value)} />
           </div>
 
-          <Button variant="brand" className="h-11 px-8 gap-2">
+          <Button
+            variant="brand"
+            className="h-11 px-8 gap-2"
+            onClick={handleBuscar}
+          >
             <Search size={18} />
             Buscar
           </Button>
@@ -102,7 +125,7 @@ export default function BuscarInstituicoes() {
 
             {instituicoesFiltradas.map((inst) => (
               <Link
-                to={`/detalhes/${inst.id}`} // ✅ CORRETO
+                to={`/detalhes/${inst.id}`}
                 key={inst.id}
                 className="bg-white p-6 rounded-3xl border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all group"
               >
