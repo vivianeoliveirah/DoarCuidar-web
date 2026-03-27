@@ -1,24 +1,15 @@
-import { supabase } from "./supabase";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
-export async function registerUser({ email, password }) {
-  return await supabase.auth.signUp({
-    email,
-    password,
+export async function login(email, senha) {
+  const res = await fetch(`${BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, senha }),
   });
-}
 
-export async function loginUser({ email, password }) {
-  return await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-}
+  if (!res.ok) throw new Error("Erro no login");
 
-export async function getUser() {
-  const { data } = await supabase.auth.getUser();
-  return data.user;
-}
-
-export async function logout() {
-  return await supabase.auth.signOut();
+  return res.json();
 }
