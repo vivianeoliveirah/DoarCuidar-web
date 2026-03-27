@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../services/supabase";
 import { CheckCircle, XCircle, Building2, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
 import Layout from "../../components/layout/Layout";
+import { api } from "../../services/api";
 
 import {
   PieChart,
@@ -26,7 +25,6 @@ export default function AdminDashboard() {
 
   const navigate = useNavigate();
 
-  // 🔥 atualizar dados
   function atualizarDados(data) {
     setOngs(data);
 
@@ -38,66 +36,35 @@ export default function AdminDashboard() {
     setStats({ total, pendente, aprovado, rejeitado });
   }
 
-  // 🔥 carregar dados
-  useEffect(() => {
-    async function carregar() {
-      const { data } = await supabase
-        .from("instituicoes")
-        .select("*");
-
-      if (data) atualizarDados(data);
-
+  async function carregar() {
+    try {
+      const data = await api.getInstituicoes();
+      atualizarDados(data);
+    } catch (error) {
+      console.error("Erro ao carregar:", error);
+    } finally {
       setLoading(false);
     }
+  }
 
+  useEffect(() => {
     carregar();
   }, []);
 
-  // ✅ aprovar
   async function aprovar(id) {
-    const { error } = await supabase
-      .from("instituicoes")
-      .update({ status: "aprovado" })
-      .eq("id", id);
-
-    if (error) {
-      console.error(error);
-      alert("Erro ao aprovar");
-      return;
-    }
-
-    const novosDados = ongs.map((ong) =>
-      ong.id === id ? { ...ong, status: "aprovado" } : ong
-    );
-
-    atualizarDados(novosDados);
+    await api.atualizarStatus(id, "aprovado");
+    carregar();
   }
 
-  // ❌ rejeitar
   async function rejeitar(id) {
-    const { error } = await supabase
-      .from("instituicoes")
-      .update({ status: "rejeitado" })
-      .eq("id", id);
-
-    if (error) {
-      console.error(error);
-      alert("Erro ao rejeitar");
-      return;
-    }
-
-    const novosDados = ongs.map((ong) =>
-      ong.id === id ? { ...ong, status: "rejeitado" } : ong
-    );
-
-    atualizarDados(novosDados);
+    await api.atualizarStatus(id, "rejeitado");
+    carregar();
   }
 
-  // 🚪 logout
-  async function sair() {
-    await supabase.auth.signOut();
-    navigate("/login");
-  }
+  const sair = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
 
   const chartData = [
     { name: "Pendentes", value: stats.pendente },
@@ -113,7 +80,7 @@ export default function AdminDashboard() {
     <Layout>
       <div className="max-w-7xl mx-auto p-6 space-y-6">
 
-        {/* 🔥 TOPO */}
+        {/* TOPO */}
         <div className="flex justify-between items-center">
 
           <div>
@@ -139,7 +106,7 @@ export default function AdminDashboard() {
 
         </div>
 
-        {/* 📊 CARDS */}
+        {/* CARDS */}
         <div className="grid md:grid-cols-4 gap-4">
 
           <div className="bg-white p-4 rounded-2xl border">
@@ -164,7 +131,7 @@ export default function AdminDashboard() {
 
         </div>
 
-        {/* 📈 GRÁFICO */}
+        {/* GRÁFICO */}
         <div className="bg-white p-6 rounded-2xl border">
           <h2 className="font-semibold mb-4">Status das ONGs</h2>
 
@@ -182,7 +149,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* 📋 LISTA */}
+        {/* LISTA */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
 
           {ongs.map((ong) => (

@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import Layout from "../../components/layout/Layout";
 import Button from "../../components/ui/Button";
 import { MapPin, Calendar, Heart, LogOut } from "lucide-react";
-import { supabase } from "../../services/supabase";
 import { useNavigate } from "react-router-dom";
+import { api } from "../../services/api";
 
-// 📊 gráfico
 import {
   BarChart,
   Bar,
@@ -22,42 +21,22 @@ export default function Perfil() {
 
   useEffect(() => {
     async function carregar() {
-      const { data: userData } = await supabase.auth.getUser();
+      try {
+        const data = await api.getPerfil(); // 🔥 BACKEND
 
-      if (!userData?.user) return;
+        setUser(data.user);
+        setDoacoes(data.doacoes || []);
 
-      const usuario = userData.user;
-
-      setUser({
-        nome: usuario.email.split("@")[0],
-        email: usuario.email,
-        uf: "SP",
-        desde: new Date(usuario.created_at).toLocaleDateString("pt-BR"),
-      });
-
-      // 🔥 buscar doações com ONG
-      const { data } = await supabase
-        .from("doacoes")
-        .select(`
-          id,
-          valor,
-          data,
-          instituicao_id,
-          instituicoes (
-            nome
-          )
-        `)
-        .eq("user_id", usuario.id)
-        .order("data", { ascending: false });
-
-      if (data) setDoacoes(data);
+      } catch (error) {
+        console.error("Erro ao carregar perfil:", error);
+      }
     }
 
     carregar();
   }, []);
 
-  const sair = async () => {
-    await supabase.auth.signOut();
+  const sair = () => {
+    localStorage.removeItem("token");
     navigate("/");
   };
 
@@ -71,7 +50,7 @@ export default function Perfil() {
   const resumoPorOng = {};
 
   doacoes.forEach((d) => {
-    const nome = d.instituicoes?.nome || "ONG";
+    const nome = d.instituicao_nome || "ONG";
 
     if (!resumoPorOng[nome]) {
       resumoPorOng[nome] = 0;
@@ -97,13 +76,12 @@ export default function Perfil() {
 
       <div className="max-w-5xl mx-auto px-4 -mt-16 pb-20 space-y-6">
 
-        {/* PERFIL + MÉTRICAS */}
+        {/* PERFIL */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* PERFIL */}
           <div className="bg-white rounded-3xl shadow-sm border p-8 text-center h-fit">
             <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold border-4 border-white shadow-sm">
-              {user.nome.charAt(0).toUpperCase()}
+              {user.nome?.charAt(0).toUpperCase()}
             </div>
 
             <h2 className="text-xl font-bold">{user.nome}</h2>
@@ -111,7 +89,7 @@ export default function Perfil() {
 
             <div className="space-y-4 text-left border-t pt-6">
               <div className="flex gap-3 text-sm">
-                <MapPin size={18} /> {user.uf}
+                <MapPin size={18} /> {user.uf || "—"}
               </div>
               <div className="flex gap-3 text-sm">
                 <Calendar size={18} /> {user.desde}
@@ -130,7 +108,7 @@ export default function Perfil() {
             </Button>
           </div>
 
-          {/* 🏆 ONG TOP */}
+          {/* ONG TOP */}
           <div className="lg:col-span-2 bg-white rounded-2xl p-5 border shadow-sm">
             <p className="text-sm text-slate-500">Você mais ajudou</p>
             {topOng ? (
@@ -146,7 +124,7 @@ export default function Perfil() {
           </div>
         </div>
 
-        {/* 📊 GRÁFICO */}
+        {/* GRÁFICO */}
         {ranking.length > 0 && (
           <div className="bg-white rounded-2xl p-5 border shadow-sm">
             <h3 className="text-lg font-semibold mb-4">
@@ -166,7 +144,7 @@ export default function Perfil() {
           </div>
         )}
 
-        {/* 📋 HISTÓRICO */}
+        {/* HISTÓRICO */}
         <div className="bg-white rounded-3xl p-8 border shadow-sm">
           <h3 className="text-xl font-bold mb-6">
             Histórico de Doações
@@ -185,7 +163,7 @@ export default function Perfil() {
                 >
                   <div>
                     <p className="font-bold">
-                      {d.instituicoes?.nome || "ONG"}
+                      {d.instituicao_nome || "ONG"}
                     </p>
                     <p className="text-xs text-slate-500">
                       {new Date(d.data).toLocaleDateString("pt-BR")}
