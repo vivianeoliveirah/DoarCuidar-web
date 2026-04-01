@@ -1,29 +1,26 @@
-import { supabase } from "./supabase";
+// src/services/instituicoesService.js
+const API_URL = "http://localhost:10000/api/instituicoes"; // porta do Flask backend
 
 export async function criarInstituicao(dados) {
-  const { data, error } = await supabase
-    .from("instituicoes")
-    .insert([dados])
-    .select();
-
-  if (error) {
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dados),
+    });
+    return await response.json();
+  } catch (error) {
     console.error("Erro ao criar instituição:", error);
     throw error;
   }
-
-  return data;
 }
 
 export async function listarInstituicoes() {
-  const { data, error } = await supabase
-    .from("instituicoes")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
+  try {
+    const response = await fetch(API_URL);
+    return await response.json();
+  } catch (error) {
     console.error("Erro ao listar instituições:", error);
     return [];
   }
-
-  return data;
 }

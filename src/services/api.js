@@ -1,4 +1,15 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "https://backend-doarcuidar.onrender.com";
+const BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://backend-doarcuidar.onrender.com";
+
+function getHeaders() {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  return {
+    "Content-Type": "application/json",
+    "user-id": user?.id || "",
+  };
+}
 
 export const api = {
   async getInstituicoes(query = "", uf = "") {
@@ -7,31 +18,21 @@ export const api = {
     if (query) params.append("q", query);
     if (uf) params.append("estado", uf);
 
-    const res = await fetch(`${BASE_URL}/api/instituicoes?${params.toString()}`);
-
-    if (!res.ok) throw new Error("Erro ao buscar instituições");
-
+    const res = await fetch(`${BASE_URL}/api/instituicoes?${params}`);
     return res.json();
   },
 
   async getInstituicaoById(id) {
     const res = await fetch(`${BASE_URL}/api/instituicoes/${id}`);
-
-    if (!res.ok) throw new Error("Instituição não encontrada");
-
     return res.json();
   },
 
   async cadastrarInstituicao(data) {
     const res = await fetch(`${BASE_URL}/api/instituicoes`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
-
-    if (!res.ok) throw new Error("Erro ao cadastrar");
 
     return res.json();
   },
@@ -39,13 +40,9 @@ export const api = {
   async atualizarStatus(id, status) {
     const res = await fetch(`${BASE_URL}/api/instituicoes/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getHeaders(),
       body: JSON.stringify({ status }),
     });
-
-    if (!res.ok) throw new Error("Erro ao atualizar");
 
     return res.json();
   },
@@ -53,23 +50,8 @@ export const api = {
   async deletarInstituicao(id) {
     const res = await fetch(`${BASE_URL}/api/instituicoes/${id}`, {
       method: "DELETE",
+      headers: getHeaders(),
     });
-
-    if (!res.ok) throw new Error("Erro ao deletar");
-
-    return res.json();
-  },
-
-  async criarUsuario(data) {
-    const res = await fetch(`${BASE_URL}/api/usuarios`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!res.ok) throw new Error("Erro ao criar usuário");
 
     return res.json();
   },
@@ -77,13 +59,17 @@ export const api = {
   async postDoacao(data) {
     const res = await fetch(`${BASE_URL}/api/doacoes`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
 
-    if (!res.ok) throw new Error("Erro ao doar");
+    return res.json();
+  },
+
+  async getPerfil() {
+    const res = await fetch(`${BASE_URL}/api/perfil`, {
+      headers: getHeaders(),
+    });
 
     return res.json();
   },

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { registerUser } from "../../services/authService";
 
 import Layout from "../../components/layout/Layout";
 import FormCard from "../../components/ui/FormCard";
@@ -8,7 +9,6 @@ import CampoSenha from "../../components/ui/CampoSenha";
 import Button from "../../components/ui/Button";
 import SelectUF from "../../components/ui/SelectUF";
 
-import { registerUser } from "../../services/authService";
 import { buscarCEP } from "../../services/cepService";
 
 export default function CadastroUsuario() {
@@ -63,9 +63,9 @@ export default function CadastroUsuario() {
     setLoading(true);
 
     const { error } = await registerUser({
-      email: form.email,
-      password: form.senha,
-    });
+  email: form.email,
+  password: form.senha,
+});
 
     setLoading(false);
 
