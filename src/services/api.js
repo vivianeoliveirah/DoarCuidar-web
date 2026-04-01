@@ -5,10 +5,24 @@ const BASE_URL =
 function getHeaders() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
-  return {
+  const headers = {
     "Content-Type": "application/json",
-    "user-id": user?.id || "",
   };
+
+  if (user?.id) {
+    headers["user-id"] = user.id;
+  }
+
+  return headers;
+}
+
+// 🔥 helper global
+async function handleResponse(res) {
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Erro na requisição");
+  }
+  return res.json();
 }
 
 export const api = {
@@ -18,13 +32,17 @@ export const api = {
     if (query) params.append("q", query);
     if (uf) params.append("estado", uf);
 
-    const res = await fetch(`${BASE_URL}/api/instituicoes?${params}`);
-    return res.json();
+    const url = `${BASE_URL}/api/instituicoes${
+      params.toString() ? `?${params}` : ""
+    }`;
+
+    const res = await fetch(url);
+    return handleResponse(res);
   },
 
   async getInstituicaoById(id) {
     const res = await fetch(`${BASE_URL}/api/instituicoes/${id}`);
-    return res.json();
+    return handleResponse(res);
   },
 
   async cadastrarInstituicao(data) {
@@ -34,7 +52,7 @@ export const api = {
       body: JSON.stringify(data),
     });
 
-    return res.json();
+    return handleResponse(res);
   },
 
   async atualizarStatus(id, status) {
@@ -44,7 +62,7 @@ export const api = {
       body: JSON.stringify({ status }),
     });
 
-    return res.json();
+    return handleResponse(res);
   },
 
   async deletarInstituicao(id) {
@@ -53,7 +71,7 @@ export const api = {
       headers: getHeaders(),
     });
 
-    return res.json();
+    return handleResponse(res);
   },
 
   async postDoacao(data) {
@@ -63,7 +81,7 @@ export const api = {
       body: JSON.stringify(data),
     });
 
-    return res.json();
+    return handleResponse(res);
   },
 
   async getPerfil() {
@@ -71,6 +89,6 @@ export const api = {
       headers: getHeaders(),
     });
 
-    return res.json();
+    return handleResponse(res);
   },
 };
