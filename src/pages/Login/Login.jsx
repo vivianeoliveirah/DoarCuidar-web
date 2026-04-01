@@ -17,25 +17,29 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
+  try {
     setLoading(true);
 
-    const { error } = await loginUser({
+    const result = await loginUser({
       email,
       password: senha,
     });
 
-    setLoading(false);
-
-    if (error) {
+    if (result?.error) {
       alert("E-mail ou senha inválidos");
-      console.error(error);
     } else {
       alert("Login realizado com sucesso 🚀");
       navigate("/");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Erro inesperado");
+  } finally {
+    setLoading(false); // 🔥 garante que nunca trava
+  }
+};
 
   return (
     <Layout className="flex flex-col items-center justify-center py-12">
