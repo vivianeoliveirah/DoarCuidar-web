@@ -1,5 +1,7 @@
 // src/services/instituicoesService.js
-const API_URL = "http://localhost:10000/api/instituicoes"; // porta do Flask backend
+
+const BASE_URL = import.meta.env.VITE_API_URL;
+const API_URL = `${BASE_URL}/api/instituicoes`;
 
 export async function criarInstituicao(dados) {
   try {
@@ -8,6 +10,7 @@ export async function criarInstituicao(dados) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados),
     });
+
     return await response.json();
   } catch (error) {
     console.error("Erro ao criar instituição:", error);
