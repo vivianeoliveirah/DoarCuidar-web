@@ -9,22 +9,27 @@ import { api } from "../../services/api"; // 🔥 NOVO
 export default function Home() {
   const [instituicoes, setInstituicoes] = useState([]);
 
-  useEffect(() => {
-    async function carregar() {
-      try {
-        const data = await api.getInstituicoes();
+ useEffect(() => {
+  async function carregar() {
+    try {
+      const response = await api.getInstituicoes();
 
-        // 🔥 pegando só 3 (igual antes)
-        setInstituicoes(data.slice(0, 3));
+      console.log("API RESPONSE:", response); // 🔍 DEBUG
 
-      } catch (error) {
-        console.error("Erro ao carregar Home:", error);
-        setInstituicoes([]);
-      }
+      // 🔥 aceita qualquer formato
+      const lista =
+        response?.data || response || [];
+
+      setInstituicoes(lista.slice(0, 3));
+
+    } catch (error) {
+      console.error("Erro ao carregar Home:", error);
+      setInstituicoes([]);
     }
+  }
 
-    carregar();
-  }, []);
+  carregar();
+}, []);  
 
   return (
     <Layout>
