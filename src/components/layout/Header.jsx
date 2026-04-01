@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import {
   Home,
@@ -31,11 +32,26 @@ function NavItem({ to, icon: Icon, children, onClick }) {
 export default function Header() {
   const navigate = useNavigate();
 
-  // ✅ leitura segura
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const [user, setUser] = useState(null);
+
+  // 🔥 sincroniza com localStorage
+  useEffect(() => {
+    const loadUser = () => {
+      const stored = localStorage.getItem("user");
+      setUser(stored ? JSON.parse(stored) : null);
+    };
+
+    loadUser();
+
+    // 🔥 escuta mudanças (login/logout)
+    window.addEventListener("storage", loadUser);
+
+    return () => window.removeEventListener("storage", loadUser);
+  }, []);
 
   const sair = () => {
     localStorage.removeItem("user");
+    setUser(null); // 🔥 atualiza na hora
     navigate("/");
   };
 
