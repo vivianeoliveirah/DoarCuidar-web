@@ -25,7 +25,7 @@ export default function App() {
         <Route path="/buscar" element={<BuscarInstituicoes />} />
         <Route path="/detalhes/:id" element={<DetalhesInstituicao />} />
 
-        {/* 🔒 USER */}
+        {/* USER */}
         <Route
           path="/doar/:id"
           element={
@@ -53,7 +53,7 @@ export default function App() {
           }
         />
 
-        {/* 🔥 ADMIN */}
+        {/* ADMIN */}
         <Route
           path="/admin"
           element={

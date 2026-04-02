@@ -9,20 +9,32 @@ function getHeaders() {
     "Content-Type": "application/json",
   };
 
-  if (user?.id) {
-    headers["user-id"] = user.id;
-  }
+  if (user?.id || user?.user?.id) {
+  headers["user-id"] = user.id || user.user.id;
+}
 
   return headers;
 }
 
-// 🔥 helper global
 async function handleResponse(res) {
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "Erro na requisição");
+  const text = await res.text();
+
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch {
+    console.error("Resposta inválida:", text);
+    throw new Error("Erro inesperado do servidor");
   }
-  return res.json();
+
+  // erro HTTP ou erro da API
+  if (!res.ok || data.success === false) {
+    throw new Error(data.error || "Erro na requisição");
+  }
+
+  //  retorna só o data (mais limpo)
+  return data;
 }
 
 export const api = {
@@ -91,4 +103,4 @@ export const api = {
 
     return handleResponse(res);
   },
-};
+}; 

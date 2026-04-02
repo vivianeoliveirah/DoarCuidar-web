@@ -8,6 +8,7 @@ import CampoSenha from "../../components/ui/CampoSenha";
 import Button from "../../components/ui/Button";
 
 import { loginUser } from "../../services/authService";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,29 +18,32 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const result = await loginUser({
-      email,
-      password: senha,
-    });
+      const result = await loginUser({
+        email,
+        password: senha,
+      });
 
-    if (result?.error) {
-      alert("E-mail ou senha inválidos");
-    } else {
-      alert("Login realizado com sucesso 🚀");
+      if (result?.error) {
+  toast.error("E-mail ou senha inválidos");
+  return;
+}
+
+toast.success("Login realizado com sucesso 🚀");
+
       navigate("/");
+
+    } catch (err) {
+      console.error(err);
+      alert("Erro inesperado");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error(err);
-    alert("Erro inesperado");
-  } finally {
-    setLoading(false); // 🔥 garante que nunca trava
-  }
-};
+  };
 
   return (
     <Layout className="flex flex-col items-center justify-center py-12">
@@ -79,6 +83,7 @@ export default function Login() {
               type="submit"
               variant="brand"
               className="w-full mt-4 h-12 text-lg"
+              disabled={loading} // 🔥 evita clique duplo
             >
               {loading ? "Entrando..." : "Entrar"}
             </Button>

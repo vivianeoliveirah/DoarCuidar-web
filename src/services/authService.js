@@ -13,20 +13,28 @@ export async function loginUser({ email, password }) {
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json();
+    const text = await res.text();
 
-    if (!res.ok) return { error: true };
+    try {
+      const data = JSON.parse(text);
 
-    localStorage.setItem("user", JSON.stringify(data));
+      if (!res.ok) return { error: true, message: data.error };
 
-    return { data };
+      localStorage.setItem("user", JSON.stringify(data));
+
+      return { data };
+    } catch {
+      console.error("Resposta inválida:", text);
+      return { error: true };
+    }
+
   } catch (err) {
-    console.error("Erro no login:", err);
+    console.error(err);
     return { error: true };
   }
 }
 
-// 🔥 REGISTER (FALTAVA — ESSE É O PROBLEMA)
+
 export async function registerUser({ email, password }) {
   const res = await fetch(`${BASE_URL}/api/auth/register`, {
     method: "POST",
