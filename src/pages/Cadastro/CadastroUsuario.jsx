@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../../services/authService";
+import { getErrorMessage } from "../../services/api";
+import toast from "react-hot-toast";
 
 import Layout from "../../components/layout/Layout";
 import FormCard from "../../components/ui/FormCard";
@@ -47,8 +49,9 @@ export default function CadastroUsuario() {
         uf: data.uf,
       }));
 
-    } catch {
-      alert("CEP não encontrado");
+    } catch (error) {
+      const mensagem = getErrorMessage(error);
+      toast.error(mensagem);
     }
   };
 
@@ -56,25 +59,25 @@ export default function CadastroUsuario() {
     e.preventDefault();
 
     if (form.senha !== form.confirmarSenha) {
-      alert("As senhas não coincidem");
+      toast.error("As senhas não coincidem");
       return;
     }
 
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const { error } = await registerUser({
-  email: form.email,
-  password: form.senha,
-});
+      await registerUser({
+        email: form.email,
+        password: form.senha,
+      });
 
-    setLoading(false);
-
-    if (error) {
-      alert("Erro ao criar conta");
-      console.error(error);
-    } else {
-      alert("Conta criada com sucesso 🎉");
+      toast.success("Conta criada com sucesso 🎉");
       navigate("/login");
+    } catch (error) {
+      const mensagem = getErrorMessage(error);
+      toast.error(mensagem);
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -1,52 +1,42 @@
-const BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  "https://backend-doarcuidar.onrender.com";
+import { createFetchOptions, handleResponse } from "./api";
 
-// 🔥 LOGIN
+const BASE_URL = import.meta.env.VITE_API_URL || "https://backend-doarcuidar.onrender.com";
+
+/**
+ * Realiza login do usuário
+ */
 export async function loginUser({ email, password }) {
+  const { options } = createFetchOptions("POST", { email, password });
+
   try {
-    const res = await fetch(`${BASE_URL}/api/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    const res = await fetch(`${BASE_URL}/api/auth/login`, options);
+    const data = await handleResponse(res);
 
-    const text = await res.text();
-
-    try {
-      const data = JSON.parse(text);
-
-      if (!res.ok) return { error: true, message: data.error };
-
-      localStorage.setItem("user", JSON.stringify(data));
-
-      return { data };
-    } catch {
-      console.error("Resposta inválida:", text);
-      return { error: true };
-    }
-
-  } catch (err) {
-    console.error(err);
-    return { error: true };
+    localStorage.setItem("user", JSON.stringify(data));
+    return data;
+  } catch (error) {
+    throw error;
   }
 }
 
-
+/**
+ * Registra novo usuário
+ */
 export async function registerUser({ email, password }) {
-  const res = await fetch(`${BASE_URL}/api/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
+  const { options } = createFetchOptions("POST", { email, password });
 
-  const data = await res.json();
+  try {
+    const res = await fetch(`${BASE_URL}/api/auth/register`, options);
+    const data = await handleResponse(res);
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
 
-  if (!res.ok) return { error: true };
-
-  return { data };
+/**
+ * Efetua logout do usuário
+ */
+export function logoutUser() {
+  localStorage.removeItem("user");
 }

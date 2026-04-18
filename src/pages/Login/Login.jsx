@@ -8,6 +8,7 @@ import CampoSenha from "../../components/ui/CampoSenha";
 import Button from "../../components/ui/Button";
 
 import { loginUser } from "../../services/authService";
+import { getErrorMessage } from "../../services/api";
 import toast from "react-hot-toast";
 
 export default function Login() {
@@ -23,23 +24,18 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const result = await loginUser({
+      await loginUser({
         email,
         password: senha,
       });
 
-      if (result?.error) {
-  toast.error("E-mail ou senha inválidos");
-  return;
-}
-
-toast.success("Login realizado com sucesso 🚀");
+      toast.success("Login realizado com sucesso 🚀");
 
       navigate("/");
 
-    } catch (err) {
-      console.error(err);
-      alert("Erro inesperado");
+    } catch (error) {
+      const mensagem = getErrorMessage(error);
+      toast.error(mensagem);
     } finally {
       setLoading(false);
     }

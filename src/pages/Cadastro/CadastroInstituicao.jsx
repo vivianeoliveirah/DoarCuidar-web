@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { getErrorMessage } from "../../services/api";
+import toast from "react-hot-toast";
+
 import Layout from "../../components/layout/Layout";
 import FormCard from "../../components/ui/FormCard";
 import InputTexto from "../../components/ui/InputTexto";
@@ -47,7 +50,8 @@ export default function CadastroInstituicao() {
 
     } catch (error) {
       console.error("Erro ao consultar CNPJ:", error);
-      alert("CNPJ não encontrado ou inválido.");
+      const mensagem = getErrorMessage(error);
+      toast.error(mensagem);
     } finally {
       setLoadingCNPJ(false);
     }

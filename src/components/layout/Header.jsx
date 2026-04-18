@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   ShieldCheck,
 } from "lucide-react";
+import { logoutUser } from "../../services/authService";
 
 function NavItem({ to, icon: Icon, children, onClick }) {
   return (
@@ -50,7 +51,7 @@ export default function Header() {
   }, []);
 
   const sair = () => {
-    localStorage.removeItem("user");
+    logoutUser();
     setUser(null); // 🔥 atualiza na hora
     navigate("/");
   };
