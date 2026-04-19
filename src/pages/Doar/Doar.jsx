@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 
 // TROQUE O "@" PELO CAMINHO RELATIVO:
 import Layout from "../../components/layout/Layout";
+import Breadcrumb from "../../components/ui/Breadcrumb";
 import FormCard from "../../components/ui/FormCard";
 import InputTexto from "../../components/ui/InputTexto";
 import Button from "../../components/ui/Button";
@@ -56,6 +57,13 @@ export default function Doar() {
   return (
     <Layout className="py-12 bg-slate-50">
       <div className="max-w-xl mx-auto px-4">
+
+        <Breadcrumb items={[
+          { label: "Buscar Instituições", href: "/buscar" },
+          { label: instituicao.nome, href: `/detalhes/${id}` },
+          { label: "Doar" }
+        ]} />
+
         <FormCard 
           title="Confirmar Doação" 
           subtitle={`Você está doando para: ${instituicao.nome}`}

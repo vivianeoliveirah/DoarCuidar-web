@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Layout from "../../components/layout/Layout";
+import Breadcrumb from "../../components/ui/Breadcrumb";
 import Button from "../../components/ui/Button";
 import { api } from "../../services/api"; // 🔥 NOVO
 
@@ -9,7 +10,6 @@ import {
   Building2,
   Mail,
   Phone,
-  ArrowLeft,
   ShieldCheck,
   ExternalLink,
   Heart,
@@ -68,14 +68,10 @@ export default function DetalhesInstituicao() {
     <Layout className="bg-slate-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
 
-        {/* VOLTAR */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-slate-500 hover:text-emerald-600 mb-8"
-        >
-          <ArrowLeft size={20} />
-          Voltar para a busca
-        </button>
+        <Breadcrumb items={[
+          { label: "Buscar Instituições", href: "/buscar" },
+          { label: instituicao.nome }
+        ]} />
 
         <div className="grid lg:grid-cols-3 gap-8">
 

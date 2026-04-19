@@ -8,6 +8,8 @@ import {
   LogOut,
   LayoutDashboard,
   ShieldCheck,
+  User,
+  UserPlus,
 } from "lucide-react";
 import { logoutUser } from "../../services/authService";
 
@@ -60,7 +62,7 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
 
         <Link to="/" className="flex items-center gap-2">
           <div className="w-9 h-9 bg-emerald-600 rounded-full flex items-center justify-center text-white">
@@ -77,11 +79,17 @@ export default function Header() {
           <NavItem to="/buscar" icon={Search}>Buscar</NavItem>
 
           {!user ? (
-            <NavItem to="/login" icon={LogIn}>Entrar</NavItem>
+            <>
+              <NavItem to="/login" icon={LogIn}>Entrar</NavItem>
+              <NavItem to="/cadastro-usuario" icon={UserPlus}>Cadastrar</NavItem>
+            </>
           ) : (
             <>
               <NavItem to="/dashboard" icon={LayoutDashboard}>
                 Painel
+              </NavItem>
+              <NavItem to="/perfil" icon={User}>
+                Perfil
               </NavItem>
 
               {isAdmin && (
