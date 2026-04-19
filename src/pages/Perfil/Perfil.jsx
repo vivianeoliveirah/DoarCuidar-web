@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { api } from "../../services/api";
+import { getSessionUser, logoutUser } from "../../services/authService";
 import Layout from "../../components/layout/Layout";
 import Button from "../../components/ui/Button";
 import { MapPin, Calendar, Heart, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { api } from "../../services/api";
 
 import {
   BarChart,
@@ -15,18 +16,16 @@ import {
 } from "recharts";
 
 export default function Perfil() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(getSessionUser());
   const [doacoes, setDoacoes] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     async function carregar() {
       try {
-        const data = await api.getPerfil(); // 🔥 BACKEND
-
-        setUser(data.user);
+        const data = await api.getPerfil();
+        setUser(data.user || getSessionUser());
         setDoacoes(data.doacoes || []);
-
       } catch (error) {
         console.error("Erro ao carregar perfil:", error);
       }
@@ -36,17 +35,15 @@ export default function Perfil() {
   }, []);
 
   const sair = () => {
-    localStorage.removeItem("token");
+    logoutUser();
     navigate("/");
   };
 
-  // 💰 total
   const totalDoado = doacoes.reduce(
     (acc, d) => acc + Number(d.valor || 0),
     0
   );
 
-  // 🏆 resumo por ONG
   const resumoPorOng = {};
 
   doacoes.forEach((d) => {
@@ -68,17 +65,16 @@ export default function Perfil() {
 
   const topOng = ranking[0];
 
-  if (!user) return <p className="p-6">Carregando...</p>;
+  if (!user) {
+    return <p className="p-6">Carregando...</p>;
+  }
 
   return (
     <Layout className="bg-slate-50">
       <div className="h-48 bg-emerald-600"></div>
 
       <div className="max-w-5xl mx-auto px-4 -mt-16 pb-20 space-y-6">
-
-        {/* PERFIL */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
           <div className="bg-white rounded-3xl shadow-sm border p-8 text-center h-fit">
             <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold border-4 border-white shadow-sm">
               {user.nome?.charAt(0).toUpperCase()}
@@ -89,7 +85,7 @@ export default function Perfil() {
 
             <div className="space-y-4 text-left border-t pt-6">
               <div className="flex gap-3 text-sm">
-                <MapPin size={18} /> {user.uf || "—"}
+                <MapPin size={18} /> {user.uf || "-"}
               </div>
               <div className="flex gap-3 text-sm">
                 <Calendar size={18} /> {user.desde}
@@ -108,7 +104,6 @@ export default function Perfil() {
             </Button>
           </div>
 
-          {/* ONG TOP */}
           <div className="lg:col-span-2 bg-white rounded-2xl p-5 border shadow-sm">
             <p className="text-sm text-slate-500">Você mais ajudou</p>
             {topOng ? (
@@ -124,12 +119,9 @@ export default function Perfil() {
           </div>
         </div>
 
-        {/* GRÁFICO */}
         {ranking.length > 0 && (
           <div className="bg-white rounded-2xl p-5 border shadow-sm">
-            <h3 className="text-lg font-semibold mb-4">
-              Doações por ONG
-            </h3>
+            <h3 className="text-lg font-semibold mb-4">Doações por ONG</h3>
 
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -144,16 +136,11 @@ export default function Perfil() {
           </div>
         )}
 
-        {/* HISTÓRICO */}
         <div className="bg-white rounded-3xl p-8 border shadow-sm">
-          <h3 className="text-xl font-bold mb-6">
-            Histórico de Doações
-          </h3>
+          <h3 className="text-xl font-bold mb-6">Histórico de Doações</h3>
 
           {doacoes.length === 0 ? (
-            <p className="text-slate-500">
-              Você ainda não fez doações 💛
-            </p>
+            <p className="text-slate-500">Você ainda não fez doações.</p>
           ) : (
             <div className="space-y-4">
               {doacoes.map((d) => (
@@ -162,9 +149,7 @@ export default function Perfil() {
                   className="flex justify-between items-center p-4 rounded-2xl bg-slate-50"
                 >
                   <div>
-                    <p className="font-bold">
-                      {d.instituicao_nome || "ONG"}
-                    </p>
+                    <p className="font-bold">{d.instituicao_nome || "ONG"}</p>
                     <p className="text-xs text-slate-500">
                       {new Date(d.data).toLocaleDateString("pt-BR")}
                     </p>
@@ -187,7 +172,6 @@ export default function Perfil() {
             </div>
           )}
         </div>
-
       </div>
     </Layout>
   );

@@ -1,15 +1,14 @@
 import { Navigate } from "react-router-dom";
+import { getSessionUser, isAdminUser } from "../services/authService";
 
 export default function AdminRoute({ children }) {
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const user = getSessionUser();
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
- 
-  const isAdmin = user?.email === "SEU_EMAIL";
 
-  if (!isAdmin) {
+  if (!isAdminUser(user)) {
     return <Navigate to="/" replace />;
   }
 

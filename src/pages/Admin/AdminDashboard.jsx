@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { CheckCircle, XCircle, Building2, LogOut } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Building2, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/layout/Layout";
 import { api } from "../../services/api";
+import { logoutUser } from "../../services/authService";
 
 import {
   PieChart,
@@ -15,7 +16,6 @@ import {
 export default function AdminDashboard() {
   const [ongs, setOngs] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [stats, setStats] = useState({
     total: 0,
     pendente: 0,
@@ -25,18 +25,18 @@ export default function AdminDashboard() {
 
   const navigate = useNavigate();
 
-  function atualizarDados(data) {
+  const atualizarDados = useCallback((data) => {
     setOngs(data);
 
     const total = data.length;
-    const pendente = data.filter(i => i.status === "pendente").length;
-    const aprovado = data.filter(i => i.status === "aprovado").length;
-    const rejeitado = data.filter(i => i.status === "rejeitado").length;
+    const pendente = data.filter((i) => i.status === "pendente").length;
+    const aprovado = data.filter((i) => i.status === "aprovado").length;
+    const rejeitado = data.filter((i) => i.status === "rejeitado").length;
 
     setStats({ total, pendente, aprovado, rejeitado });
-  }
+  }, []);
 
-  async function carregar() {
+  const carregar = useCallback(async () => {
     try {
       const data = await api.getInstituicoes();
       atualizarDados(data);
@@ -45,11 +45,11 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [atualizarDados]);
 
   useEffect(() => {
     carregar();
-  }, []);
+  }, [carregar]);
 
   async function aprovar(id) {
     await api.atualizarStatus(id, "aprovado");
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
   }
 
   const sair = () => {
-    localStorage.removeItem("token");
+    logoutUser();
     navigate("/");
   };
 
@@ -72,23 +72,22 @@ export default function AdminDashboard() {
     { name: "Rejeitadas", value: stats.rejeitado },
   ];
 
-  const COLORS = ["#facc15", "#22c55e", "#ef4444"];
+  const colors = ["#facc15", "#22c55e", "#ef4444"];
 
-  if (loading) return <p className="p-6">Carregando...</p>;
+  if (loading) {
+    return <p className="p-6">Carregando...</p>;
+  }
 
   return (
     <Layout>
       <div className="max-w-7xl mx-auto p-6 space-y-6">
-
-        {/* TOPO */}
         <div className="flex justify-between items-center">
-
           <div>
             <button
               onClick={() => navigate("/")}
               className="text-sm text-emerald-600 hover:underline"
             >
-              ← Voltar
+              Voltar
             </button>
 
             <h1 className="text-2xl font-bold mt-2">
@@ -103,12 +102,9 @@ export default function AdminDashboard() {
             <LogOut size={16} />
             Sair
           </button>
-
         </div>
 
-        {/* CARDS */}
         <div className="grid md:grid-cols-4 gap-4">
-
           <div className="bg-white p-4 rounded-2xl border">
             <p className="text-sm text-slate-500">Total</p>
             <h2 className="text-2xl font-bold">{stats.total}</h2>
@@ -128,10 +124,8 @@ export default function AdminDashboard() {
             <p className="text-red-700 text-sm">Rejeitadas</p>
             <h2 className="text-2xl font-bold">{stats.rejeitado}</h2>
           </div>
-
         </div>
 
-        {/* GRÁFICO */}
         <div className="bg-white p-6 rounded-2xl border">
           <h2 className="font-semibold mb-4">Status das ONGs</h2>
 
@@ -140,7 +134,7 @@ export default function AdminDashboard() {
               <PieChart>
                 <Pie data={chartData} dataKey="value" label>
                   {chartData.map((_, index) => (
-                    <Cell key={index} fill={COLORS[index]} />
+                    <Cell key={index} fill={colors[index]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -149,9 +143,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* LISTA */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-
           {ongs.map((ong) => (
             <div
               key={ong.id}
@@ -177,8 +169,8 @@ export default function AdminDashboard() {
                     ong.status === "aprovado"
                       ? "text-green-600"
                       : ong.status === "rejeitado"
-                      ? "text-red-600"
-                      : "text-yellow-600"
+                        ? "text-red-600"
+                        : "text-yellow-600"
                   }`}
                 >
                   {ong.status}
@@ -204,9 +196,7 @@ export default function AdminDashboard() {
               )}
             </div>
           ))}
-
         </div>
-
       </div>
     </Layout>
   );

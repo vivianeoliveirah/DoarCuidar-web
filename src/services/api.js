@@ -37,7 +37,6 @@ function createExternalFetchOptions() {
  * Retorna mensagem amigável baseada no tipo de erro
  */
 function getErrorMessage(error) {
-  // Trata ExternalApiError (de serviços externos)
   if (error.name === "ExternalApiError") {
     const messages = {
       TIMEOUT: "Serviço temporariamente indisponível. Tente novamente.",
@@ -49,9 +48,11 @@ function getErrorMessage(error) {
     return messages[error.type] || "Erro no serviço externo";
   }
 
-  // Trata ApiError (do nosso backend)
   if (error instanceof ApiError) {
-    if (error.statusCode >= 500) return "Servidor indisponível. Tente novamente em breve.";
+    if (error.statusCode >= 500) {
+      return "Servidor indisponível. Tente novamente em breve.";
+    }
+
     if (error.statusCode >= 400 && error.statusCode < 500) {
       return `Requisição inválida (${error.statusCode}). Verifique os dados enviados.`;
     }
@@ -63,6 +64,7 @@ function getErrorMessage(error) {
       HTTP: error.statusCode ? `Erro do servidor (${error.statusCode})` : "Erro na requisição",
       UNKNOWN: "Erro desconhecido. Tente novamente.",
     };
+
     return messages[error.type] || messages.UNKNOWN;
   }
 
@@ -84,12 +86,13 @@ function getHeaders() {
 }
 
 /**
- * Cria options de fetch com timeout
+ * Cria options de fetch
  */
-function createFetchOptions(method = "GET", body = null) {
+function createFetchOptions(method = "GET", body = null, signal) {
   return {
     options: {
       method,
+      signal,
       headers: getHeaders(),
       ...(body && { body: JSON.stringify(body) }),
     },
@@ -97,26 +100,19 @@ function createFetchOptions(method = "GET", body = null) {
 }
 
 /**
- * Processa resposta do fetch com timeout manual
+ * Processa resposta do fetch
  */
 async function handleResponse(res) {
   let text;
-  try {
-    // Implementa timeout manual
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("TIMEOUT")), TIMEOUT_MS);
-    });
 
-    const responsePromise = res.text();
-    text = await Promise.race([responsePromise, timeoutPromise]);
-  } catch (error) {
-    if (error.message === "TIMEOUT") {
-      throw new ApiError("Requisição expirou", "TIMEOUT", null);
-    }
+  try {
+    text = await res.text();
+  } catch {
     throw new ApiError("Erro ao ler resposta do servidor", "NETWORK");
   }
 
   let data;
+
   try {
     data = JSON.parse(text);
   } catch {
@@ -133,14 +129,41 @@ async function handleResponse(res) {
   }
 
   if (data.success === false) {
-    throw new ApiError(
-      data.error || "Erro na requisição",
-      "HTTP",
-      400
-    );
+    throw new ApiError(data.error || "Erro na requisição", "HTTP", 400);
   }
 
   return data;
+}
+
+function normalizeData(data) {
+  return data?.data !== undefined ? data.data : data;
+}
+
+async function request(path, { method = "GET", body = null } = {}) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  try {
+    const { options } = createFetchOptions(method, body, controller.signal);
+    const res = await fetch(`${BASE_URL}${path}`, options);
+    const data = await handleResponse(res);
+    return normalizeData(data);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    if (error.name === "AbortError") {
+      throw new ApiError("Requisição expirou", "TIMEOUT");
+    }
+
+    throw new ApiError(
+      "Erro de conexão. Verifique sua internet e tente novamente.",
+      "NETWORK"
+    );
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export const api = {
@@ -150,83 +173,55 @@ export const api = {
     if (query) params.append("q", query);
     if (uf) params.append("estado", uf);
 
-    const url = `${BASE_URL}/api/instituicoes${
-      params.toString() ? `?${params}` : ""
-    }`;
-
-    const { options } = createFetchOptions("GET");
-    const res = await fetch(url, options);
-    return await handleResponse(res);
+    const search = params.toString();
+    return await request(`/api/instituicoes${search ? `?${search}` : ""}`);
   },
 
   async getInstituicaoById(id) {
-    const url = `${BASE_URL}/api/instituicoes/${id}`;
-    const { options } = createFetchOptions("GET");
-    const res = await fetch(url, options);
-    return await handleResponse(res);
+    return await request(`/api/instituicoes/${id}`);
   },
 
   async cadastrarInstituicao(data) {
-    const url = `${BASE_URL}/api/instituicoes`;
-    const { options } = createFetchOptions("POST", data);
-    try {
-      const res = await fetch(url, options);
-      return await handleResponse(res);
-    } catch (error) {
-      throw error;
-    }
+    return await request("/api/instituicoes", {
+      method: "POST",
+      body: data,
+    });
   },
 
   async atualizarStatus(id, status) {
-    const url = `${BASE_URL}/api/instituicoes/${id}`;
-    const { options } = createFetchOptions("PUT", {
-      status,
+    return await request(`/api/instituicoes/${id}`, {
+      method: "PUT",
+      body: { status },
     });
-    try {
-      const res = await fetch(url, options);
-      return await handleResponse(res);
-    } catch (error) {
-      clearTimeout(timeoutId);
-      throw error;
-    }
   },
 
   async deletarInstituicao(id) {
-    const url = `${BASE_URL}/api/instituicoes/${id}`;
-    const { options } = createFetchOptions("DELETE");
-    try {
-      const res = await fetch(url, options);
-      return await handleResponse(res);
-    } catch (error) {
-      clearTimeout(timeoutId);
-      throw error;
-    }
+    return await request(`/api/instituicoes/${id}`, {
+      method: "DELETE",
+    });
   },
 
   async postDoacao(data) {
-    const url = `${BASE_URL}/api/doacoes`;
-    const { options } = createFetchOptions("POST", data);
-    try {
-      const res = await fetch(url, options);
-      return await handleResponse(res);
-    } catch (error) {
-      clearTimeout(timeoutId);
-      throw error;
-    }
+    return await request("/api/doacoes", {
+      method: "POST",
+      body: data,
+    });
+  },
+
+  async getDoacoes() {
+    return await request("/api/doacoes");
   },
 
   async getPerfil() {
-    const url = `${BASE_URL}/api/perfil`;
-    const { options } = createFetchOptions("GET");
-    try {
-      const res = await fetch(url, options);
-      return await handleResponse(res);
-    } catch (error) {
-      clearTimeout(timeoutId);
-      throw error;
-    }
+    return await request("/api/perfil");
   },
 };
 
-// Exporta utilitários para uso em componentes
-export { ApiError, ExternalApiError, getErrorMessage, createFetchOptions, handleResponse, createExternalFetchOptions }; 
+export {
+  ApiError,
+  ExternalApiError,
+  getErrorMessage,
+  createFetchOptions,
+  handleResponse,
+  createExternalFetchOptions,
+};

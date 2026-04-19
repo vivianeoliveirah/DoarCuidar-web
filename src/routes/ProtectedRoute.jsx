@@ -1,13 +1,12 @@
 import { Navigate } from "react-router-dom";
+import { getSessionUser } from "../services/authService";
 
 export default function ProtectedRoute({ children }) {
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const user = getSessionUser();
 
-  // não logado → manda pro login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // logado → libera acesso
   return children;
 }

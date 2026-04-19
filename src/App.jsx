@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 
 import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
@@ -14,10 +14,33 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
 
+function NotFound() {
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div className="max-w-md w-full rounded-3xl border bg-white p-8 text-center shadow-sm">
+        <p className="text-sm font-semibold text-emerald-600">Erro 404</p>
+        <h1 className="mt-2 text-3xl font-bold text-slate-900">
+          Página não encontrada
+        </h1>
+        <p className="mt-3 text-slate-600">
+          O link pode estar desatualizado ou a página foi movida.
+        </p>
+        <Link
+          to="/"
+          className="inline-flex mt-6 rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700"
+        >
+          Voltar para a Home
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Routes>
+        {/* PUBLIC */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
@@ -34,7 +57,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/perfil"
           element={
@@ -43,7 +65,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/dashboard"
           element={
@@ -62,6 +83,8 @@ export default function App() {
             </AdminRoute>
           }
         />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
