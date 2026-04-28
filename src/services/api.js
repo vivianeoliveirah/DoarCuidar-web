@@ -1,5 +1,8 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "https://backend-doarcuidar.onrender.com";
 const TIMEOUT_MS = 8000;
+const CACHE_TTL_MS = 1000 * 60 * 3;
+const requestCache = new Map();
+const pendingRequests = new Map();
 
 /**
  * Classe customizada para erros da API
@@ -75,14 +78,69 @@ function getErrorMessage(error) {
  * Cria headers com autenticação
  */
 function getHeaders() {
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const user = getStoredAuthUser();
+  const token = getStoredAuthToken(user);
   const headers = { "Content-Type": "application/json" };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
   if (user?.id || user?.user?.id) {
     headers["user-id"] = user.id || user.user.id;
   }
 
   return headers;
+}
+
+function getStoredAuthUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    localStorage.removeItem("user");
+    return null;
+  }
+}
+
+function getStoredAuthToken(user = getStoredAuthUser()) {
+  return (
+    localStorage.getItem("token") ||
+    user?.token ||
+    user?.accessToken ||
+    user?.jwt ||
+    user?.data?.token ||
+    null
+  );
+}
+
+function getUserCacheKey() {
+  const user = getStoredAuthUser();
+  return user?.id || user?.user?.id || "public";
+}
+
+function createCacheKey(path) {
+  return `${getUserCacheKey()}:${path}`;
+}
+
+function getCachedValue(cacheKey) {
+  const cached = requestCache.get(cacheKey);
+
+  if (!cached) return null;
+
+  if (Date.now() - cached.timestamp > CACHE_TTL_MS) {
+    requestCache.delete(cacheKey);
+    return null;
+  }
+
+  return cached.data;
+}
+
+function clearApiCache(pattern = "") {
+  for (const key of requestCache.keys()) {
+    if (!pattern || key.includes(pattern)) {
+      requestCache.delete(key);
+    }
+  }
 }
 
 /**
@@ -139,15 +197,43 @@ function normalizeData(data) {
   return data?.data !== undefined ? data.data : data;
 }
 
-async function request(path, { method = "GET", body = null } = {}) {
+async function request(path, { method = "GET", body = null, cache = true } = {}) {
+  const isGet = method.toUpperCase() === "GET";
+  const cacheKey = createCacheKey(path);
+
+  if (isGet && cache) {
+    const cached = getCachedValue(cacheKey);
+    if (cached) return cached;
+
+    const pending = pendingRequests.get(cacheKey);
+    if (pending) return pending;
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-  try {
+  const promise = (async () => {
     const { options } = createFetchOptions(method, body, controller.signal);
     const res = await fetch(`${BASE_URL}${path}`, options);
-    const data = await handleResponse(res);
-    return normalizeData(data);
+    const data = normalizeData(await handleResponse(res));
+
+    if (isGet && cache) {
+      requestCache.set(cacheKey, {
+        data,
+        timestamp: Date.now(),
+      });
+    } else if (!isGet) {
+      clearApiCache();
+    }
+
+    return data;
+  })();
+
+  if (isGet && cache) {
+    pendingRequests.set(cacheKey, promise);
+  }
+
+  try {
+    return await promise;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -163,6 +249,7 @@ async function request(path, { method = "GET", body = null } = {}) {
     );
   } finally {
     clearTimeout(timeoutId);
+    pendingRequests.delete(cacheKey);
   }
 }
 
@@ -220,6 +307,7 @@ export const api = {
 export {
   ApiError,
   ExternalApiError,
+  clearApiCache,
   getErrorMessage,
   createFetchOptions,
   handleResponse,

@@ -1,14 +1,11 @@
-// src/components/ui/FormCard.jsx
 export default function FormCard({ title, subtitle, children }) {
   return (
-    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden max-w-2xl mx-auto">
-      <div className="px-6 pt-8 pb-6 border-b border-slate-50">
-        <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
-        {subtitle && <p className="text-slate-500 mt-1 text-sm">{subtitle}</p>}
+    <section className="mx-auto max-w-2xl overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.07)]">
+      <div className="border-b border-slate-100 px-6 pb-6 pt-8 sm:px-8">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-950">{title}</h2>
+        {subtitle && <p className="mt-2 text-sm leading-6 text-slate-500">{subtitle}</p>}
       </div>
-      <div className="p-6">
-        {children}
-      </div>
-    </div>
+      <div className="p-6 sm:p-8">{children}</div>
+    </section>
   );
 }

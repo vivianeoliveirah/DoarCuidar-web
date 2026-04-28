@@ -1,64 +1,70 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  Building2,
+  ExternalLink,
+  Heart,
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+} from "lucide-react";
+
+import EmptyState from "../../components/dashboard/EmptyState";
 import Layout from "../../components/layout/Layout";
 import Breadcrumb from "../../components/ui/Breadcrumb";
 import Button from "../../components/ui/Button";
-import { api } from "../../services/api"; // 🔥 NOVO
+import Loader from "../../components/ui/Loader";
+import { useApiResource } from "../../hooks/useApiResource";
+import { api } from "../../services/api";
 
-import {
-  MapPin,
-  Building2,
-  Mail,
-  Phone,
-  ShieldCheck,
-  ExternalLink,
-  Heart,
-} from "lucide-react";
+const fallbackInstitutions = {
+  "fallback-amigos-do-bem": {
+    id: "fallback-amigos-do-bem",
+    nome: "AMIGOS DO BEM",
+    cnpj: "05.108.918/0001-72",
+    uf: "SP",
+    descricao:
+      "Transforma vidas por meio de educação, geração de renda e projetos de desenvolvimento local para combater a fome e a miséria.",
+    email: "",
+    telefone: "",
+    site: "",
+  },
+};
 
 export default function DetalhesInstituicao() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const fallbackInstitution = fallbackInstitutions[id];
+  const {
+    data: apiInstituicao,
+    error,
+    loading,
+    refetch,
+  } = useApiResource(() => api.getInstituicaoById(id), {
+    initialData: null,
+    deps: [id],
+    enabled: !fallbackInstitution,
+  });
+  const instituicao = fallbackInstitution || apiInstituicao;
 
-  const [instituicao, setInstituicao] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function carregar() {
-      try {
-        setLoading(true);
-
-        const data = await api.getInstituicaoById(id);
-
-        setInstituicao(data);
-
-      } catch (error) {
-        console.error("Erro ao carregar instituição:", error);
-        setInstituicao(null);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    carregar();
-  }, [id]);
-
-  // 🔄 Loading
-  if (loading) {
+  if (loading && !fallbackInstitution) {
     return (
       <Layout>
-        <div className="text-center py-20 text-slate-400">
-          Carregando instituição...
-        </div>
+        <Loader text="Carregando instituição..." />
       </Layout>
     );
   }
 
-  // ❌ Não encontrada
-  if (!instituicao) {
+  if (error || !instituicao) {
     return (
-      <Layout>
-        <div className="text-center py-20 text-red-500">
-          Instituição não encontrada.
+      <Layout className="py-12">
+        <div className="mx-auto max-w-2xl px-4">
+          <EmptyState
+            title="Instituição não encontrada"
+            description={error || "Verifique se o link está correto ou volte para a busca."}
+            actionLabel="Tentar novamente"
+            onAction={refetch}
+          />
         </div>
       </Layout>
     );
@@ -66,121 +72,102 @@ export default function DetalhesInstituicao() {
 
   return (
     <Layout className="bg-slate-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="mx-auto max-w-7xl px-4">
+        <Breadcrumb
+          items={[
+            { label: "Buscar Instituições", href: "/instituicoes" },
+            { label: instituicao.nome },
+          ]}
+        />
 
-        <Breadcrumb items={[
-          { label: "Buscar Instituições", href: "/buscar" },
-          { label: instituicao.nome }
-        ]} />
-
-        <div className="grid lg:grid-cols-3 gap-8">
-
-          {/* ESQUERDA */}
-          <div className="lg:col-span-2 space-y-8">
-
-            {/* HEADER */}
-            <div className="bg-white rounded-3xl p-8 border">
-              <div className="flex gap-6">
-
-                <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600">
-                  <Building2 size={40} />
+        <div className="grid gap-8 lg:grid-cols-[1fr_22rem]">
+          <main className="space-y-6">
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              <div className="flex flex-col gap-6 sm:flex-row">
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+                  <Building2 size={38} aria-hidden="true" />
                 </div>
 
                 <div>
-                  <span className="text-sm text-slate-400">
-                    CNPJ {instituicao.cnpj || "Não informado"}
-                  </span>
-
-                  <h1 className="text-3xl font-bold mt-2">
-                    {instituicao.nome || "Sem nome"}
+                  <p className="text-sm font-medium text-slate-500">
+                    CNPJ {instituicao.cnpj || "não informado"}
+                  </p>
+                  <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+                    {instituicao.nome || "Instituição sem nome"}
                   </h1>
-
-                  <div className="flex gap-4 mt-3 text-sm text-slate-600">
-                    <span className="flex items-center gap-1">
-                      <MapPin size={16} /> {instituicao.uf || "—"}
+                  <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-600">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1">
+                      <MapPin size={16} aria-hidden="true" />
+                      {instituicao.uf || "-"}
                     </span>
-
-                    <span className="flex items-center gap-1">
-                      <ShieldCheck size={16} /> Ativa
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
+                      <ShieldCheck size={16} aria-hidden="true" />
+                      Ativa
                     </span>
                   </div>
                 </div>
               </div>
-            </div>
+            </section>
 
-            {/* DESCRIÇÃO */}
-            <div className="bg-white rounded-3xl p-8 border">
-              <h2 className="text-xl font-bold mb-4">
-                Sobre a Instituição
-              </h2>
-
-              <p className="text-slate-600">
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              <h2 className="text-xl font-bold text-slate-950">Sobre a instituição</h2>
+              <p className="mt-4 leading-7 text-slate-600">
                 {instituicao.descricao || "Esta instituição ainda não possui descrição."}
               </p>
 
-              <div className="grid md:grid-cols-2 gap-4 mt-6">
-
-                {/* EMAIL */}
-                <div className="p-4 bg-slate-50 rounded-xl">
-                  <p className="text-xs text-slate-400">Email</p>
-                  <p className="flex items-center gap-2">
-                    <Mail size={16} />
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</p>
+                  <p className="mt-2 flex items-center gap-2 text-sm text-slate-700">
+                    <Mail size={16} aria-hidden="true" />
                     {instituicao.email || "Não informado"}
                   </p>
                 </div>
 
-                {/* TELEFONE */}
-                <div className="p-4 bg-slate-50 rounded-xl">
-                  <p className="text-xs text-slate-400">Telefone</p>
-                  <p className="flex items-center gap-2">
-                    <Phone size={16} />
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Telefone</p>
+                  <p className="mt-2 flex items-center gap-2 text-sm text-slate-700">
+                    <Phone size={16} aria-hidden="true" />
                     {instituicao.telefone || "Não informado"}
                   </p>
                 </div>
-
               </div>
-            </div>
+            </section>
+          </main>
 
-          </div>
+          <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm lg:sticky lg:top-24">
+            <Heart size={40} className="mx-auto mb-4 text-emerald-600" fill="currentColor" aria-hidden="true" />
+            <h2 className="text-lg font-bold text-slate-950">Faça uma doação</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Ajude {instituicao.nome} a ampliar seu impacto.
+            </p>
 
-          {/* DIREITA */}
-          <div>
-            <div className="bg-white rounded-3xl p-8 text-center shadow-lg">
+            <Button
+              type="button"
+              className="mt-6 w-full"
+              onClick={() => navigate(fallbackInstitution ? "/instituicoes" : `/doar/${instituicao.id}`)}
+            >
+              {fallbackInstitution ? "Voltar para a busca" : "Doar via PIX"}
+            </Button>
 
-              <Heart size={40} className="mx-auto text-pink-500 mb-4" />
-
-              <h3 className="font-bold text-lg">
-                Faça uma Doação
-              </h3>
-
-              <p className="text-sm text-slate-500 mb-6">
-                Ajude {instituicao.nome}
-              </p>
-
-              {/* PIX */}
-              <Button
-                className="w-full mb-3"
-                onClick={() => navigate(`/doar/${instituicao.id}`)}
+            {instituicao.site ? (
+              <a
+                href={instituicao.site}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 block"
               >
-                Doar via PIX
-              </Button>
-
-              {/* SITE */}
-              {instituicao.site ? (
-                <a href={instituicao.site} target="_blank">
-                  <Button variant="outline" className="w-full">
-                    <ExternalLink size={16} /> Visitar site
-                  </Button>
-                </a>
-              ) : (
-                <Button variant="outline" className="w-full" disabled>
-                  Site não disponível
+                <Button type="button" variant="outline" className="w-full">
+                  <ExternalLink size={16} aria-hidden="true" />
+                  Visitar site
                 </Button>
-              )}
-
-            </div>
-          </div>
-
+              </a>
+            ) : (
+              <Button type="button" variant="outline" className="mt-3 w-full" disabled>
+                Site não disponível
+              </Button>
+            )}
+          </aside>
         </div>
       </div>
     </Layout>

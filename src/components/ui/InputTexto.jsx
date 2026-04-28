@@ -1,10 +1,10 @@
 export default function InputTexto({ label, ...props }) {
   return (
-    <div className="flex flex-col gap-1 w-full">
-      {label && <label className="text-sm font-medium text-slate-700">{label}</label>}
+    <div className="flex w-full flex-col gap-1.5">
+      {label && <label className="text-sm font-semibold text-slate-700">{label}</label>}
       <input
         {...props}
-        className="h-11 px-4 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+        className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
       />
     </div>
   );

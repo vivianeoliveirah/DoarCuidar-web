@@ -1,13 +1,19 @@
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react"; // Verifique se lucide-react está instalado
+import { Eye, EyeOff } from "lucide-react";
 
-export default function CampoSenha({ label, value, onChange, id, placeholder = "••••••••" }) {
+export default function CampoSenha({
+  label,
+  value,
+  onChange,
+  id,
+  placeholder = "Digite sua senha",
+}) {
   const [mostrar, setMostrar] = useState(false);
 
   return (
-    <div className="flex flex-col gap-1 w-full text-left">
+    <div className="flex w-full flex-col gap-1.5 text-left">
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-slate-700">
+        <label htmlFor={id} className="text-sm font-semibold text-slate-700">
           {label}
         </label>
       )}
@@ -18,16 +24,16 @@ export default function CampoSenha({ label, value, onChange, id, placeholder = "
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className="h-11 w-full px-4 pr-12 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+          className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
           required
         />
         <button
           type="button"
-          onClick={() => setMostrar(!mostrar)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-emerald-600 transition-colors"
-          title={mostrar ? "Esconder senha" : "Mostrar senha"}
+          onClick={() => setMostrar((current) => !current)}
+          className="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+          aria-label={mostrar ? "Esconder senha" : "Mostrar senha"}
         >
-          {mostrar ? <EyeOff size={20} /> : <Eye size={20} />}
+          {mostrar ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
         </button>
       </div>
     </div>

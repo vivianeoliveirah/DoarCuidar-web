@@ -1,21 +1,21 @@
-export default function Button({ variant="brand", size="md", className="", ...props }) {
+export default function Button({ variant = "brand", size = "md", className = "", ...props }) {
   const variants = {
-    brand: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm disabled:opacity-50",
-    outline: "border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50",
-    dark: "bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50",
-    danger: "bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+    brand: "bg-emerald-600 text-white shadow-lg shadow-emerald-600/15 hover:bg-emerald-700 disabled:opacity-50",
+    outline: "border border-slate-200 bg-white text-slate-700 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-50",
+    dark: "bg-slate-950 text-white shadow-lg shadow-slate-950/10 hover:bg-slate-800 disabled:opacity-50",
+    danger: "bg-red-600 text-white shadow-lg shadow-red-600/15 hover:bg-red-700 disabled:opacity-50",
   };
 
   const sizes = {
-    sm: "px-3 py-1.5 text-xs rounded-xl",
-    md: "px-5 py-2.5 text-sm rounded-xl",
-    lg: "px-8 py-3.5 text-base rounded-2xl"
+    sm: "min-h-10 px-4 text-xs rounded-full",
+    md: "min-h-11 px-5 text-sm rounded-full",
+    lg: "min-h-13 px-8 text-base rounded-full",
   };
 
   return (
-    <button 
-      className={`transition-all active:scale-95 font-medium flex items-center justify-center gap-2 ${variants[variant]} ${sizes[size]} ${className}`} 
-      {...props} 
+    <button
+      className={`inline-flex items-center justify-center gap-2 font-bold transition hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 ${variants[variant]} ${sizes[size]} ${className}`}
+      {...props}
     />
   );
 }

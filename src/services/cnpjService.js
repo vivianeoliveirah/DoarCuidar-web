@@ -1,9 +1,7 @@
 import { ExternalApiError, createExternalFetchOptions } from "./api";
 
-const TIMEOUT_MS = 8000;
-
 export async function consultarCNPJ(cnpj) {
-  if (!cnpj || typeof cnpj !== 'string') {
+  if (!cnpj || typeof cnpj !== "string") {
     throw new ExternalApiError("CNPJ é obrigatório", "INVALID_INPUT");
   }
 
@@ -27,11 +25,8 @@ export async function consultarCNPJ(cnpj) {
       throw new ExternalApiError("Erro na consulta do CNPJ", "NETWORK");
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
-    clearTimeout(timeoutId);
-
     if (error.name === "AbortError") {
       throw new ExternalApiError("Consulta de CNPJ demorou muito", "TIMEOUT");
     }
@@ -41,5 +36,7 @@ export async function consultarCNPJ(cnpj) {
     }
 
     throw new ExternalApiError("Erro ao consultar CNPJ", "NETWORK");
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

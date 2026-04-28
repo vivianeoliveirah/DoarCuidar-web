@@ -1,160 +1,186 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { MapPin, RefreshCw, Search } from "lucide-react";
 
+import EmptyState from "../../components/dashboard/EmptyState";
 import Layout from "../../components/layout/Layout";
+import Button from "../../components/ui/Button";
 import InputTexto from "../../components/ui/InputTexto";
 import SelectUF from "../../components/ui/SelectUF";
-import Button from "../../components/ui/Button";
+import { useApiResource } from "../../hooks/useApiResource";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import { api } from "../../services/api";
 
-import { Search, MapPin } from "lucide-react";
-import { api } from "../../services/api"; // 🔥 NOVO
+function asInstitutionList(response) {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  return [];
+}
+
+const amigosDoBem = {
+  id: "fallback-amigos-do-bem",
+  nome: "AMIGOS DO BEM",
+  cnpj: "05.108.918/0001-72",
+  uf: "SP",
+  status: "aprovado",
+  descricao:
+    "Transforma vidas por meio de educação, geração de renda e projetos de desenvolvimento local para combater a fome e a miséria.",
+};
+
+function isAmigosDoBem(instituicao) {
+  const nome = `${instituicao?.nome || ""} ${instituicao?.razao_social || ""}`.toLowerCase();
+  const cnpj = instituicao?.cnpj || "";
+
+  return nome.includes("amigos do bem") || cnpj === amigosDoBem.cnpj;
+}
 
 export default function BuscarInstituicoes() {
   const [busca, setBusca] = useState("");
   const [uf, setUf] = useState("");
-  const [instituicoes, setInstituicoes] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-
-  // 🔥 carregar inicial
-  useEffect(() => {
-    carregarDados();
-  }, []);
-
-  async function carregarDados() {
-    try {
-      setCarregando(true);
-
-      const data = await api.getInstituicoes();
-
-      // 🔥 só aprovadas (mantendo regra)
-      const aprovadas = data.filter((i) => i.status === "aprovado");
-
-      setInstituicoes(aprovadas);
-
-    } catch (error) {
-      console.error("Erro ao buscar instituições:", error);
-      setInstituicoes([]);
-    } finally {
-      setCarregando(false);
-    }
-  }
-
-  // 🔍 busca com botão
-  async function handleBuscar() {
-    try {
-      setCarregando(true);
-
-      const data = await api.getInstituicoes(busca, uf);
-
-      const aprovadas = data.filter((i) => i.status === "aprovado");
-
-      setInstituicoes(aprovadas);
-
-    } catch (error) {
-      console.error("Erro na busca:", error);
-    } finally {
-      setCarregando(false);
-    }
-  }
-
-  // 🔍 filtro local (mantido)
-  const instituicoesFiltradas = instituicoes.filter((inst) => {
-    const nome = inst.nome || "";
-    const cnpj = inst.cnpj || "";
-
-    const buscaMatch =
-      nome.toLowerCase().includes(busca.toLowerCase()) ||
-      cnpj.includes(busca);
-
-    const ufMatch = uf === "" || inst.uf === uf;
-
-    return buscaMatch && ufMatch;
+  const debouncedSearch = useDebouncedValue(busca.trim().toLowerCase(), 300);
+  const {
+    data: instituicoes,
+    error,
+    loading,
+    refreshing,
+    refetch,
+  } = useApiResource(api.getInstituicoes, {
+    initialData: [],
+    select: asInstitutionList,
   });
 
+  const instituicoesFiltradas = useMemo(() => {
+    const listaComAmigosDoBem = instituicoes.some(isAmigosDoBem)
+      ? instituicoes
+      : [amigosDoBem, ...instituicoes];
+
+    return listaComAmigosDoBem
+      .filter((inst) => inst.status === "aprovado")
+      .filter((inst) => {
+        const nome = `${inst.nome || ""} ${inst.razao_social || ""}`.toLowerCase();
+        const cnpj = inst.cnpj || "";
+        const buscaMatch =
+          !debouncedSearch ||
+          nome.includes(debouncedSearch) ||
+          cnpj.includes(debouncedSearch);
+        const ufMatch = !uf || inst.uf === uf;
+
+        return buscaMatch && ufMatch;
+      });
+  }, [debouncedSearch, instituicoes, uf]);
+
   return (
-    <Layout className="py-12">
-      <div className="mx-auto max-w-7xl px-4">
+    <Layout className="bg-slate-50 py-12 sm:py-16">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.14em] text-emerald-700">
+              Rede DoarCuidar
+            </p>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
+              Buscar Instituições
+            </h1>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
+              Encontre causas reais, filtre por estado e escolha uma instituição para apoiar com confiança.
+            </p>
+          </div>
 
-        {/* HEADER */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-slate-900">
-            Buscar Instituições
-          </h1>
-
-          <p className="text-slate-500 mt-2">
-            Encontre causas reais e faça a diferença 💚
-          </p>
+          <button
+            type="button"
+            onClick={refetch}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+            aria-label="Atualizar lista de instituições"
+          >
+            <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} aria-hidden="true" />
+            Atualizar
+          </button>
         </div>
 
-        {/* FILTROS */}
-        <div className="bg-white p-6 rounded-3xl shadow-sm border mb-10 flex flex-col md:flex-row gap-4 items-end">
-
+        <div className="mb-8 grid gap-4 rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.05)] md:grid-cols-[1fr_12rem_auto] md:items-end">
           <InputTexto
             label="Nome ou CNPJ"
             placeholder="Ex: Instituto..."
             aria-label="Buscar instituição por nome ou CNPJ"
             value={busca}
-            onChange={(e) => setBusca(e.target.value)}
+            onChange={(event) => setBusca(event.target.value)}
           />
 
-          <div className="w-full md:w-48">
-            <SelectUF value={uf} onChange={(e) => setUf(e.target.value)} />
-          </div>
+          <SelectUF value={uf} onChange={(event) => setUf(event.target.value)} />
 
           <Button
+            type="button"
             variant="brand"
-            className="h-11 px-8 gap-2"
-            onClick={handleBuscar}
+            className="min-h-12 px-8"
+            onClick={refetch}
+            aria-label="Buscar instituições"
           >
-            <Search size={18} />
+            <Search size={18} aria-hidden="true" />
             Buscar
           </Button>
         </div>
 
-        {/* RESULTADOS */}
-        {carregando ? (
-          <div className="text-center py-20 text-slate-400">
-            Carregando instituições...
+        {error ? (
+          <EmptyState
+            title="Não foi possível carregar as instituições"
+            description={error}
+            actionLabel="Tentar novamente"
+            onAction={refetch}
+          />
+        ) : loading ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
+            {[1, 2, 3, 4, 5, 6].map((item) => (
+              <div key={item} className="h-52 animate-pulse rounded-[1.35rem] bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.04)] ring-1 ring-slate-100">
+                <div className="h-5 w-2/3 rounded-full bg-slate-200" />
+                <div className="mt-5 h-3 w-1/2 rounded-full bg-slate-100" />
+                <div className="mt-8 space-y-3">
+                  <div className="h-3 rounded-full bg-slate-100" />
+                  <div className="h-3 w-4/5 rounded-full bg-slate-100" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : instituicoesFiltradas.length === 0 ? (
-          <div className="text-center py-20 text-slate-400">
-            Nenhuma instituição encontrada 😔
-          </div>
+          <EmptyState
+            title="Nenhuma instituição encontrada"
+            description="Ajuste os filtros ou atualize a lista para consultar novas instituições aprovadas."
+            actionLabel="Limpar filtros"
+            onAction={() => {
+              setBusca("");
+              setUf("");
+            }}
+          />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {instituicoesFiltradas.map((inst) => (
               <Link
                 to={`/detalhes/${inst.id}`}
                 key={inst.id}
-                className="bg-white p-6 rounded-3xl border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all group"
+                className="group rounded-[1.35rem] border border-slate-100 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-[0_24px_60px_rgba(15,23,42,0.08)] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
               >
-                <div className="flex justify-between items-start mb-4">
-
-                  <h3 className="font-bold text-xl group-hover:text-emerald-600 transition">
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <h2 className="text-lg font-bold leading-snug text-slate-950 transition group-hover:text-emerald-700">
                     {inst.nome}
-                  </h3>
+                  </h2>
 
-                  <span className="bg-emerald-50 text-emerald-700 text-xs px-2 py-1 rounded-lg flex items-center gap-1">
-                    <MapPin size={12} />
-                    {inst.uf}
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">
+                    <MapPin size={12} aria-hidden="true" />
+                    {inst.uf || "-"}
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-400 mb-3 font-mono">
-                  {inst.cnpj}
+                <p className="mb-4 font-mono text-xs text-slate-500">
+                  {inst.cnpj || "CNPJ não informado"}
                 </p>
 
-                <p className="text-sm text-slate-600 mb-6 line-clamp-2">
+                <p className="mb-6 line-clamp-3 text-sm leading-6 text-slate-600">
                   {inst.descricao || "Sem descrição disponível."}
                 </p>
 
-                <div className="text-emerald-600 font-semibold text-sm group-hover:underline">
-                  Ver detalhes →
-                </div>
+                <span className="text-sm font-bold text-emerald-700">
+                  Ver detalhes
+                </span>
               </Link>
             ))}
-
           </div>
         )}
       </div>

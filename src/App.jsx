@@ -1,25 +1,33 @@
-import { Link, Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
 
-import Home from "./pages/Home/Home";
-import Login from "./pages/Login/Login";
-import CadastroUsuario from "./pages/Cadastro/CadastroUsuario";
-import CadastroInstituicao from "./pages/Cadastro/CadastroInstituicao";
-import BuscarInstituicoes from "./pages/Instituicoes/BuscarInstituicoes";
-import DetalhesInstituicao from "./pages/Instituicoes/DetalhesInstituicao";
-import Doar from "./pages/Doar/Doar";
-import Perfil from "./pages/Perfil/Perfil";
-import Dashboard from "./pages/Dashboard/Dashboard";
-import AdminDashboard from "./pages/Admin/AdminDashboard";
-
+import Loader from "./components/ui/Loader";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
 
+const Home = lazy(() => import("./pages/Home/Home"));
+const Login = lazy(() => import("./pages/Login/Login"));
+const CadastroUsuario = lazy(() => import("./pages/Cadastro/CadastroUsuario"));
+const CadastroInstituicao = lazy(() =>
+  import("./pages/Cadastro/CadastroInstituicao")
+);
+const BuscarInstituicoes = lazy(() =>
+  import("./pages/Instituicoes/BuscarInstituicoes")
+);
+const DetalhesInstituicao = lazy(() =>
+  import("./pages/Instituicoes/DetalhesInstituicao")
+);
+const Doar = lazy(() => import("./pages/Doar/Doar"));
+const Perfil = lazy(() => import("./pages/Perfil/Perfil"));
+const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
+const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
+
 function NotFound() {
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full rounded-3xl border bg-white p-8 text-center shadow-sm">
-        <p className="text-sm font-semibold text-emerald-600">Erro 404</p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <p className="text-sm font-semibold text-emerald-700">Erro 404</p>
+        <h1 className="mt-2 text-3xl font-bold text-slate-950">
           Página não encontrada
         </h1>
         <p className="mt-3 text-slate-600">
@@ -27,7 +35,7 @@ function NotFound() {
         </p>
         <Link
           to="/"
-          className="inline-flex mt-6 rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700"
+          className="mt-6 inline-flex rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
         >
           Voltar para a Home
         </Link>
@@ -39,53 +47,70 @@ function NotFound() {
 export default function App() {
   return (
     <div className="min-h-screen bg-slate-50">
-      <Routes>
-        {/* PUBLIC */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
-        <Route path="/cadastro-instituicao" element={<CadastroInstituicao />} />
-        <Route path="/buscar" element={<BuscarInstituicoes />} />
-        <Route path="/detalhes/:id" element={<DetalhesInstituicao />} />
+      <Suspense fallback={<Loader text="Carregando página..." />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/cadastro" element={<CadastroUsuario />} />
+          <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
+          <Route path="/cadastro-instituicao" element={<CadastroInstituicao />} />
+          <Route path="/instituicoes" element={<BuscarInstituicoes />} />
+          <Route path="/buscar" element={<Navigate to="/instituicoes" replace />} />
+          <Route path="/detalhes/:id" element={<DetalhesInstituicao />} />
 
-        {/* USER */}
-        <Route
-          path="/doar/:id"
-          element={
-            <ProtectedRoute>
-              <Doar />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/perfil"
-          element={
-            <ProtectedRoute>
-              <Perfil />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/doar/:id"
+            element={
+              <ProtectedRoute>
+                <Doar />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <ProtectedRoute>
+                <Perfil />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
+          <Route
+            path="/painel"
+            element={<Navigate to="/dashboard" replace />}
+          />
+          <Route
+            path="/doacoes"
+            element={<Navigate to="/dashboard#doacoes" replace />}
+          />
+          <Route
+            path="/relatorios"
+            element={<Navigate to="/dashboard#relatorios" replace />}
+          />
+          <Route
+            path="/configuracoes"
+            element={
+              <ProtectedRoute>
+                <Navigate to="/perfil#configuracoes" replace />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* ADMIN */}
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          }
-        />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </div>
   );
 }

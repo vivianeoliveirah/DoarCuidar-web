@@ -5,74 +5,66 @@ export default function HeroSection() {
   const navigate = useNavigate();
 
   return (
-    <section className="relative bg-slate-50 py-8">
-      
-      <div className="max-w-5xl mx-auto px-4 text-center">
+    <section className="bg-white">
+      <div className="mx-auto flex max-w-6xl flex-col items-center px-4 pb-10 pt-14 text-center sm:px-6 sm:pb-12 sm:pt-16 lg:pb-14 lg:pt-20">
+        <p className="inline-flex rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
+          Doações com transparência
+        </p>
 
-        {/* TÍTULO */}
-        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight">
+        <h1 className="mt-7 max-w-4xl text-4xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
           Encontre uma instituição
-          <span className="block text-emerald-600 mt-2">
+          <span className="mt-2 block text-emerald-600">
             e faça a diferença hoje
           </span>
         </h1>
 
-        {/* SUBTEXTO */}
-        <p className="text-slate-600 mt-4">
+        <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
           Consulte CNPJ oficial, filtre por estado e conecte-se com causas reais.
         </p>
 
-        {/* FRASE */}
-        <div className="mt-6 flex justify-center">
-          <div className="max-w-2xl w-full bg-white/80 backdrop-blur rounded-xl px-6 py-4 border border-slate-200 shadow-sm">
-
-            <p className="text-slate-700 text-sm leading-relaxed text-center italic">
-              “Toda a caridade que fizerdes deve ser para os pais, parentes,
-              órfãos, necessitados e viajantes. E todo o bem que fizerdes,
-              será reconhecido.”
+        <figure className="mt-8 w-full max-w-3xl rounded-[1.5rem] border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-slate-50 px-5 py-6 shadow-[0_18px_45px_rgba(15,23,42,0.05)] sm:px-8">
+          <blockquote>
+            <p className="text-base font-medium leading-8 text-slate-700">
+              “Perguntam-te que parte devem gastar (em caridade). Dize-lhes: Toda a
+              caridade que fizerdes, deve ser para os pais, parentes, órfãos,
+              necessitados e viajantes (desamparados). E sabei que todo o bem que
+              fizerdes, Allah dele tomará consciência.”
             </p>
+          </blockquote>
+          <figcaption className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+            2ª Surata Al Báçara – A Vaca 215
+          </figcaption>
+        </figure>
 
-            <span className="block text-xs text-slate-400 mt-2 text-center">
-              2ª Surata Al Báçara – A Vaca 215
-            </span>
-
-          </div>
-        </div>
-
-        {/* BOTÕES */}
-        <div className="flex flex-col md:flex-row gap-4 justify-center mt-6">
-
+        <div className="mt-8 flex w-full max-w-xl flex-col justify-center gap-3 sm:flex-row">
           <button
-            onClick={() => navigate("/buscar")}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-semibold shadow-md transition-all hover:scale-105"
+            type="button"
+            onClick={() => navigate("/instituicoes")}
+            className="inline-flex min-h-13 flex-1 items-center justify-center rounded-full bg-emerald-600 px-7 py-3.5 text-base font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+            aria-label="Explorar instituições para doar"
           >
             Explorar causas
           </button>
-
           <button
-            onClick={() => navigate("/cadastro-instituicao")}
-            className="border border-emerald-600 text-emerald-600 hover:bg-emerald-50 px-8 py-3 rounded-xl font-semibold transition-all"
+            type="button"
+            onClick={() => document.getElementById("conhecer-projeto")?.scrollIntoView({ behavior: "smooth" })}
+            className="inline-flex min-h-13 flex-1 items-center justify-center rounded-full border border-emerald-200 bg-white px-7 py-3.5 text-base font-bold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+            aria-label="Conhecer como funciona o DoarCuidar"
           >
-            Cadastrar ONG
+            Como funciona
           </button>
-
         </div>
 
-        {/* INFO */}
-        <div className="mt-5 flex items-center justify-center gap-6 text-sm text-slate-600">
-
+        <div className="mt-7 flex flex-col items-center justify-center gap-3 text-sm font-semibold text-slate-600 sm:flex-row sm:gap-8">
           <span className="inline-flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+            <ShieldCheck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
             Dados verificados
           </span>
-
           <span className="inline-flex items-center gap-2">
-            <Users className="h-4 w-4" aria-hidden="true" />
+            <Users className="h-4 w-4 text-emerald-600" aria-hidden="true" />
             Comunidade engajada
           </span>
-
         </div>
-
       </div>
     </section>
   );
