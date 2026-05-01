@@ -11,7 +11,7 @@ import FormCard from "../../components/ui/FormCard";
 import InputTexto from "../../components/ui/InputTexto";
 import Loader from "../../components/ui/Loader";
 import { useApiResource } from "../../hooks/useApiResource";
-import { api } from "../../services/api";
+import { api, getErrorMessage } from "../../services/api";
 
 const SUGGESTED_VALUES = [20, 50, 100];
 
@@ -20,6 +20,7 @@ export default function Doar() {
   const navigate = useNavigate();
   const [valor, setValor] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const {
     data: instituicao,
     error,
@@ -37,22 +38,27 @@ export default function Doar() {
     event.preventDefault();
 
     if (valorInvalido) {
-      toast.error("Informe um valor de doação válido.");
+      const message = "Informe um valor de apoio válido.";
+      setSubmitError(message);
+      toast.error(message);
       return;
     }
 
     try {
       setSubmitting(true);
+      setSubmitError("");
       await api.postDoacao({
         instituicaoId: id,
         valor: valorNumerico,
         data: new Date().toISOString(),
       });
 
-      toast.success("Obrigado pela sua doação!");
+      toast.success("Apoio registrado no seu histórico.");
       navigate("/dashboard");
-    } catch {
-      toast.error("Erro ao processar doação. Tente novamente.");
+    } catch (error) {
+      const message = getErrorMessage(error);
+      setSubmitError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -93,19 +99,19 @@ export default function Doar() {
         />
 
         <FormCard
-          title="Confirmar Doação"
-          subtitle={`Você está doando para: ${instituicao.nome}`}
+          title="Registrar apoio"
+          subtitle={`Este registro fica no seu histórico. O pagamento deve ser feito pelos canais oficiais de: ${instituicao.nome}`}
         >
           <form onSubmit={handleDoar} className="space-y-6">
             <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
               <p className="flex items-start gap-3 text-sm font-medium leading-6 text-emerald-900">
                 <ShieldCheck size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
-                Sua doação ajuda a manter projetos de impacto social ativos.
+                O DoarCuidar não processa pagamentos. Use esta etapa para registrar o valor que você pretende acompanhar no histórico.
               </p>
             </div>
 
             <InputTexto
-              label="Valor da Doação (R$)"
+              label="Valor do apoio (R$)"
               type="number"
               placeholder="Ex: 50.00"
               value={valor}
@@ -129,6 +135,12 @@ export default function Doar() {
               ))}
             </div>
 
+            {submitError && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800">
+                {submitError}
+              </div>
+            )}
+
             <Button
               type="submit"
               variant="brand"
@@ -136,7 +148,7 @@ export default function Doar() {
               disabled={submitting || valorInvalido}
             >
               <HeartHandshake size={18} aria-hidden="true" />
-              {submitting ? "Processando..." : "Confirmar doação"}
+              {submitting ? "Registrando..." : "Registrar apoio"}
             </Button>
 
             <button

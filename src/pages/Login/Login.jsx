@@ -16,13 +16,15 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
       setLoading(true);
-      await loginUser({ email, password: senha });
+      setFormError("");
+      await loginUser({ email: email.trim(), password: senha });
       toast.success("Login realizado com sucesso");
       const from = location.state?.from;
       navigate(
@@ -30,7 +32,9 @@ export default function Login() {
         { replace: true }
       );
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      const message = getErrorMessage(error);
+      setFormError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -41,7 +45,7 @@ export default function Login() {
       <div className="w-full max-w-md px-4">
         <FormCard
           title="Entrar no DoarCuidar"
-          subtitle="Acesse sua conta para acompanhar doações, instituições e impacto social."
+          subtitle="Acesse sua conta para registrar apoios, acompanhar histórico e visualizar seu perfil de doador."
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <InputTexto
@@ -63,11 +67,20 @@ export default function Login() {
               />
 
               <div className="text-right">
-                <span className="text-xs font-medium text-slate-400">
-                  Recuperação de senha indisponível no protótipo
-                </span>
+                <Link
+                  to="/recuperar-senha"
+                  className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
+                >
+                  Esqueci minha senha
+                </Link>
               </div>
             </div>
+
+            {formError && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800">
+                {formError}
+              </div>
+            )}
 
             <Button
               type="submit"

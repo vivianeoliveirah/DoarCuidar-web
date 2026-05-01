@@ -1,5 +1,6 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "https://backend-doarcuidar.onrender.com";
-const TIMEOUT_MS = 8000;
+const BACKEND_TIMEOUT_MS = 45000;
+const EXTERNAL_TIMEOUT_MS = 8000;
 const CACHE_TTL_MS = 1000 * 60 * 3;
 const requestCache = new Map();
 const pendingRequests = new Map();
@@ -32,7 +33,7 @@ class ExternalApiError extends Error {
  */
 function createExternalFetchOptions() {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timeoutId = setTimeout(() => controller.abort(), EXTERNAL_TIMEOUT_MS);
   return { controller, timeoutId };
 }
 
@@ -40,11 +41,17 @@ function createExternalFetchOptions() {
  * Retorna mensagem amigável baseada no tipo de erro
  */
 function getErrorMessage(error) {
+  if (!error) {
+    return "Erro desconhecido. Tente novamente.";
+  }
+
   if (error.name === "ExternalApiError") {
     const messages = {
       TIMEOUT: "Serviço temporariamente indisponível. Tente novamente.",
       NETWORK: "Erro de conexão. Verifique sua internet.",
       INVALID_INPUT: error.message,
+      METHOD_NOT_ALLOWED: "Não foi possível consultar o CNPJ no momento.",
+      UNAVAILABLE: "Não foi possível consultar o CNPJ no momento.",
       NOT_FOUND: "Dados não encontrados",
       PARSE: "Resposta inválida do serviço",
     };
@@ -52,8 +59,28 @@ function getErrorMessage(error) {
   }
 
   if (error instanceof ApiError) {
+    if (error.type === "UNAVAILABLE") {
+      return error.message;
+    }
+
     if (error.statusCode >= 500) {
       return "Servidor indisponível. Tente novamente em breve.";
+    }
+
+    if (error.statusCode === 401 || error.statusCode === 403) {
+      return "E-mail ou senha incorretos. Confira os dados e tente novamente.";
+    }
+
+    if (error.statusCode === 404) {
+      return "Serviço não encontrado no momento. Tente novamente mais tarde.";
+    }
+
+    if (error.statusCode === 405) {
+      return "Esta ação não está disponível no momento.";
+    }
+
+    if (error.statusCode === 400) {
+      return "Não foi possível processar os dados enviados. Confira as informações e tente novamente.";
     }
 
     if (error.statusCode >= 400 && error.statusCode < 500) {
@@ -161,6 +188,8 @@ function createFetchOptions(method = "GET", body = null, signal) {
  * Processa resposta do fetch
  */
 async function handleResponse(res) {
+  const contentType = res.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
   let text;
 
   try {
@@ -169,25 +198,37 @@ async function handleResponse(res) {
     throw new ApiError("Erro ao ler resposta do servidor", "NETWORK");
   }
 
+  if (!text) {
+    if (res.ok) return null;
+    throw new ApiError(`Erro HTTP ${res.status}`, "HTTP", res.status);
+  }
+
+  if (!isJson) {
+    if (!res.ok) {
+      throw new ApiError(`Erro HTTP ${res.status}`, "HTTP", res.status);
+    }
+
+    throw new ApiError("Resposta inválida do servidor", "PARSE");
+  }
+
   let data;
 
   try {
     data = JSON.parse(text);
   } catch {
-    console.error("Resposta inválida do servidor:", text);
     throw new ApiError("Resposta inválida do servidor", "PARSE");
   }
 
   if (!res.ok) {
     throw new ApiError(
-      data.error || `Erro HTTP ${res.status}`,
+      data.error || data.message || `Erro HTTP ${res.status}`,
       "HTTP",
       res.status
     );
   }
 
   if (data.success === false) {
-    throw new ApiError(data.error || "Erro na requisição", "HTTP", 400);
+    throw new ApiError(data.error || data.message || "Erro na requisição", "HTTP", 400);
   }
 
   return data;
@@ -210,7 +251,7 @@ async function request(path, { method = "GET", body = null, cache = true } = {})
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timeoutId = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS);
   const promise = (async () => {
     const { options } = createFetchOptions(method, body, controller.signal);
     const res = await fetch(`${BASE_URL}${path}`, options);

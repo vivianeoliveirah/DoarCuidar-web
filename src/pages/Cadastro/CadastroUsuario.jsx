@@ -29,6 +29,7 @@ export default function CadastroUsuario() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const handleChange = (key) => (e) => {
     setForm((prev) => ({
@@ -57,9 +58,12 @@ export default function CadastroUsuario() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError("");
 
     if (form.senha !== form.confirmarSenha) {
-      toast.error("As senhas não coincidem");
+      const message = "As senhas não coincidem";
+      setFormError(message);
+      toast.error(message);
       return;
     }
 
@@ -67,14 +71,21 @@ export default function CadastroUsuario() {
       setLoading(true);
 
       await registerUser({
+        nome: form.nome,
         email: form.email,
         password: form.senha,
+        telefone: form.telefone,
+        endereco: form.endereco,
+        cep: form.cep,
+        cidade: form.cidade,
+        uf: form.uf,
       });
 
       toast.success("Conta criada com sucesso 🎉");
       navigate("/login");
     } catch (error) {
       const mensagem = getErrorMessage(error);
+      setFormError(mensagem);
       toast.error(mensagem);
     } finally {
       setLoading(false);
@@ -85,7 +96,7 @@ export default function CadastroUsuario() {
     <Layout className="py-12 bg-slate-50">
       <FormCard
         title="Crie sua conta"
-        subtitle="É rápido, seguro e você pode doar quando quiser."
+        subtitle="Crie sua conta para registrar apoios, acessar seu perfil e acompanhar seu histórico."
       >
         <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -134,7 +145,13 @@ export default function CadastroUsuario() {
             <SelectUF value={form.uf} onChange={handleChange("uf")} />
           </div>
 
-          <Button className="w-full h-12">
+          {formError && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800">
+              {formError}
+            </div>
+          )}
+
+          <Button className="w-full h-12" disabled={loading}>
             {loading ? "Criando..." : "Criar conta"}
           </Button>
 

@@ -12,6 +12,7 @@ export function useApiResource(fetcher, options = {}) {
   } = options;
 
   const mountedRef = useRef(false);
+  const dataRef = useRef(initialData);
   const fetcherRef = useRef(fetcher);
   const initialDataRef = useRef(initialData);
   const onErrorRef = useRef(onError);
@@ -21,8 +22,10 @@ export function useApiResource(fetcher, options = {}) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(enabled);
   const [refreshing, setRefreshing] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
+    dataRef.current = data;
     fetcherRef.current = fetcher;
     initialDataRef.current = initialData;
     onErrorRef.current = onError;
@@ -48,6 +51,8 @@ export function useApiResource(fetcher, options = {}) {
 
         if (mountedRef.current) {
           setData(nextData);
+          dataRef.current = nextData;
+          setHasLoaded(true);
           onSuccessRef.current?.(nextData);
         }
 
@@ -60,7 +65,7 @@ export function useApiResource(fetcher, options = {}) {
           onErrorRef.current?.(err);
         }
 
-        return initialDataRef.current;
+        return dataRef.current;
       } finally {
         if (mountedRef.current) {
           setLoading(false);
@@ -90,9 +95,10 @@ export function useApiResource(fetcher, options = {}) {
       error,
       loading,
       refreshing,
+      hasLoaded,
       refetch: () => load({ silent: true }),
       reload: () => load(),
     }),
-    [data, error, loading, refreshing, load]
+    [data, error, loading, refreshing, hasLoaded, load]
   );
 }
