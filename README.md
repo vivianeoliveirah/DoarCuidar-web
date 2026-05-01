@@ -215,31 +215,26 @@ uvicorn app.main:app --reload
 
 # Variáveis de ambiente
 
-## Frontend (.env)
+Crie os arquivos locais de ambiente a partir de exemplos como `.env.example`.
+Não publique valores reais de chaves, tokens, URLs de banco ou segredos no README.
+
+## Frontend
 
 ```env
 VITE_USE_DEMO=true
-VITE_API_URL=""
-
-VITE_FIREBASE_API_KEY=""
-VITE_FIREBASE_AUTH_DOMAIN=""
-VITE_FIREBASE_PROJECT_ID=""
-VITE_FIREBASE_STORAGE_BUCKET=""
-VITE_FIREBASE_MESSAGING_SENDER_ID=""
-VITE_FIREBASE_APP_ID=""
+VITE_API_URL=https://sua-api.example.com
 ```
 
 ---
 
-## Backend (.env)
+## Backend
+
+Mantenha as variáveis sensíveis apenas no ambiente da hospedagem ou em um
+arquivo local ignorado pelo Git. No backend, use nomes descritivos no
+`.env.example`, mas nunca envie valores reais para o repositório.
 
 ```env
-DATABASE_URL=""
-SECRET_KEY=""
-ALGORITHM="HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-SUPABASE_URL=""
-SUPABASE_KEY=""
+APP_ENV=development
 ```
 
 ---
