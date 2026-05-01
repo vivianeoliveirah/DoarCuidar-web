@@ -3,9 +3,9 @@ import { BarChart3, CheckCircle2, HeartHandshake, ShieldCheck } from "lucide-rea
 
 const benefits = [
   "Instituições organizadas por dados cadastrais e localização.",
-  "Histórico de doações acessível para acompanhamento do doador.",
-  "Indicadores visuais para entender evolução e impacto.",
-  "Fluxo simples para cadastrar, buscar e apoiar campanhas.",
+  "Histórico de apoios acessível para acompanhamento do doador.",
+  "Indicadores visuais para entender cobertura e qualidade dos dados.",
+  "Fluxo simples para buscar, comparar e acessar canais oficiais.",
 ];
 
 export default function DarkBenefitsSection() {
@@ -18,7 +18,7 @@ export default function DarkBenefitsSection() {
             Uma experiência pensada para confiança e continuidade.
           </h2>
           <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
-            A plataforma une navegação clara, dados de instituições e visualizações analíticas para que cada contribuição seja acompanhada com mais segurança.
+            A plataforma une navegação clara, dados de instituições e visualizações analíticas para que cada decisão de apoio seja acompanhada com mais segurança.
           </p>
 
           <ul className="mt-8 space-y-4">
@@ -36,16 +36,16 @@ export default function DarkBenefitsSection() {
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <p className="text-sm font-semibold text-emerald-400">Dashboard DoarCuidar</p>
-                <h3 className="mt-1 text-xl font-bold">Impacto social</h3>
+                <h3 className="mt-1 text-xl font-bold">Transparência dos dados</h3>
               </div>
               <ShieldCheck className="text-emerald-400" aria-hidden="true" />
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
               {[
-                { icon: HeartHandshake, label: "Doações", value: "R$ 48k" },
-                { icon: BarChart3, label: "Evolução", value: "+24%" },
-                { icon: ShieldCheck, label: "Transparência", value: "Alta" },
+                { icon: HeartHandshake, label: "Apoios", value: "Histórico" },
+                { icon: BarChart3, label: "Cobertura", value: "UFs" },
+                { icon: ShieldCheck, label: "Dados", value: "CNPJ" },
               ].map((item) => (
                 <div key={item.label} className="rounded-2xl bg-white/10 p-4">
                   {createElement(item.icon, {

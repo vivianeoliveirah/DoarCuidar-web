@@ -6,7 +6,7 @@ export default function FinalCtaSection() {
 
   return (
     <section className="bg-white px-4 py-16 sm:px-6 sm:py-20">
-      <div className="mx-auto max-w-5xl rounded-[1.75rem] border border-emerald-100 bg-gradient-to-br from-emerald-600 to-emerald-700 px-6 py-10 text-center text-white shadow-[0_24px_70px_rgba(5,150,105,0.22)] sm:px-10">
+      <div className="mx-auto max-w-5xl rounded-2xl border border-emerald-500 bg-gradient-to-br from-emerald-600 to-emerald-700 px-6 py-10 text-center text-white shadow-md shadow-emerald-950/10 sm:px-10">
         <p className="text-sm font-bold uppercase tracking-[0.16em] text-emerald-100">
           Comece agora
         </p>

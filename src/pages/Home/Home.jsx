@@ -4,6 +4,7 @@ import Layout from "../../components/layout/Layout";
 import HeroSection from "../../components/home/HeroSection";
 import DonationGallery from "../../components/home/DonationGallery";
 import ComoFunciona from "../../components/home/ComoFunciona";
+import TransparencySection from "../../components/transparencia/TransparencySection";
 import { useApiResource } from "../../hooks/useApiResource";
 import { api } from "../../services/api";
 
@@ -26,9 +27,8 @@ export default function Home() {
   });
 
   const destaques = useMemo(() => {
-    const aprovadas = instituicoes.filter((item) => item.status === "aprovado");
-    const amigosDoBem = aprovadas.find(isAmigosDoBem);
-    const demais = aprovadas.filter((item) => !isAmigosDoBem(item));
+    const amigosDoBem = instituicoes.find(isAmigosDoBem);
+    const demais = instituicoes.filter((item) => !isAmigosDoBem(item));
 
     return [...(amigosDoBem ? [amigosDoBem] : []), ...demais].slice(0, 3);
   }, [instituicoes]);
@@ -37,6 +37,7 @@ export default function Home() {
     <Layout className="bg-white">
       <HeroSection />
       <DonationGallery instituicoes={destaques} />
+      <TransparencySection />
       <div id="conhecer-projeto">
         <ComoFunciona />
       </div>

@@ -3,14 +3,11 @@ import { Link, Navigate, Route, Routes } from "react-router-dom";
 
 import Loader from "./components/ui/Loader";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import AdminRoute from "./routes/AdminRoute";
 
 const Home = lazy(() => import("./pages/Home/Home"));
 const Login = lazy(() => import("./pages/Login/Login"));
+const RecuperarSenha = lazy(() => import("./pages/Login/RecuperarSenha"));
 const CadastroUsuario = lazy(() => import("./pages/Cadastro/CadastroUsuario"));
-const CadastroInstituicao = lazy(() =>
-  import("./pages/Cadastro/CadastroInstituicao")
-);
 const BuscarInstituicoes = lazy(() =>
   import("./pages/Instituicoes/BuscarInstituicoes")
 );
@@ -20,7 +17,7 @@ const DetalhesInstituicao = lazy(() =>
 const Doar = lazy(() => import("./pages/Doar/Doar"));
 const Perfil = lazy(() => import("./pages/Perfil/Perfil"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
-const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
+const Transparencia = lazy(() => import("./pages/Transparencia/Transparencia"));
 
 function NotFound() {
   return (
@@ -51,10 +48,12 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/recuperar-senha" element={<RecuperarSenha />} />
           <Route path="/cadastro" element={<CadastroUsuario />} />
           <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
-          <Route path="/cadastro-instituicao" element={<CadastroInstituicao />} />
+          <Route path="/cadastro-instituicao" element={<Navigate to="/instituicoes" replace />} />
           <Route path="/instituicoes" element={<BuscarInstituicoes />} />
+          <Route path="/transparencia" element={<Transparencia />} />
           <Route path="/buscar" element={<Navigate to="/instituicoes" replace />} />
           <Route path="/detalhes/:id" element={<DetalhesInstituicao />} />
 
@@ -101,11 +100,7 @@ export default function App() {
 
           <Route
             path="/admin"
-            element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            }
+            element={<Navigate to="/instituicoes" replace />}
           />
 
           <Route path="*" element={<NotFound />} />

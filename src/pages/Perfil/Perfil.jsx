@@ -115,7 +115,7 @@ export default function Perfil() {
         )}
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+          <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm shadow-slate-950/5">
             <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-2xl border-4 border-white bg-emerald-50 text-3xl font-bold text-emerald-700 shadow-sm">
               {user?.nome?.charAt(0).toUpperCase() || "D"}
             </div>
@@ -151,7 +151,7 @@ export default function Perfil() {
           </aside>
 
           <div className="space-y-6 lg:col-span-2">
-            <Panel title="Instituição que você mais ajudou">
+            <Panel title="Instituição com mais apoios registrados">
               {summary.topOng ? (
                 <div>
                   <h3 className="text-2xl font-bold text-slate-950">{summary.topOng.nome}</h3>
@@ -160,13 +160,13 @@ export default function Perfil() {
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">Sem doações ainda.</p>
+                <p className="text-sm text-slate-500">Sem apoios registrados ainda.</p>
               )}
             </Panel>
 
             {summary.ranking.length > 0 && (
-              <Panel title="Doações por instituição">
-                <div className="h-64" aria-label="Gráfico de doações por instituição">
+              <Panel title="Apoios por instituição">
+                <div className="h-64" aria-label="Gráfico de apoios por instituição">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={summary.ranking}>
                       <XAxis dataKey="nome" tickLine={false} axisLine={false} />
@@ -181,9 +181,9 @@ export default function Perfil() {
           </div>
         </div>
 
-        <Panel title="Histórico de doações">
+        <Panel title="Histórico de apoios">
           {doacoes.length === 0 ? (
-            <p className="text-sm text-slate-500">Você ainda não fez doações.</p>
+            <p className="text-sm text-slate-500">Você ainda não registrou apoios.</p>
           ) : (
             <div className="space-y-3">
               {doacoes.map((item) => (
@@ -209,7 +209,7 @@ export default function Perfil() {
                       onClick={() => navigate(`/detalhes/${item.instituicao_id}`)}
                       className="mt-1 text-sm font-semibold text-emerald-700 hover:underline"
                     >
-                      Doar novamente
+                      Registrar apoio novamente
                     </button>
                   </div>
                 </article>

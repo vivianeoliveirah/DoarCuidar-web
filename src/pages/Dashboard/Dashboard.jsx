@@ -1,11 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -15,13 +13,12 @@ import {
 } from "recharts";
 import {
   Building2,
-  CalendarDays,
+  FileCheck2,
+  Globe2,
   HeartHandshake,
+  MapPinned,
   RefreshCw,
-  Target,
-  TrendingUp,
-  Users,
-  Wallet,
+  SearchCheck,
 } from "lucide-react";
 
 import ChartSkeleton from "../../components/dashboard/ChartSkeleton";
@@ -32,24 +29,55 @@ import Layout from "../../components/layout/Layout";
 import { useApiResource } from "../../hooks/useApiResource";
 import { api } from "../../services/api";
 
-const PERIODS = [
-  { id: "7dias", label: "7 dias" },
-  { id: "mes", label: "Mês" },
-  { id: "ano", label: "Ano" },
-  { id: "todos", label: "Tudo" },
-];
-
 const chartColors = ["#059669", "#0f766e", "#14b8a6", "#64748b", "#94a3b8"];
 
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
+const demoInstitutions = [
+  {
+    id: "demo-amigos-do-bem",
+    nome: "AMIGOS DO BEM",
+    cnpj: "05.108.918/0001-72",
+    uf: "SP",
+    categoria: "Assistencia social",
+    descricao: "Projetos de educação, geração de renda e combate à fome.",
+    email: "contato@amigosdobem.org",
+    site: "https://www.amigosdobem.org/",
+    created_at: "2026-03-18T10:00:00.000Z",
+  },
+  {
+    id: "demo-instituto-esperanca",
+    nome: "Instituto Esperanca",
+    cnpj: "33.915.604/0001-17",
+    uf: "RJ",
+    categoria: "Educacao",
+    descricao: "Apoio educacional e atividades comunitárias.",
+    telefone: "(21) 99999-0000",
+    created_at: "2026-03-25T10:00:00.000Z",
+  },
+  {
+    id: "demo-casa-cuidado",
+    nome: "Casa Cuidado",
+    cnpj: "03.151.435/0001-25",
+    uf: "MG",
+    categoria: "Saude",
+    descricao: "Acolhimento e cuidado para pessoas em vulnerabilidade.",
+    created_at: "2026-04-02T10:00:00.000Z",
+  },
+];
 
-const compactFormatter = new Intl.NumberFormat("pt-BR", {
-  notation: "compact",
-  maximumFractionDigits: 1,
-});
+const demoSupports = [
+  {
+    id: "demo-apoio-1",
+    instituicao_id: "demo-amigos-do-bem",
+    instituicao_nome: "AMIGOS DO BEM",
+    data: "2026-04-05T12:00:00.000Z",
+  },
+  {
+    id: "demo-apoio-2",
+    instituicao_id: "demo-instituto-esperanca",
+    instituicao_nome: "Instituto Esperanca",
+    data: "2026-04-12T12:00:00.000Z",
+  },
+];
 
 function asList(response) {
   if (Array.isArray(response)) return response;
@@ -57,71 +85,43 @@ function asList(response) {
   return [];
 }
 
-function getDonationDate(donation) {
-  return new Date(donation.created_at || donation.data || donation.date);
+function hasValue(value) {
+  return value !== undefined && value !== null && String(value).trim() !== "";
+}
+
+function hasOfficialChannel(institution) {
+  return hasValue(institution.site) || hasValue(institution.email) || hasValue(institution.telefone);
+}
+
+function getInstitutionName(institution) {
+  return institution.nome_fantasia || institution.nome || institution.razao_social || "Instituicao";
+}
+
+function getSupportDate(support) {
+  return new Date(support.created_at || support.data || support.date);
 }
 
 function isValidDate(date) {
   return date instanceof Date && !Number.isNaN(date.getTime());
 }
 
-function filterByPeriod(donations, period) {
-  if (period === "todos") return donations;
-
-  const now = new Date();
-
-  return donations.filter((donation) => {
-    const date = getDonationDate(donation);
-    if (!isValidDate(date)) return false;
-
-    if (period === "7dias") {
-      return (now - date) / (1000 * 60 * 60 * 24) <= 7;
-    }
-
-    if (period === "mes") {
-      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-    }
-
-    return date.getFullYear() === now.getFullYear();
-  });
+function percent(part, total) {
+  if (!total) return "0%";
+  return `${Math.round((part / total) * 100)}%`;
 }
 
-function buildMonthlySeries(donations) {
-  const months = new Map();
+function buildUfDistribution(institutions) {
+  const states = new Map();
 
-  donations.forEach((donation) => {
-    const date = getDonationDate(donation);
-    if (!isValidDate(date)) return;
-
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-    const current = months.get(key) || {
-      key,
-      label: date.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }),
-      total: 0,
-      quantidade: 0,
-    };
-
-    current.total += Number(donation.valor || 0);
-    current.quantidade += 1;
-    months.set(key, current);
+  institutions.forEach((institution) => {
+    const uf = institution.uf || "NI";
+    states.set(uf, (states.get(uf) || 0) + 1);
   });
 
-  return [...months.values()].sort((a, b) => a.key.localeCompare(b.key));
-}
-
-function buildInstitutionRanking(donations) {
-  const ranking = new Map();
-
-  donations.forEach((donation) => {
-    const nome = donation.instituicao_nome || donation.instituicao || "Instituição";
-    const current = ranking.get(nome) || { nome, total: 0, quantidade: 0 };
-
-    current.total += Number(donation.valor || 0);
-    current.quantidade += 1;
-    ranking.set(nome, current);
-  });
-
-  return [...ranking.values()].sort((a, b) => b.total - a.total);
+  return [...states.entries()]
+    .map(([uf, total]) => ({ uf, total }))
+    .sort((a, b) => b.total - a.total || a.uf.localeCompare(b.uf))
+    .slice(0, 8);
 }
 
 function buildCategoryDistribution(institutions) {
@@ -132,8 +132,7 @@ function buildCategoryDistribution(institutions) {
       institution.categoria ||
       institution.area_atuacao ||
       institution.segmento ||
-      institution.uf ||
-      "Social";
+      "Sem categoria";
     categories.set(category, (categories.get(category) || 0) + 1);
   });
 
@@ -141,6 +140,21 @@ function buildCategoryDistribution(institutions) {
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 5);
+}
+
+function buildQualityData(institutions) {
+  const total = institutions.length;
+  const withCnpj = institutions.filter((item) => hasValue(item.cnpj)).length;
+  const withUf = institutions.filter((item) => hasValue(item.uf)).length;
+  const withDescription = institutions.filter((item) => hasValue(item.descricao)).length;
+  const withChannel = institutions.filter(hasOfficialChannel).length;
+
+  return [
+    { name: "CNPJ", value: withCnpj, percent: percent(withCnpj, total) },
+    { name: "UF", value: withUf, percent: percent(withUf, total) },
+    { name: "Descricao", value: withDescription, percent: percent(withDescription, total) },
+    { name: "Canal oficial", value: withChannel, percent: percent(withChannel, total) },
+  ];
 }
 
 function CustomTooltip({ active, payload, label }) {
@@ -151,12 +165,7 @@ function CustomTooltip({ active, payload, label }) {
       {label && <p className="font-semibold text-slate-900">{label}</p>}
       {payload.map((item) => (
         <p key={`${item.name}-${item.dataKey}`} className="text-slate-600">
-          {item.name}:{" "}
-          <span className="font-semibold text-emerald-700">
-            {item.dataKey === "total"
-              ? currencyFormatter.format(item.value)
-              : item.value}
-          </span>
+          {item.name}: <span className="font-semibold text-emerald-700">{item.value}</span>
         </p>
       ))}
     </div>
@@ -164,98 +173,66 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function Dashboard() {
-  const [period, setPeriod] = useState("mes");
-  const donationsResource = useApiResource(api.getDoacoes, {
-    initialData: [],
-    select: asList,
-  });
   const institutionsResource = useApiResource(api.getInstituicoes, {
-    initialData: [],
+    initialData: demoInstitutions,
     select: asList,
   });
+  const supportsResource = useApiResource(api.getDoacoes, {
+    initialData: demoSupports,
+    select: asList,
+  });
+
+  const usingDemoData = Boolean(institutionsResource.error || supportsResource.error);
 
   const dashboard = useMemo(() => {
-    const donations = donationsResource.data || [];
-    const institutions = institutionsResource.data || [];
-    const filteredDonations = filterByPeriod(donations, period);
-    const monthly = buildMonthlySeries(filteredDonations);
-    const ranking = buildInstitutionRanking(filteredDonations);
-    const categoryDistribution = buildCategoryDistribution(institutions);
-    const totalRaised = filteredDonations.reduce(
-      (acc, donation) => acc + Number(donation.valor || 0),
-      0
-    );
-    const activeCampaigns = institutions.filter(
-      (institution) => institution.status === "aprovado" || institution.status === "ativa"
-    ).length;
-    const impactedPeople = Math.max(
-      filteredDonations.length * 3 + activeCampaigns * 25,
-      activeCampaigns * 10
-    );
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-    const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-    const currentMonthTotal = donations.reduce((acc, donation) => {
-      const date = getDonationDate(donation);
-      if (!isValidDate(date)) return acc;
-      return date.getMonth() === currentMonth && date.getFullYear() === currentYear
-        ? acc + Number(donation.valor || 0)
-        : acc;
-    }, 0);
-    const previousMonthTotal = donations.reduce((acc, donation) => {
-      const date = getDonationDate(donation);
-      if (!isValidDate(date)) return acc;
-      return date.getMonth() === previousMonth && date.getFullYear() === previousYear
-        ? acc + Number(donation.valor || 0)
-        : acc;
-    }, 0);
-    const growth =
-      previousMonthTotal > 0
-        ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100
-        : currentMonthTotal > 0
-          ? 100
-          : 0;
+    const institutions = institutionsResource.data?.length
+      ? institutionsResource.data
+      : demoInstitutions;
+    const supports = supportsResource.data?.length ? supportsResource.data : demoSupports;
+    const withCnpj = institutions.filter((item) => hasValue(item.cnpj)).length;
+    const withChannel = institutions.filter(hasOfficialChannel).length;
+    const ufs = new Set(institutions.map((item) => item.uf).filter(Boolean));
 
     return {
-      activeCampaigns,
-      categoryDistribution,
-      filteredDonations,
-      growth,
-      impactedPeople,
       institutions,
-      monthly,
-      ranking,
-      recentCampaigns: [...institutions]
-        .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+      supports,
+      withCnpj,
+      withChannel,
+      ufCount: ufs.size,
+      ufDistribution: buildUfDistribution(institutions),
+      categoryDistribution: buildCategoryDistribution(institutions),
+      qualityData: buildQualityData(institutions),
+      recentInstitutions: [...institutions]
+        .sort((a, b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0))
         .slice(0, 6),
-      recentDonations: [...filteredDonations]
-        .sort((a, b) => getDonationDate(b) - getDonationDate(a))
+      recentSupports: [...supports]
+        .sort((a, b) => getSupportDate(b) - getSupportDate(a))
         .slice(0, 6),
-      totalRaised,
     };
-  }, [donationsResource.data, institutionsResource.data, period]);
+  }, [institutionsResource.data, supportsResource.data]);
 
-  const loading = donationsResource.loading || institutionsResource.loading;
-  const error = donationsResource.error || institutionsResource.error;
-  const refreshing = donationsResource.refreshing || institutionsResource.refreshing;
+  const loading =
+    (institutionsResource.loading || supportsResource.loading) &&
+    !dashboard.institutions.length;
+  const refreshing = institutionsResource.refreshing || supportsResource.refreshing;
 
   const refetchAll = () => {
-    donationsResource.refetch();
     institutionsResource.refetch();
+    supportsResource.refetch();
   };
 
   return (
     <Layout className="bg-slate-50">
       <section className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
-        <div className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-950/5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-emerald-700">Painel analítico</p>
+            <p className="text-sm font-semibold text-emerald-700">Painel de transparencia</p>
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
               Dashboard DoarCuidar
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Indicadores processados a partir das APIs de doações e instituições para acompanhar arrecadação, impacto social e transparência.
+              Indicadores sobre busca, cobertura e qualidade dos dados institucionais.
+              O painel não mede dinheiro arrecadado, porque o DoarCuidar não processa pagamentos.
             </p>
           </div>
 
@@ -274,244 +251,211 @@ export default function Dashboard() {
           </button>
         </div>
 
-        <div id="relatorios" className="flex flex-wrap gap-2 scroll-mt-6" role="tablist" aria-label="Filtro por período">
-          {PERIODS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={period === item.id}
-              onClick={() => setPeriod(item.id)}
-              className={`min-h-10 rounded-xl px-4 text-sm font-semibold transition ${
-                period === item.id
-                  ? "bg-emerald-600 text-white shadow-sm"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        {error && (
-          <EmptyState
-            title="Não foi possível carregar o dashboard"
-            description={error}
-            actionLabel="Tentar novamente"
-            onAction={refetchAll}
-          />
+        {usingDemoData && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            Dados exibidos em modo demonstração. Não foi possível atualizar tudo agora.
+          </div>
         )}
 
-        {!error && (
-          <>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-              <MetricCard
-                title="Total de doações"
-                value={dashboard.filteredDonations.length}
-                description="Contribuições registradas no período."
-                icon={HeartHandshake}
-                tone="sky"
-              />
-              <MetricCard
-                title="Total arrecadado"
-                value={currencyFormatter.format(dashboard.totalRaised)}
-                description="Soma das doações processadas."
-                icon={Wallet}
-                tone="emerald"
-              />
-              <MetricCard
-                title="Instituições"
-                value={dashboard.institutions.length}
-                description="Cadastros disponíveis na plataforma."
-                icon={Building2}
-                tone="slate"
-              />
-              <MetricCard
-                title="Campanhas ativas"
-                value={dashboard.activeCampaigns}
-                description="Instituições aptas a receber apoio."
-                icon={Target}
-                tone="amber"
-              />
-              <MetricCard
-                title="Pessoas impactadas"
-                value={compactFormatter.format(dashboard.impactedPeople)}
-                description="Estimativa calculada pelos dados disponíveis."
-                icon={Users}
-                tone="emerald"
-              />
-            </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <MetricCard
+            title="Instituicoes disponiveis"
+            value={dashboard.institutions.length}
+            description="Registros retornados pela API para consulta pública."
+            icon={Building2}
+            tone="emerald"
+          />
+          <MetricCard
+            title="Estados cobertos"
+            value={dashboard.ufCount}
+            description="UFs diferentes presentes na base consultada."
+            icon={MapPinned}
+            tone="sky"
+          />
+          <MetricCard
+            title="Com CNPJ"
+            value={percent(dashboard.withCnpj, dashboard.institutions.length)}
+            description={`${dashboard.withCnpj} de ${dashboard.institutions.length} registros.`}
+            icon={FileCheck2}
+            tone="slate"
+          />
+          <MetricCard
+            title="Com canal oficial"
+            value={percent(dashboard.withChannel, dashboard.institutions.length)}
+            description="Site, e-mail ou telefone informado."
+            icon={Globe2}
+            tone="amber"
+          />
+          <MetricCard
+            title="Apoios registrados"
+            value={dashboard.supports.length}
+            description="Registros de acompanhamento, sem valor financeiro consolidado."
+            icon={HeartHandshake}
+            tone="emerald"
+          />
+        </div>
 
-            {loading ? (
-              <ChartSkeleton />
-            ) : (
-              <div className="grid gap-6 xl:grid-cols-[1.35fr_0.9fr]">
-                <Panel
-                  title="Evolução mensal de doações"
-                  description="Quantidade e valor arrecadado ao longo do tempo."
-                >
-                  <div className="h-80" aria-label="Gráfico de evolução mensal de doações">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={dashboard.monthly} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                        <XAxis dataKey="label" tickLine={false} axisLine={false} />
-                        <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => compactFormatter.format(value)} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar name="Total" dataKey="total" fill="#059669" radius={[8, 8, 0, 0]} />
-                        <Bar name="Doações" dataKey="quantidade" fill="#14b8a6" radius={[8, 8, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </Panel>
-
-                <Panel
-                  title="Distribuição por categorias"
-                  description="Categorias inferidas pelos dados de instituições."
-                >
-                  <div className="h-80" aria-label="Gráfico de distribuição por categorias">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={dashboard.categoryDistribution}
-                          dataKey="value"
-                          nameKey="name"
-                          innerRadius={58}
-                          outerRadius={98}
-                          paddingAngle={4}
-                        >
-                          {dashboard.categoryDistribution.map((item, index) => (
-                            <Cell key={item.name} fill={chartColors[index % chartColors.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </Panel>
-
-                <Panel
-                  title="Crescimento de arrecadação"
-                  description={`Comparativo mensal atual: ${Math.round(dashboard.growth)}%.`}
-                  className="xl:col-span-2"
-                >
-                  <div className="h-72" aria-label="Gráfico de crescimento de arrecadação">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={dashboard.monthly} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                        <XAxis dataKey="label" tickLine={false} axisLine={false} />
-                        <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => compactFormatter.format(value)} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Line
-                          type="monotone"
-                          name="Total"
-                          dataKey="total"
-                          stroke="#059669"
-                          strokeWidth={3}
-                          dot={{ r: 4, fill: "#059669" }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </Panel>
-
-                <Panel
-                  title="Instituições mais apoiadas"
-                  description="Ranking por valor e volume de doações."
-                  className="xl:col-span-2"
-                >
-                  <div className="grid gap-4 lg:grid-cols-[1fr_1.1fr]">
-                    <div className="h-72" aria-label="Gráfico de instituições mais apoiadas">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={dashboard.ranking.slice(0, 6)} layout="vertical" margin={{ left: 20, right: 12 }}>
-                          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                          <XAxis type="number" hide />
-                          <YAxis type="category" dataKey="nome" width={110} tickLine={false} axisLine={false} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Bar name="Total" dataKey="total" fill="#059669" radius={[0, 8, 8, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                      <table className="w-full min-w-[420px] text-left text-sm">
-                        <thead className="text-xs uppercase tracking-wide text-slate-500">
-                          <tr className="border-b border-slate-100">
-                            <th className="px-3 py-3 font-semibold">Instituição</th>
-                            <th className="px-3 py-3 font-semibold">Doações</th>
-                            <th className="px-3 py-3 text-right font-semibold">Total</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {dashboard.ranking.slice(0, 6).map((item) => (
-                            <tr key={item.nome} className="hover:bg-slate-50">
-                              <td className="px-3 py-4 font-semibold text-slate-950">{item.nome}</td>
-                              <td className="px-3 py-4 text-slate-600">{item.quantidade}</td>
-                              <td className="px-3 py-4 text-right font-bold text-emerald-700">
-                                {currencyFormatter.format(item.total)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </Panel>
-
-                <Panel
-                  title="Últimas doações"
-                  description="Registros mais recentes retornados pela API."
-                >
-                  <div id="doacoes" className="scroll-mt-6 overflow-x-auto">
-                    <table className="w-full min-w-[520px] text-left text-sm">
-                      <thead className="text-xs uppercase tracking-wide text-slate-500">
-                        <tr className="border-b border-slate-100">
-                          <th className="px-3 py-3 font-semibold">Instituição</th>
-                          <th className="px-3 py-3 font-semibold">Data</th>
-                          <th className="px-3 py-3 text-right font-semibold">Valor</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {dashboard.recentDonations.map((item, index) => (
-                          <tr key={item.id || `${item.instituicao_id}-${index}`} className="hover:bg-slate-50">
-                            <td className="px-3 py-4 font-semibold text-slate-950">
-                              {item.instituicao_nome || item.instituicao || "Instituição"}
-                            </td>
-                            <td className="px-3 py-4 text-slate-600">
-                              {getDonationDate(item).toLocaleDateString("pt-BR")}
-                            </td>
-                            <td className="px-3 py-4 text-right font-bold text-emerald-700">
-                              {currencyFormatter.format(Number(item.valor || 0))}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </Panel>
-
-                <Panel
-                  title="Campanhas recentes"
-                  description="Instituições recém-cadastradas ou atualizadas."
-                >
-                  <div className="space-y-3">
-                    {dashboard.recentCampaigns.map((item) => (
-                      <article key={item.id} className="rounded-2xl bg-slate-50 p-4">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <h3 className="font-bold text-slate-950">{item.nome}</h3>
-                            <p className="mt-1 text-xs text-slate-500">{item.uf || "UF não informada"}</p>
-                          </div>
-                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                            {item.status || "cadastrada"}
-                          </span>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                </Panel>
+        {loading ? (
+          <ChartSkeleton />
+        ) : dashboard.institutions.length === 0 ? (
+          <EmptyState
+            title="Nenhuma instituição disponível"
+            description="Atualize os dados ou tente novamente em instantes."
+            actionLabel="Atualizar"
+            onAction={refetchAll}
+          />
+        ) : (
+          <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <Panel
+              title="Cobertura por estado"
+              description="Distribuição das instituições encontradas por UF."
+            >
+              <div className="h-80" aria-label="Gráfico de cobertura por estado">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={dashboard.ufDistribution} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="uf" tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar name="Instituicoes" dataKey="total" fill="#059669" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            )}
-          </>
+            </Panel>
+
+            <Panel
+              title="Áreas de atuação"
+              description="Categorias informadas ou inferidas pelos dados."
+            >
+              <div className="h-80" aria-label="Gráfico de áreas de atuação">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={dashboard.categoryDistribution}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={58}
+                      outerRadius={98}
+                      paddingAngle={4}
+                    >
+                      {dashboard.categoryDistribution.map((item, index) => (
+                        <Cell key={item.name} fill={chartColors[index % chartColors.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Panel>
+
+            <Panel
+              title="Qualidade dos dados"
+              description="Campos essenciais para a pessoa decidir com mais contexto."
+              className="xl:col-span-2"
+            >
+              <div className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
+                <div className="h-72" aria-label="Gráfico de qualidade dos dados">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={dashboard.qualityData} layout="vertical" margin={{ left: 24, right: 12 }}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                      <XAxis type="number" hide />
+                      <YAxis type="category" dataKey="name" width={110} tickLine={false} axisLine={false} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar name="Registros" dataKey="value" fill="#0f766e" radius={[0, 8, 8, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="grid content-center gap-3">
+                  {dashboard.qualityData.map((item) => (
+                    <div key={item.name} className="rounded-2xl bg-slate-50 p-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <p className="text-sm font-bold text-slate-950">{item.name}</p>
+                        <span className="text-sm font-bold text-emerald-700">{item.percent}</span>
+                      </div>
+                      <div className="mt-3 h-2 rounded-full bg-slate-200">
+                        <div
+                          className="h-2 rounded-full bg-emerald-600"
+                          style={{ width: item.percent }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Panel>
+
+            <Panel
+              title="Instituicoes recentes"
+              description="Ultimos registros disponiveis para consulta."
+            >
+              <div className="space-y-3">
+                {dashboard.recentInstitutions.map((item) => (
+                  <article key={item.id} className="rounded-2xl bg-slate-50 p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="font-bold text-slate-950">{getInstitutionName(item)}</h3>
+                        <p className="mt-1 font-mono text-xs text-slate-500">
+                          {item.cnpj || "CNPJ não informado"}
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                        {item.uf || "UF"}
+                      </span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </Panel>
+
+            <Panel
+              title="Apoios registrados"
+              description="Historico de acompanhamento, sem confirmar pagamento real."
+            >
+              {dashboard.recentSupports.length === 0 ? (
+                <p className="text-sm text-slate-500">Nenhum apoio registrado ainda.</p>
+              ) : (
+                <div id="doacoes" className="scroll-mt-6 space-y-3">
+                  {dashboard.recentSupports.map((item, index) => {
+                    const date = getSupportDate(item);
+
+                    return (
+                      <article
+                        key={item.id || `${item.instituicao_id}-${index}`}
+                        className="rounded-2xl bg-slate-50 p-4"
+                      >
+                        <h3 className="font-bold text-slate-950">
+                          {item.instituicao_nome || item.instituicao || "Instituição"}
+                        </h3>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {isValidDate(date) ? date.toLocaleDateString("pt-BR") : "Data não informada"}
+                        </p>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </Panel>
+
+            <Panel
+              title="Proximos dados uteis"
+              description="Boas métricas para evoluir o produto sem depender de valor doado."
+              className="xl:col-span-2"
+            >
+              <div className="grid gap-3 md:grid-cols-3">
+                {[
+                  "Instituicoes favoritadas por usuario.",
+                  "Termos e estados mais pesquisados.",
+                  "Quantidade de acessos aos canais oficiais.",
+                ].map((item) => (
+                  <div key={item} className="rounded-2xl bg-slate-50 p-4">
+                    <SearchCheck className="h-5 w-5 text-emerald-600" aria-hidden="true" />
+                    <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </div>
         )}
       </section>
     </Layout>

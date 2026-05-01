@@ -1,6 +1,6 @@
 export default function Panel({ title, description, action, children, className = "" }) {
   return (
-    <section className={`rounded-[1.35rem] border border-slate-100 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.05)] ${className}`}>
+    <section className={`rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-950/5 ${className}`}>
       {(title || description || action) && (
         <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
           <div>

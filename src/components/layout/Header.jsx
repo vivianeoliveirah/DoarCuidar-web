@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Heart,
   HeartHandshake,
+  FileCheck2,
   Home,
   LayoutDashboard,
   LogIn,
@@ -100,6 +101,7 @@ export default function Header() {
     () => [
       { to: "/", icon: Home, label: "Home" },
       { to: "/instituicoes", icon: Search, label: "Instituições" },
+      { to: "/transparencia", icon: FileCheck2, label: "Transparencia" },
       { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
       ...(user ? [{ to: "/perfil", icon: User, label: "Perfil" }] : []),
     ],
@@ -123,7 +125,7 @@ export default function Header() {
       <div className="mb-8 border-b border-white/10 pb-6">
         <Brand light onClick={() => setMobileOpen(false)} />
         <p className="mt-3 text-xs leading-5 text-slate-400">
-          Plataforma de doações e impacto social.
+          Busque instituições e compare informações antes de apoiar.
         </p>
       </div>
 
@@ -161,10 +163,10 @@ export default function Header() {
             navigate("/instituicoes");
           }}
           className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-          aria-label="Buscar instituições para doar"
+          aria-label="Buscar instituições"
         >
           <HeartHandshake size={18} aria-hidden="true" />
-          Doar agora
+          Buscar instituições
         </button>
 
         {user && (
@@ -181,7 +183,7 @@ export default function Header() {
 
         {!user && (
           <p className="px-2 text-xs leading-5 text-slate-400">
-            A curadoria de instituições fica reservada ao fluxo interno do projeto.
+            Entre para registrar apoios e acompanhar seu histórico.
           </p>
         )}
       </div>

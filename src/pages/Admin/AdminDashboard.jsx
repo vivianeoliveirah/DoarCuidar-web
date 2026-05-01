@@ -119,7 +119,7 @@ export default function AdminDashboard() {
   return (
     <Layout className="bg-slate-50">
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 lg:px-6">
-        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-950/5 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-semibold text-emerald-700">Administração</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">

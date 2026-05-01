@@ -1,4 +1,4 @@
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, CalendarCheck2, MapPin, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const fallbackImages = [
@@ -13,24 +13,27 @@ const fallbackInstitutions = [
     nome: "AMIGOS DO BEM",
     cnpj: "05.108.918/0001-72",
     uf: "SP",
+    status: "aprovado",
     descricao:
-      "Transforma vidas por meio de educação, geração de renda e projetos de desenvolvimento local para combater a fome e a miséria.",
+      "Transforma vidas por meio de educacao, geracao de renda e projetos de desenvolvimento local para combater a fome e a miseria.",
   },
   {
     id: "fallback-lbv",
     nome: "SEDE CENTRAL DA LBV",
     cnpj: "33.915.604/0001-17",
     uf: "SP",
+    status: "aprovado",
     descricao:
-      "Promove desenvolvimento social, educação, cultura, assistência e iniciativas solidárias para comunidades em vulnerabilidade.",
+      "Promove desenvolvimento social, educacao, cultura, assistencia e iniciativas solidarias para comunidades em vulnerabilidade.",
   },
   {
     id: "fallback-lalec",
     nome: "LALEC",
     cnpj: "03.151.435/0001-25",
     uf: "SP",
+    status: "aprovado",
     descricao:
-      "Acolhe crianças em situação de vulnerabilidade com cuidado, segurança e apoio para seu desenvolvimento.",
+      "Acolhe criancas em situacao de vulnerabilidade com cuidado, seguranca e apoio para seu desenvolvimento.",
   },
 ];
 
@@ -54,11 +57,13 @@ export default function DonationGallery({ instituicoes = [] }) {
 
   const lista = source.slice(0, 3).map((inst, index) => ({
     id: inst.id,
-    title: inst.nome,
+    title: inst.nome || inst.nome_fantasia || inst.razao_social,
     description: inst.descricao || "Sem descrição disponível.",
     image: inst.imagem_url || fallbackImages[index % fallbackImages.length],
     uf: inst.uf,
     cnpj: inst.cnpj,
+    fonteValidacao: inst.fonte_validacao || "Consulta pública de CNPJ",
+    ultimaAtualizacao: inst.updated_at || inst.created_at,
     isFallback: String(inst.id).startsWith("fallback-"),
   }));
 
@@ -68,10 +73,10 @@ export default function DonationGallery({ instituicoes = [] }) {
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
-              Instituições em destaque
+              Instituicoes em destaque
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
-              Conecte-se com quem já está fazendo a diferença.
+              Perfis com CNPJ, localizacao e canais oficiais para apoiar escolhas mais conscientes.
             </p>
           </div>
 
@@ -90,7 +95,7 @@ export default function DonationGallery({ instituicoes = [] }) {
           {lista.map((item) => (
             <article
               key={item.id}
-              className="group overflow-hidden rounded-[1.35rem] border border-slate-100 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
+              className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-950/5 transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-950/10"
             >
               <button
                 type="button"
@@ -118,6 +123,21 @@ export default function DonationGallery({ instituicoes = [] }) {
                   <p className="mt-1 font-mono text-xs text-slate-500">
                     {item.cnpj || "CNPJ não informado"}
                   </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 ring-1 ring-emerald-100">
+                      <ShieldCheck size={13} aria-hidden="true" />
+                      CNPJ verificado
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-slate-700 ring-1 ring-slate-200">
+                      Dados institucionais
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-slate-700 ring-1 ring-slate-200">
+                      <CalendarCheck2 size={13} aria-hidden="true" />
+                      Fonte: {item.fonteValidacao}
+                    </span>
+                  </div>
+
                   <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
                     {item.description}
                   </p>
@@ -137,7 +157,7 @@ export default function DonationGallery({ instituicoes = [] }) {
                   onClick={() => (item.isFallback ? navigate("/instituicoes") : navigate(`/doar/${item.id}`))}
                   className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
                 >
-                  Doar
+                  Canais oficiais
                 </button>
               </div>
             </article>

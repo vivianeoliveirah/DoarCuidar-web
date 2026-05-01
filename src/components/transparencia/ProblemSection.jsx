@@ -9,13 +9,13 @@ const problems = [
   },
   {
     icon: FileQuestion,
-    title: "Pouca clareza sobre campanhas",
+    title: "Pouca clareza sobre canais oficiais",
     text: "Instituições precisam apresentar dados simples para fortalecer a confiança de quem deseja ajudar.",
   },
   {
     icon: Clock,
     title: "Acompanhamento disperso",
-    text: "Histórico, métricas e impacto ficam mais úteis quando estão reunidos em uma visão organizada.",
+    text: "Histórico, métricas e dados ficam mais úteis quando estão reunidos em uma visão organizada.",
   },
 ];
 
@@ -26,7 +26,7 @@ export default function ProblemSection() {
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-sm font-semibold text-emerald-700">Problema</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-            Doar deveria ser simples, claro e seguro.
+            Apoiar deveria ser simples, claro e seguro.
           </h2>
           <p className="mt-4 text-base leading-7 text-slate-600">
             O DoarCuidar organiza informações essenciais para reduzir incertezas e aproximar doadores de instituições sérias.
