@@ -10,6 +10,7 @@ import InputTexto from "../../components/ui/InputTexto";
 import CampoSenha from "../../components/ui/CampoSenha";
 import Button from "../../components/ui/Button";
 import SelectUF from "../../components/ui/SelectUF";
+import FeedbackMessage from "../../components/ui/FeedbackMessage";
 
 import { buscarCEP } from "../../services/cepService";
 
@@ -29,7 +30,7 @@ export default function CadastroUsuario() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState("");
+  const [feedback, setFeedback] = useState(null);
 
   const handleChange = (key) => (e) => {
     setForm((prev) => ({
@@ -58,12 +59,14 @@ export default function CadastroUsuario() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setFormError("");
+    setFeedback(null);
 
     if (form.senha !== form.confirmarSenha) {
-      const message = "As senhas não coincidem";
-      setFormError(message);
-      toast.error(message);
+      setFeedback({
+        type: "error",
+        title: "Senhas diferentes",
+        message: "As senhas não coincidem. Confira os dois campos e tente novamente.",
+      });
       return;
     }
 
@@ -85,8 +88,14 @@ export default function CadastroUsuario() {
       navigate("/login");
     } catch (error) {
       const mensagem = getErrorMessage(error);
-      setFormError(mensagem);
-      toast.error(mensagem);
+      setFeedback({
+        type: error?.statusCode >= 500 ? "error" : "warning",
+        title:
+          error?.statusCode >= 500
+            ? "Não conseguimos criar a conta"
+            : "Revise as informações",
+        message: mensagem,
+      });
     } finally {
       setLoading(false);
     }
@@ -145,11 +154,7 @@ export default function CadastroUsuario() {
             <SelectUF value={form.uf} onChange={handleChange("uf")} />
           </div>
 
-          {formError && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800">
-              {formError}
-            </div>
-          )}
+          <FeedbackMessage feedback={feedback} />
 
           <Button className="w-full h-12" disabled={loading}>
             {loading ? "Criando..." : "Criar conta"}

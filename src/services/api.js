@@ -42,7 +42,7 @@ function createExternalFetchOptions() {
  */
 function getErrorMessage(error) {
   if (!error) {
-    return "Erro desconhecido. Tente novamente.";
+    return "Algo deu errado ao processar sua solicitação. Tente novamente ou verifique suas informações.";
   }
 
   if (error.name === "ExternalApiError") {
@@ -64,7 +64,7 @@ function getErrorMessage(error) {
     }
 
     if (error.statusCode >= 500) {
-      return "Servidor indisponível. Tente novamente em breve.";
+      return "Não conseguimos acessar o sistema no momento. Tente novamente em instantes.";
     }
 
     if (error.statusCode === 401 || error.statusCode === 403) {
@@ -80,7 +80,7 @@ function getErrorMessage(error) {
     }
 
     if (error.statusCode === 400) {
-      return "Não foi possível processar os dados enviados. Confira as informações e tente novamente.";
+      return "Algo deu errado ao processar sua solicitação. Tente novamente ou verifique suas informações.";
     }
 
     if (error.statusCode >= 400 && error.statusCode < 500) {
@@ -89,16 +89,16 @@ function getErrorMessage(error) {
 
     const messages = {
       TIMEOUT: "A requisição demorou muito. Verifique sua conexão de internet.",
-      NETWORK: "Erro de conexão. Verifique sua internet e tente novamente.",
-      PARSE: "Resposta inválida do servidor. Tente novamente.",
-      HTTP: error.statusCode ? `Erro do servidor (${error.statusCode})` : "Erro na requisição",
-      UNKNOWN: "Erro desconhecido. Tente novamente.",
+      NETWORK: "Não foi possível conectar ao sistema. Verifique sua internet e tente novamente.",
+      PARSE: "Não conseguimos ler a resposta do sistema. Tente novamente em instantes.",
+      HTTP: "Algo deu errado ao processar sua solicitação. Tente novamente ou verifique suas informações.",
+      UNKNOWN: "Algo deu errado ao processar sua solicitação. Tente novamente ou verifique suas informações.",
     };
 
     return messages[error.type] || messages.UNKNOWN;
   }
 
-  return "Erro desconhecido";
+  return "Algo deu errado ao processar sua solicitação. Tente novamente ou verifique suas informações.";
 }
 
 /**

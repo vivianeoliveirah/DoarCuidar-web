@@ -7,8 +7,12 @@ import FormCard from "../../components/ui/FormCard";
 import InputTexto from "../../components/ui/InputTexto";
 import CampoSenha from "../../components/ui/CampoSenha";
 import Button from "../../components/ui/Button";
-import { loginUser } from "../../services/authService";
-import { getErrorMessage } from "../../services/api";
+import FeedbackMessage from "../../components/ui/FeedbackMessage";
+import {
+  AUTH_ERROR_MESSAGES,
+  getAuthErrorFeedback,
+  loginUser,
+} from "../../services/authService";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,15 +20,25 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState("");
+  const [feedback, setFeedback] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail || !senha) {
+      setFeedback({
+        type: "error",
+        title: "Dados incompletos",
+        message: AUTH_ERROR_MESSAGES.emptyLogin,
+      });
+      return;
+    }
 
     try {
       setLoading(true);
-      setFormError("");
-      await loginUser({ email: email.trim(), password: senha });
+      setFeedback(null);
+      await loginUser({ email: normalizedEmail, password: senha });
       toast.success("Login realizado com sucesso");
       const from = location.state?.from;
       navigate(
@@ -32,9 +46,7 @@ export default function Login() {
         { replace: true }
       );
     } catch (error) {
-      const message = getErrorMessage(error);
-      setFormError(message);
-      toast.error(message);
+      setFeedback(getAuthErrorFeedback(error, "login"));
     } finally {
       setLoading(false);
     }
@@ -56,6 +68,7 @@ export default function Login() {
               placeholder="exemplo@email.com"
               autoComplete="email"
               required
+              aria-invalid={feedback?.type === "error"}
             />
 
             <div className="space-y-1">
@@ -64,6 +77,7 @@ export default function Login() {
                 value={senha}
                 onChange={(event) => setSenha(event.target.value)}
                 placeholder="Digite sua senha"
+                aria-invalid={feedback?.type === "error"}
               />
 
               <div className="text-right">
@@ -76,11 +90,7 @@ export default function Login() {
               </div>
             </div>
 
-            {formError && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800">
-                {formError}
-              </div>
-            )}
+            <FeedbackMessage feedback={feedback} />
 
             <Button
               type="submit"

@@ -8,7 +8,22 @@ import {
 const BASE_URL = import.meta.env.VITE_API_URL || "https://backend-doarcuidar.onrender.com";
 const AUTH_CHANGE_EVENT = "doarcuidar-auth-change";
 const PASSWORD_RESET_UNAVAILABLE_MESSAGE =
-  "Recuperação de senha indisponível no protótipo.";
+  "A recuperação de senha ainda não está disponível nesta versão do sistema.";
+
+const AUTH_ERROR_MESSAGES = {
+  emptyLogin: "Preencha seu e-mail e senha para continuar.",
+  invalidLogin: "E-mail ou senha incorretos. Verifique os dados e tente novamente.",
+  validation:
+    "Algo deu errado ao processar sua solicitação. Tente novamente ou verifique suas informações.",
+  server:
+    "Não conseguimos acessar o sistema no momento. Tente novamente em instantes.",
+  network:
+    "Não foi possível conectar ao sistema. Verifique sua internet e tente novamente.",
+  unavailable:
+    "Funcionalidade em desenvolvimento. Em breve você poderá recuperar sua senha por e-mail.",
+  fallback:
+    "Algo deu errado ao processar sua solicitação. Tente novamente ou verifique suas informações.",
+};
 
 function dispatchAuthChange() {
   window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
@@ -39,12 +54,12 @@ async function authRequest(path, body) {
 
     if (error.name === "TypeError") {
       throw new ApiError(
-        "Não foi possível conectar ao servidor. Tente novamente em instantes.",
+        AUTH_ERROR_MESSAGES.network,
         "NETWORK"
       );
     }
 
-    throw new ApiError("Erro inesperado na autenticação.", "UNKNOWN");
+    throw new ApiError(AUTH_ERROR_MESSAGES.fallback, "UNKNOWN");
   }
 }
 
@@ -139,6 +154,54 @@ export async function requestPasswordReset() {
   throw new ApiError(PASSWORD_RESET_UNAVAILABLE_MESSAGE, "UNAVAILABLE", 501);
 }
 
+export function getAuthErrorFeedback(error, context = "default") {
+  if (context === "login" && (error?.statusCode === 400 || error?.statusCode === 401 || error?.statusCode === 403)) {
+    return {
+      type: "error",
+      title: "Não foi possível entrar",
+      message: AUTH_ERROR_MESSAGES.invalidLogin,
+    };
+  }
+
+  if (error?.type === "UNAVAILABLE" || error?.statusCode === 501) {
+    return {
+      type: "warning",
+      title: PASSWORD_RESET_UNAVAILABLE_MESSAGE,
+      message: AUTH_ERROR_MESSAGES.unavailable,
+    };
+  }
+
+  if (error?.statusCode >= 500) {
+    return {
+      type: "error",
+      title: "Sistema indisponível",
+      message: AUTH_ERROR_MESSAGES.server,
+    };
+  }
+
+  if (error?.type === "NETWORK" || error?.type === "TIMEOUT" || error?.type === "PARSE") {
+    return {
+      type: "warning",
+      title: "Não conseguimos concluir a solicitação",
+      message: AUTH_ERROR_MESSAGES.network,
+    };
+  }
+
+  if (error?.statusCode === 400) {
+    return {
+      type: "warning",
+      title: "Revise as informações",
+      message: AUTH_ERROR_MESSAGES.validation,
+    };
+  }
+
+  return {
+    type: "error",
+    title: "Algo deu errado",
+    message: AUTH_ERROR_MESSAGES.fallback,
+  };
+}
+
 export function logoutUser() {
   localStorage.removeItem("user");
   localStorage.removeItem("token");
@@ -146,4 +209,8 @@ export function logoutUser() {
   dispatchAuthChange();
 }
 
-export { AUTH_CHANGE_EVENT, PASSWORD_RESET_UNAVAILABLE_MESSAGE };
+export {
+  AUTH_CHANGE_EVENT,
+  AUTH_ERROR_MESSAGES,
+  PASSWORD_RESET_UNAVAILABLE_MESSAGE,
+};

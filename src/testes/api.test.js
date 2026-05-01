@@ -43,7 +43,7 @@ describe("tratamento de respostas da API", () => {
     const error = new ApiError("Erro HTTP 500", "HTTP", 500);
 
     expect(getErrorMessage(error)).toBe(
-      "Servidor indisponível. Tente novamente em breve."
+      "Não conseguimos acessar o sistema no momento. Tente novamente em instantes."
     );
   });
 });

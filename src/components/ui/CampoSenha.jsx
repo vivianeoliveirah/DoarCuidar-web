@@ -7,6 +7,7 @@ export default function CampoSenha({
   onChange,
   id,
   placeholder = "Digite sua senha",
+  ...props
 }) {
   const [mostrar, setMostrar] = useState(false);
 
@@ -24,6 +25,7 @@ export default function CampoSenha({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
+          {...props}
           className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
           required
         />
