@@ -36,9 +36,9 @@ O sistema foi idealizado para conectar doadores a instituições confiáveis por
 O projeto utiliza arquitetura desacoplada:
 
 - **Frontend:** React + Vite
-- **Backend:** FastAPI (Python)
-- **Banco de dados:** PostgreSQL/Supabase
-- **Deploy:** Vercel + Render
+- **Backend:** FastAPI (Render)
+- **Banco de dados/autenticação:** Supabase
+- **Deploy:** Netlify + Render
 
 ---
 
@@ -131,9 +131,9 @@ O projeto utiliza arquitetura desacoplada:
 ```txt
 Frontend (React/Vite)
         ↓
-API REST (FastAPI)
+API REST (FastAPI / Render)
         ↓
-PostgreSQL / Supabase
+Supabase Auth + PostgreSQL
 ```
 
 Estrutura baseada em:
@@ -174,45 +174,6 @@ http://localhost:5173
 
 ---
 
-## 3️⃣ Backend
-
-```bash
-cd backend-doarcuidar
-python -m venv venv
-```
-
-### Ativar ambiente virtual
-
-#### Windows (Git Bash)
-
-```bash
-source venv/Scripts/activate
-```
-
----
-
-### Instalar dependências
-
-```bash
-python -m pip install -r requirements.txt
-```
-
----
-
-### Executar backend
-
-```bash
-python run.py
-```
-
-ou
-
-```bash
-uvicorn app.main:app --reload
-```
-
----
-
 # Variáveis de ambiente
 
 Crie os arquivos locais de ambiente a partir de exemplos como `.env.example`.
@@ -221,20 +182,7 @@ Não publique valores reais de chaves, tokens, URLs de banco ou segredos no READ
 ## Frontend
 
 ```env
-VITE_USE_DEMO=true
-VITE_API_URL=https://sua-api.example.com
-```
-
----
-
-## Backend
-
-Mantenha as variáveis sensíveis apenas no ambiente da hospedagem ou em um
-arquivo local ignorado pelo Git. No backend, use nomes descritivos no
-`.env.example`, mas nunca envie valores reais para o repositório.
-
-```env
-APP_ENV=development
+VITE_API_URL=https://sua-api.onrender.com
 ```
 
 ---
@@ -251,14 +199,14 @@ APP_ENV=development
 
 ---
 
-## Backend
+## Backend / Dados
 
 - Python
 - FastAPI
 - Uvicorn
-- SQLAlchemy
+- Supabase Auth
+- Supabase Database
 - PostgreSQL
-- Supabase
 
 ---
 
@@ -271,8 +219,9 @@ APP_ENV=development
 
 ## Nuvem / Deploy
 
-- Vercel
+- Netlify
 - Render
+- Supabase
 
 ---
 

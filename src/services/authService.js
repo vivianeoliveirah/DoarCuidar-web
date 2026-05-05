@@ -42,6 +42,24 @@ function decodeJwtPayload(token) {
   }
 }
 
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function normalizeRegisterPayload(data) {
+  return {
+    nome: String(data.nome || data.name || "").trim(),
+    email: normalizeEmail(data.email),
+    password: String(data.password || data.senha || ""),
+    senha: String(data.senha || data.password || ""),
+    telefone: String(data.telefone || "").trim(),
+    endereco: String(data.endereco || "").trim(),
+    cep: String(data.cep || "").trim(),
+    cidade: String(data.cidade || "").trim(),
+    uf: String(data.uf || "").trim().toUpperCase(),
+  };
+}
+
 async function authRequest(path, body) {
   try {
     const { options } = createFetchOptions("POST", body);
@@ -53,31 +71,41 @@ async function authRequest(path, body) {
     }
 
     if (error.name === "TypeError") {
-      throw new ApiError(
-        AUTH_ERROR_MESSAGES.network,
-        "NETWORK"
-      );
+      throw new ApiError(AUTH_ERROR_MESSAGES.network, "NETWORK");
     }
 
     throw new ApiError(AUTH_ERROR_MESSAGES.fallback, "UNKNOWN");
   }
 }
 
-function normalizeEmail(email) {
-  return String(email || "").trim().toLowerCase();
+function extractToken(data) {
+  return (
+    data?.token ||
+    data?.accessToken ||
+    data?.access_token ||
+    data?.jwt ||
+    data?.session?.access_token ||
+    data?.data?.token ||
+    data?.data?.access_token ||
+    null
+  );
 }
 
-function normalizeRegisterPayload(data) {
-  return {
-    nome: String(data.nome || data.name || "").trim(),
-    email: normalizeEmail(data.email),
-    password: String(data.password || ""),
-    telefone: String(data.telefone || "").trim(),
-    endereco: String(data.endereco || "").trim(),
-    cep: String(data.cep || "").trim(),
-    cidade: String(data.cidade || "").trim(),
-    uf: String(data.uf || "").trim().toUpperCase(),
-  };
+function persistBackendSession(data) {
+  const token = extractToken(data);
+
+  localStorage.setItem("user", JSON.stringify(data));
+
+  if (token) {
+    localStorage.setItem("token", token);
+  } else {
+    localStorage.removeItem("token");
+  }
+
+  clearApiCache();
+  dispatchAuthChange();
+
+  return data;
 }
 
 export function getStoredToken() {
@@ -86,8 +114,11 @@ export function getStoredToken() {
     localStorage.getItem("token") ||
     storedUser?.token ||
     storedUser?.accessToken ||
+    storedUser?.access_token ||
     storedUser?.jwt ||
+    storedUser?.session?.access_token ||
     storedUser?.data?.token ||
+    storedUser?.data?.access_token ||
     null
   );
 }
@@ -133,17 +164,10 @@ export async function loginUser({ email, password }) {
   const data = await authRequest("/api/auth/login", {
     email: normalizeEmail(email),
     password,
+    senha: password,
   });
 
-  localStorage.setItem("user", JSON.stringify(data));
-  const token = data?.token || data?.accessToken || data?.jwt || data?.data?.token;
-  if (token) {
-    localStorage.setItem("token", token);
-  }
-  clearApiCache();
-  dispatchAuthChange();
-
-  return data;
+  return persistBackendSession(data);
 }
 
 export async function registerUser(data) {

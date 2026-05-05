@@ -134,8 +134,11 @@ function getStoredAuthToken(user = getStoredAuthUser()) {
     localStorage.getItem("token") ||
     user?.token ||
     user?.accessToken ||
+    user?.access_token ||
     user?.jwt ||
+    user?.session?.access_token ||
     user?.data?.token ||
+    user?.data?.access_token ||
     null
   );
 }
