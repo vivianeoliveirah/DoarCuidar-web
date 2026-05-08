@@ -16,7 +16,7 @@ import { api, getErrorMessage } from "../../services/api";
 const SUGGESTED_VALUES = [20, 50, 100];
 
 function getInstitutionName(instituicao) {
-  return instituicao?.nome_fantasia || instituicao?.nome || instituicao?.razao_social || "InstituiÃ§Ã£o";
+  return instituicao?.nome_fantasia || instituicao?.nome || instituicao?.razao_social || "Instituição";
 }
 
 export default function Doar() {
