@@ -223,8 +223,12 @@ async function handleResponse(res) {
   }
 
   if (!res.ok) {
+    const detailMessage = Array.isArray(data.detail)
+      ? data.detail.map((item) => item?.msg || item?.message || item).join("; ")
+      : data.detail;
+
     throw new ApiError(
-      data.error || data.message || `Erro HTTP ${res.status}`,
+      data.error || data.message || detailMessage || `Erro HTTP ${res.status}`,
       "HTTP",
       res.status
     );
@@ -333,9 +337,14 @@ export const api = {
   },
 
   async postDoacao(data) {
+    const payload = {
+      instituicao_nome: data.instituicao_nome || data.instituicao || data.nome || "",
+      valor: Number(data.valor),
+    };
+
     return await request("/api/doacoes", {
       method: "POST",
-      body: data,
+      body: payload,
     });
   },
 

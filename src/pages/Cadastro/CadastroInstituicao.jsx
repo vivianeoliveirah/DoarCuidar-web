@@ -28,6 +28,7 @@ export default function CadastroInstituicao() {
   function montarDescricaoCNPJ(data, descricaoAtual) {
     const partes = [
       data.cnae_fiscal_descricao,
+      data.situacao_cadastral ? `SituaÃ§Ã£o cadastral: ${data.situacao_cadastral}.` : null,
       data.municipio && data.uf ? `Localizada em ${data.municipio}/${data.uf}.` : null,
       data.descricao_porte ? `Porte: ${data.descricao_porte}.` : null,
     ].filter(Boolean);

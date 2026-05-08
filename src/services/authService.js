@@ -51,12 +51,7 @@ function normalizeRegisterPayload(data) {
     nome: String(data.nome || data.name || "").trim(),
     email: normalizeEmail(data.email),
     password: String(data.password || data.senha || ""),
-    senha: String(data.senha || data.password || ""),
-    telefone: String(data.telefone || "").trim(),
-    endereco: String(data.endereco || "").trim(),
-    cep: String(data.cep || "").trim(),
-    cidade: String(data.cidade || "").trim(),
-    uf: String(data.uf || "").trim().toUpperCase(),
+    role: data.role || "user",
   };
 }
 
@@ -164,7 +159,6 @@ export async function loginUser({ email, password }) {
   const data = await authRequest("/api/auth/login", {
     email: normalizeEmail(email),
     password,
-    senha: password,
   });
 
   return persistBackendSession(data);

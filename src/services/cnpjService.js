@@ -71,6 +71,7 @@ function normalizarBrasilApi(data) {
     municipio: data.municipio,
     cnae_fiscal_descricao: data.cnae_fiscal_descricao,
     descricao_porte: data.descricao_porte,
+    situacao_cadastral: data.descricao_situacao_cadastral || data.situacao_cadastral,
   };
 }
 
@@ -91,6 +92,10 @@ function normalizarCnpjWs(data) {
       estabelecimento.atividade_principal?.descricao ||
       estabelecimento.cnae_principal?.descricao,
     descricao_porte: data.porte?.descricao,
+    situacao_cadastral:
+      estabelecimento.situacao_cadastral ||
+      estabelecimento.situacao_cadastral_descricao ||
+      estabelecimento.situacao,
   };
 }
 

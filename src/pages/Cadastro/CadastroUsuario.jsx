@@ -14,6 +14,12 @@ import FeedbackMessage from "../../components/ui/FeedbackMessage";
 
 import { buscarCEP } from "../../services/cepService";
 
+const MIN_PASSWORD_LENGTH = 6;
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
 export default function CadastroUsuario() {
   const navigate = useNavigate();
 
@@ -60,6 +66,33 @@ export default function CadastroUsuario() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFeedback(null);
+
+    if (!form.nome.trim() || !form.email.trim() || !form.senha) {
+      setFeedback({
+        type: "error",
+        title: "Dados obrigatÃ³rios",
+        message: "Informe nome, e-mail e senha para criar sua conta.",
+      });
+      return;
+    }
+
+    if (!isValidEmail(form.email)) {
+      setFeedback({
+        type: "warning",
+        title: "E-mail invÃ¡lido",
+        message: "Digite um e-mail vÃ¡lido antes de continuar.",
+      });
+      return;
+    }
+
+    if (form.senha.length < MIN_PASSWORD_LENGTH) {
+      setFeedback({
+        type: "warning",
+        title: "Senha muito curta",
+        message: `Use uma senha com pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`,
+      });
+      return;
+    }
 
     if (form.senha !== form.confirmarSenha) {
       setFeedback({
@@ -110,13 +143,13 @@ export default function CadastroUsuario() {
         <form onSubmit={handleSubmit} className="space-y-4">
 
           <div className="grid md:grid-cols-2 gap-4">
-            <InputTexto label="Nome completo" value={form.nome} onChange={handleChange("nome")} />
-            <InputTexto label="E-mail" type="email" value={form.email} onChange={handleChange("email")} />
+            <InputTexto label="Nome completo" value={form.nome} onChange={handleChange("nome")} required />
+            <InputTexto label="E-mail" type="email" value={form.email} onChange={handleChange("email")} required />
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <CampoSenha label="Senha" value={form.senha} onChange={handleChange("senha")} />
-            <CampoSenha label="Confirmar senha" value={form.confirmarSenha} onChange={handleChange("confirmarSenha")} />
+            <CampoSenha label="Senha" value={form.senha} onChange={handleChange("senha")} required />
+            <CampoSenha label="Confirmar senha" value={form.confirmarSenha} onChange={handleChange("confirmarSenha")} required />
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">

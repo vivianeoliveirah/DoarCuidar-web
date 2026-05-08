@@ -15,6 +15,10 @@ import { api, getErrorMessage } from "../../services/api";
 
 const SUGGESTED_VALUES = [20, 50, 100];
 
+function getInstitutionName(instituicao) {
+  return instituicao?.nome_fantasia || instituicao?.nome || instituicao?.razao_social || "InstituiÃ§Ã£o";
+}
+
 export default function Doar() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -48,9 +52,8 @@ export default function Doar() {
       setSubmitting(true);
       setSubmitError("");
       await api.postDoacao({
-        instituicaoId: id,
+        instituicao_nome: getInstitutionName(instituicao),
         valor: valorNumerico,
-        data: new Date().toISOString(),
       });
 
       toast.success("Apoio registrado no seu histórico.");
