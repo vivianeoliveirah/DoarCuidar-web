@@ -10,6 +10,8 @@ import SelectUF from "../../components/ui/SelectUF";
 import { consultarCNPJ } from "../../services/cnpjService";
 import { criarInstituicao } from "../../services/instituicoesService";
 
+const DESCRIPTION_ID = "descricao-instituicao";
+
 export default function CadastroInstituicao() {
 
   const [form, setForm] = useState({
@@ -189,11 +191,12 @@ export default function CadastroInstituicao() {
           />
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor={DESCRIPTION_ID} className="block text-sm font-medium text-slate-700 mb-1">
               Descrição das Atividades
             </label>
 
             <textarea
+              id={DESCRIPTION_ID}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none min-h-30 resize-none"
               value={form.descricao}
               onChange={handleChange("descricao")}
@@ -203,13 +206,13 @@ export default function CadastroInstituicao() {
           </div>
 
           {formError && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800">
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800" role="alert">
               {formError}
             </div>
           )}
 
           {formSuccess && (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-900">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-900" role="status" aria-live="polite">
               {formSuccess}
             </div>
           )}

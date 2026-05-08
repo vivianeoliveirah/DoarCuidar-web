@@ -98,6 +98,7 @@ export default function BuscarInstituicoes() {
         <div className="mb-8 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-950/5 md:grid-cols-[1fr_12rem_auto] md:items-end">
           <InputTexto
             label="Nome ou CNPJ"
+            name="q"
             placeholder="Ex: Instituto..."
             aria-label="Buscar instituição por nome ou CNPJ"
             value={busca}

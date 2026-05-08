@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function CampoSenha({
@@ -10,17 +10,19 @@ export default function CampoSenha({
   ...props
 }) {
   const [mostrar, setMostrar] = useState(false);
+  const generatedId = useId();
+  const inputId = id || generatedId;
 
   return (
     <div className="flex w-full flex-col gap-1.5 text-left">
       {label && (
-        <label htmlFor={id} className="text-sm font-semibold text-slate-700">
+        <label htmlFor={inputId} className="text-sm font-semibold text-slate-700">
           {label}
         </label>
       )}
       <div className="relative">
         <input
-          id={id}
+          id={inputId}
           type={mostrar ? "text" : "password"}
           value={value}
           onChange={onChange}
