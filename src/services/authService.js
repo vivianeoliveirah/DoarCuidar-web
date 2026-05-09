@@ -5,7 +5,7 @@ import {
   handleResponse,
 } from "./api";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "https://backend-doarcuidar.onrender.com";
+const BASE_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 const AUTH_CHANGE_EVENT = "doarcuidar-auth-change";
 const PASSWORD_RESET_UNAVAILABLE_MESSAGE =
   "A recuperação de senha ainda não está disponível nesta versão do sistema.";
@@ -56,10 +56,18 @@ function normalizeRegisterPayload(data) {
 }
 
 async function authRequest(path, body) {
+  if (!BASE_URL) {
+    throw new ApiError(
+      "Autenticação por backend não configurada. Configure VITE_API_URL ou migre auth para Supabase Auth.",
+      "UNAVAILABLE",
+      501
+    );
+  }
+
   try {
     const { options } = createFetchOptions("POST", body);
     const res = await fetch(`${BASE_URL}${path}`, options);
-    return await handleResponse(res);
+    return await handleResponse(res, { method: "POST", path });
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -184,7 +192,7 @@ export function getAuthErrorFeedback(error, context = "default") {
   if (error?.type === "UNAVAILABLE" || error?.statusCode === 501) {
     return {
       type: "warning",
-      title: PASSWORD_RESET_UNAVAILABLE_MESSAGE,
+      title: context === "password-reset" ? PASSWORD_RESET_UNAVAILABLE_MESSAGE : "Autenticação não configurada",
       message: AUTH_ERROR_MESSAGES.unavailable,
     };
   }

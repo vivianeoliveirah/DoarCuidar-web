@@ -27,6 +27,28 @@ const amigosDoBem = {
     "Transforma vidas por meio de educação, geração de renda e projetos de desenvolvimento local para combater a fome e a miséria.",
 };
 
+const fallbackInstituicoes = [
+  amigosDoBem,
+  {
+    id: "fallback-lbv",
+    nome: "SEDE CENTRAL DA LBV",
+    cnpj: "33.915.604/0001-17",
+    uf: "SP",
+    status: "aprovado",
+    descricao:
+      "Promove desenvolvimento social, educacao, cultura, assistencia e iniciativas solidarias para comunidades em vulnerabilidade.",
+  },
+  {
+    id: "fallback-lalec",
+    nome: "LALEC",
+    cnpj: "03.151.435/0001-25",
+    uf: "SP",
+    status: "aprovado",
+    descricao:
+      "Acolhe criancas em situacao de vulnerabilidade com cuidado, seguranca e apoio para seu desenvolvimento.",
+  },
+];
+
 function isAmigosDoBem(instituicao) {
   const nome = `${instituicao?.nome || ""} ${instituicao?.razao_social || ""}`.toLowerCase();
   const cnpj = instituicao?.cnpj || "";
@@ -45,7 +67,7 @@ export default function BuscarInstituicoes() {
     refreshing,
     refetch,
   } = useApiResource(api.getInstituicoes, {
-    initialData: [],
+    initialData: fallbackInstituicoes,
     select: asInstitutionList,
   });
 
@@ -67,6 +89,8 @@ export default function BuscarInstituicoes() {
         return buscaMatch && ufMatch;
       });
   }, [debouncedSearch, instituicoes, uf]);
+  const isUsingFallback = loading || Boolean(error);
+  const showLoading = loading && instituicoes.length === 0;
 
   return (
     <Layout className="bg-slate-50 py-12 sm:py-16">
@@ -111,7 +135,7 @@ export default function BuscarInstituicoes() {
             type="button"
             variant="brand"
             className="min-h-12 px-8"
-            onClick={refetch}
+            onClick={() => setBusca((current) => current.trim())}
             aria-label="Buscar instituições"
           >
             <Search size={18} aria-hidden="true" />
@@ -119,15 +143,21 @@ export default function BuscarInstituicoes() {
           </Button>
         </div>
 
-        {error ? (
+        {isUsingFallback && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900" role="status" aria-live="polite">
+            Carregando dados. O servidor pode levar alguns segundos para iniciar. Enquanto isso, exibimos dados demonstrativos.
+          </div>
+        )}
+
+        {error && instituicoesFiltradas.length === 0 ? (
           <EmptyState
             title="Não foi possível carregar as instituições"
             description={error}
             actionLabel="Tentar novamente"
             onAction={refetch}
           />
-        ) : loading ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
+        ) : showLoading ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" role="status" aria-live="polite" aria-label="Carregando instituições">
             {[1, 2, 3, 4, 5, 6].map((item) => (
               <div key={item} className="h-52 animate-pulse rounded-2xl bg-white p-6 shadow-sm shadow-slate-950/5 ring-1 ring-slate-200">
                 <div className="h-5 w-2/3 rounded-full bg-slate-200" />
