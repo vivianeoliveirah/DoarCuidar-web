@@ -2,13 +2,14 @@ import { ApiError, requestJson } from "./apiCore";
 import { backendApi } from "./backendApi";
 
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY || "";
+const SUPABASE_KEY =
+  import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY || "";
 const SUPABASE_REST_URL = SUPABASE_URL ? `${SUPABASE_URL}/rest/v1` : "";
 
 function requireSupabaseConfig() {
   if (!SUPABASE_REST_URL || !SUPABASE_KEY) {
     throw new ApiError(
-      "Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_KEY.",
+      "Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY ou VITE_SUPABASE_KEY.",
       "UNAVAILABLE"
     );
   }
