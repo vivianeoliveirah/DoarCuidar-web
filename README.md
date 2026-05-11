@@ -19,7 +19,7 @@ O frontend nao conecta diretamente ao Supabase. Ele consome apenas a API do back
 Frontend, arquivo `.env` na raiz:
 
 ```env
-VITE_API_URL=http://localhost:3001
+VITE_API_URL=https://backend-doarcuidar.onrender.com
 ```
 
 Backend, arquivo `backend/.env`:
@@ -55,20 +55,19 @@ npm run dev
 
 ## Endpoints principais
 
-- `GET /health`
-- `GET /instituicoes`
-- `GET /instituicoes?uf=SP`
-- `GET /instituicoes?nome=AMIGOS`
-- `GET /instituicoes/:id`
-- `POST /instituicoes`
-- `PATCH /instituicoes/:id/status`
-- `DELETE /instituicoes/:id`
-- `POST /auth/login`
-- `POST /auth/register`
-- `POST /auth/password-reset`
-- `GET /doacoes`
-- `POST /doacoes`
-- `GET /perfil`
+- `GET /api/instituicoes`
+- `GET /api/instituicoes?uf=SP`
+- `GET /api/instituicoes?nome=AMIGOS`
+- `GET /api/instituicoes/:id`
+- `POST /api/instituicoes`
+- `PATCH /api/instituicoes/:id/status`
+- `DELETE /api/instituicoes/:id`
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `POST /api/auth/password-reset`
+- `GET /api/doacoes`
+- `POST /api/doacoes`
+- `GET /api/perfil`
 
 ## Tecnologias
 

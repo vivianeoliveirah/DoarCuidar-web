@@ -19,8 +19,21 @@ app.get("/health", (_req, res) => {
 app.use("/instituicoes", instituicoesRouter);
 app.use("/doacoes", doacoesRouter);
 app.use("/auth", authRouter);
+app.use("/api/instituicoes", instituicoesRouter);
+app.use("/api/doacoes", doacoesRouter);
+app.use("/api/auth", authRouter);
 
 app.get("/perfil", async (req, res, next) => {
+  try {
+    const user = req.headers["user-id"] ? { id: req.headers["user-id"] } : null;
+    const doacoes = await listarDoacoes(user?.id || "");
+    res.json({ user, doacoes });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/perfil", async (req, res, next) => {
   try {
     const user = req.headers["user-id"] ? { id: req.headers["user-id"] } : null;
     const doacoes = await listarDoacoes(user?.id || "");

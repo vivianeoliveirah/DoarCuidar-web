@@ -1,6 +1,7 @@
 import { requestJson } from "./apiCore";
 
 const BACKEND_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const API_PREFIX = "/api";
 
 function buildInstituicoesPath(query = "", uf = "") {
   const params = new URLSearchParams();
@@ -14,7 +15,11 @@ function buildInstituicoesPath(query = "", uf = "") {
 }
 
 function backendRequest(path, options = {}) {
-  return requestJson(BACKEND_URL, path, options);
+  return requestJson(BACKEND_URL, `${API_PREFIX}${path}`, options);
+}
+
+function isUnsupportedRead(error) {
+  return error?.statusCode === 404 || error?.statusCode === 405;
 }
 
 export const api = {
@@ -58,11 +63,23 @@ export const api = {
   },
 
   async getDoacoes() {
-    return await backendRequest("/doacoes");
+    try {
+      return await backendRequest("/doacoes");
+    } catch (error) {
+      if (isUnsupportedRead(error)) return [];
+      throw error;
+    }
   },
 
   async getPerfil() {
-    return await backendRequest("/perfil");
+    try {
+      return await backendRequest("/perfil");
+    } catch (error) {
+      if (error?.statusCode === 401 || isUnsupportedRead(error)) {
+        return { user: null, doacoes: [] };
+      }
+      throw error;
+    }
   },
 };
 

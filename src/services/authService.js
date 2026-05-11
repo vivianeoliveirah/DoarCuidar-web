@@ -1,6 +1,7 @@
 import { ApiError, clearApiCache, requestJson } from "./apiCore";
 
 const BACKEND_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const API_PREFIX = "/api";
 const AUTH_CHANGE_EVENT = "doarcuidar-auth-change";
 const PASSWORD_RESET_UNAVAILABLE_MESSAGE =
   "Enviaremos as instruções de recuperação para o e-mail informado.";
@@ -84,7 +85,7 @@ function persistBackendSession(data) {
 }
 
 function authRequest(path, body) {
-  return requestJson(BACKEND_URL, path, {
+  return requestJson(BACKEND_URL, `${API_PREFIX}${path}`, {
     method: "POST",
     body,
     cache: false,
@@ -156,9 +157,18 @@ export async function registerUser(data) {
 }
 
 export async function requestPasswordReset(email) {
-  return await authRequest("/auth/password-reset", {
-    email: normalizeEmail(email),
-  });
+  const value = typeof email === "object" ? email?.email : email;
+  const normalizedEmail = normalizeEmail(value);
+
+  if (!normalizedEmail) {
+    throw new ApiError(AUTH_ERROR_MESSAGES.emptyLogin, "INVALID_INPUT", 400);
+  }
+
+  throw new ApiError(
+    "Recuperação de senha indisponível no backend atual.",
+    "UNAVAILABLE",
+    501
+  );
 }
 
 export function getAuthErrorFeedback(error, context = "default") {
