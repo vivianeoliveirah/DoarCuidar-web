@@ -1,7 +1,11 @@
 import { requestJson } from "./apiCore";
 
 const BACKEND_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-const API_PREFIX = "/api";
+const API_ENDPOINTS = {
+  instituicoes: "/api/instituicoes",
+  doacoes: "/api/doacoes",
+  perfil: "/api/perfil",
+};
 
 function buildInstituicoesPath(query = "", uf = "") {
   const params = new URLSearchParams();
@@ -11,11 +15,11 @@ function buildInstituicoesPath(query = "", uf = "") {
   if (uf) params.set("uf", String(uf).toUpperCase());
 
   const search = params.toString();
-  return `/instituicoes${search ? `?${search}` : ""}`;
+  return `${API_ENDPOINTS.instituicoes}${search ? `?${search}` : ""}`;
 }
 
 function backendRequest(path, options = {}) {
-  return requestJson(BACKEND_URL, `${API_PREFIX}${path}`, options);
+  return requestJson(BACKEND_URL, path, options);
 }
 
 function isUnsupportedRead(error) {
@@ -30,33 +34,33 @@ export const api = {
   },
 
   async getInstituicaoById(id) {
-    return await backendRequest(`/instituicoes/${id}`, {
+    return await backendRequest(`${API_ENDPOINTS.instituicoes}/${id}`, {
       timeout: 12000,
     });
   },
 
   async cadastrarInstituicao(data) {
-    return await backendRequest("/instituicoes", {
+    return await backendRequest(API_ENDPOINTS.instituicoes, {
       method: "POST",
       body: data,
     });
   },
 
   async atualizarStatus(id, status) {
-    return await backendRequest(`/instituicoes/${id}/status`, {
+    return await backendRequest(`${API_ENDPOINTS.instituicoes}/${id}/status`, {
       method: "PATCH",
       body: { status },
     });
   },
 
   async deletarInstituicao(id) {
-    return await backendRequest(`/instituicoes/${id}`, {
+    return await backendRequest(`${API_ENDPOINTS.instituicoes}/${id}`, {
       method: "DELETE",
     });
   },
 
   async postDoacao(data) {
-    return await backendRequest("/doacoes", {
+    return await backendRequest(API_ENDPOINTS.doacoes, {
       method: "POST",
       body: data,
     });
@@ -64,7 +68,7 @@ export const api = {
 
   async getDoacoes() {
     try {
-      return await backendRequest("/doacoes");
+      return await backendRequest(API_ENDPOINTS.doacoes);
     } catch (error) {
       if (isUnsupportedRead(error)) return [];
       throw error;
@@ -73,7 +77,7 @@ export const api = {
 
   async getPerfil() {
     try {
-      return await backendRequest("/perfil");
+      return await backendRequest(API_ENDPOINTS.perfil);
     } catch (error) {
       if (error?.statusCode === 401 || isUnsupportedRead(error)) {
         return { user: null, doacoes: [] };

@@ -17,44 +17,6 @@ function asInstitutionList(response) {
   return [];
 }
 
-const amigosDoBem = {
-  id: "fallback-amigos-do-bem",
-  nome: "AMIGOS DO BEM",
-  cnpj: "05.108.918/0001-72",
-  uf: "SP",
-  status: "aprovado",
-  descricao:
-    "Transforma vidas por meio de educação, geração de renda e projetos de desenvolvimento local para combater a fome e a miséria.",
-};
-
-const fallbackInstituicoes = [
-  amigosDoBem,
-  {
-    id: "fallback-lbv",
-    nome: "SEDE CENTRAL DA LBV",
-    cnpj: "33.915.604/0001-17",
-    uf: "SP",
-    status: "aprovado",
-    descricao:
-      "Promove desenvolvimento social, educacao, cultura, assistencia e iniciativas solidarias para comunidades em vulnerabilidade.",
-  },
-  {
-    id: "fallback-lalec",
-    nome: "LALEC",
-    cnpj: "03.151.435/0001-25",
-    uf: "SP",
-    status: "aprovado",
-    descricao:
-      "Acolhe criancas em situacao de vulnerabilidade com cuidado, seguranca e apoio para seu desenvolvimento.",
-  },
-];
-
-function isAmigosDoBem(instituicao) {
-  const nome = `${instituicao?.nome || ""} ${instituicao?.razao_social || ""}`.toLowerCase();
-  const cnpj = instituicao?.cnpj || "";
-
-  return nome.includes("amigos do bem") || cnpj === amigosDoBem.cnpj;
-}
 
 export default function BuscarInstituicoes() {
   const [busca, setBusca] = useState("");
@@ -67,30 +29,24 @@ export default function BuscarInstituicoes() {
     refreshing,
     refetch,
   } = useApiResource(() => api.getInstituicoes(debouncedSearch, uf), {
-    initialData: fallbackInstituicoes,
+    initialData: [],
     deps: [debouncedSearch, uf],
     select: asInstitutionList,
   });
 
   const instituicoesFiltradas = useMemo(() => {
-    const listaComAmigosDoBem = instituicoes.some(isAmigosDoBem)
-      ? instituicoes
-      : [amigosDoBem, ...instituicoes];
+    return instituicoes.filter((inst) => {
+      const nome = `${inst.nome || ""} ${inst.razao_social || ""}`.toLowerCase();
+      const cnpj = inst.cnpj || "";
+      const buscaMatch =
+        !debouncedSearch ||
+        nome.includes(debouncedSearch) ||
+        cnpj.includes(debouncedSearch);
+      const ufMatch = !uf || inst.uf === uf;
 
-    return listaComAmigosDoBem
-      .filter((inst) => {
-        const nome = `${inst.nome || ""} ${inst.razao_social || ""}`.toLowerCase();
-        const cnpj = inst.cnpj || "";
-        const buscaMatch =
-          !debouncedSearch ||
-          nome.includes(debouncedSearch) ||
-          cnpj.includes(debouncedSearch);
-        const ufMatch = !uf || inst.uf === uf;
-
-        return buscaMatch && ufMatch;
-      });
+      return buscaMatch && ufMatch;
+    });
   }, [debouncedSearch, instituicoes, uf]);
-  const isUsingFallback = loading || Boolean(error);
   const showLoading = loading && instituicoes.length === 0;
 
   return (
@@ -144,11 +100,6 @@ export default function BuscarInstituicoes() {
           </Button>
         </div>
 
-        {isUsingFallback && (
-          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900" role="status" aria-live="polite">
-            Carregando dados. O servidor pode levar alguns segundos para iniciar. Enquanto isso, exibimos dados demonstrativos.
-          </div>
-        )}
 
         {error && instituicoesFiltradas.length === 0 ? (
           <EmptyState

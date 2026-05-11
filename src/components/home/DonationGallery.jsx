@@ -7,53 +7,10 @@ const fallbackImages = [
   "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=80",
 ];
 
-const fallbackInstitutions = [
-  {
-    id: "fallback-amigos-do-bem",
-    nome: "AMIGOS DO BEM",
-    cnpj: "05.108.918/0001-72",
-    uf: "SP",
-    status: "aprovado",
-    descricao:
-      "Transforma vidas por meio de educacao, geracao de renda e projetos de desenvolvimento local para combater a fome e a miseria.",
-  },
-  {
-    id: "fallback-lbv",
-    nome: "SEDE CENTRAL DA LBV",
-    cnpj: "33.915.604/0001-17",
-    uf: "SP",
-    status: "aprovado",
-    descricao:
-      "Promove desenvolvimento social, educacao, cultura, assistencia e iniciativas solidarias para comunidades em vulnerabilidade.",
-  },
-  {
-    id: "fallback-lalec",
-    nome: "LALEC",
-    cnpj: "03.151.435/0001-25",
-    uf: "SP",
-    status: "aprovado",
-    descricao:
-      "Acolhe criancas em situacao de vulnerabilidade com cuidado, seguranca e apoio para seu desenvolvimento.",
-  },
-];
-
-function isAmigosDoBem(instituicao) {
-  const nome = `${instituicao?.nome || ""} ${instituicao?.razao_social || ""}`.toLowerCase();
-  const cnpj = instituicao?.cnpj || "";
-
-  return nome.includes("amigos do bem") || cnpj === "05.108.918/0001-72";
-}
 
 export default function DonationGallery({ instituicoes = [] }) {
   const navigate = useNavigate();
-  const amigosDoBem = fallbackInstitutions[0];
-  const source =
-    instituicoes.length > 0
-      ? [
-          ...(instituicoes.some(isAmigosDoBem) ? [] : [amigosDoBem]),
-          ...instituicoes,
-        ]
-      : fallbackInstitutions;
+  const source = instituicoes;
 
   const lista = source.slice(0, 3).map((inst, index) => ({
     id: inst.id,
@@ -64,7 +21,6 @@ export default function DonationGallery({ instituicoes = [] }) {
     cnpj: inst.cnpj,
     fonteValidacao: inst.fonte_validacao || "Consulta pública de CNPJ",
     ultimaAtualizacao: inst.updated_at || inst.created_at,
-    isFallback: String(inst.id).startsWith("fallback-"),
   }));
 
   return (
@@ -99,7 +55,7 @@ export default function DonationGallery({ instituicoes = [] }) {
             >
               <button
                 type="button"
-                onClick={() => (item.isFallback ? navigate("/instituicoes") : navigate(`/detalhes/${item.id}`))}
+                onClick={() => navigate(`/detalhes/${item.id}`)}
                 className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-inset"
               >
                 <div className="relative h-44 overflow-hidden sm:h-48">
@@ -147,14 +103,14 @@ export default function DonationGallery({ instituicoes = [] }) {
               <div className="flex items-center justify-between border-t border-slate-100 px-5 py-4">
                 <button
                   type="button"
-                  onClick={() => (item.isFallback ? navigate("/instituicoes") : navigate(`/detalhes/${item.id}`))}
+                  onClick={() => navigate(`/detalhes/${item.id}`)}
                   className="text-sm font-bold text-emerald-700 hover:text-emerald-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
                 >
                   Ver detalhes
                 </button>
                 <button
                   type="button"
-                  onClick={() => (item.isFallback ? navigate("/instituicoes") : navigate(`/doar/${item.id}`))}
+                  onClick={() => navigate(`/doar/${item.id}`)}
                   className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
                 >
                   Canais oficiais

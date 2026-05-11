@@ -31,53 +31,6 @@ import { api } from "../../services/api";
 
 const chartColors = ["#059669", "#0f766e", "#14b8a6", "#64748b", "#94a3b8"];
 
-const demoInstitutions = [
-  {
-    id: "demo-amigos-do-bem",
-    nome: "AMIGOS DO BEM",
-    cnpj: "05.108.918/0001-72",
-    uf: "SP",
-    categoria: "Assistencia social",
-    descricao: "Projetos de educação, geração de renda e combate à fome.",
-    email: "contato@amigosdobem.org",
-    site: "https://www.amigosdobem.org/",
-    created_at: "2026-03-18T10:00:00.000Z",
-  },
-  {
-    id: "demo-instituto-esperanca",
-    nome: "Instituto Esperanca",
-    cnpj: "33.915.604/0001-17",
-    uf: "RJ",
-    categoria: "Educacao",
-    descricao: "Apoio educacional e atividades comunitárias.",
-    telefone: "(21) 99999-0000",
-    created_at: "2026-03-25T10:00:00.000Z",
-  },
-  {
-    id: "demo-casa-cuidado",
-    nome: "Casa Cuidado",
-    cnpj: "03.151.435/0001-25",
-    uf: "MG",
-    categoria: "Saude",
-    descricao: "Acolhimento e cuidado para pessoas em vulnerabilidade.",
-    created_at: "2026-04-02T10:00:00.000Z",
-  },
-];
-
-const demoSupports = [
-  {
-    id: "demo-apoio-1",
-    instituicao_id: "demo-amigos-do-bem",
-    instituicao_nome: "AMIGOS DO BEM",
-    data: "2026-04-05T12:00:00.000Z",
-  },
-  {
-    id: "demo-apoio-2",
-    instituicao_id: "demo-instituto-esperanca",
-    instituicao_nome: "Instituto Esperanca",
-    data: "2026-04-12T12:00:00.000Z",
-  },
-];
 
 function asList(response) {
   if (Array.isArray(response)) return response;
@@ -174,21 +127,18 @@ function CustomTooltip({ active, payload, label }) {
 
 export default function Dashboard() {
   const institutionsResource = useApiResource(api.getInstituicoes, {
-    initialData: demoInstitutions,
+    initialData: [],
     select: asList,
   });
   const supportsResource = useApiResource(api.getDoacoes, {
-    initialData: demoSupports,
+    initialData: [],
     select: asList,
   });
 
-  const usingDemoData = Boolean(institutionsResource.error || supportsResource.error);
 
   const dashboard = useMemo(() => {
-    const institutions = institutionsResource.data?.length
-      ? institutionsResource.data
-      : demoInstitutions;
-    const supports = supportsResource.data?.length ? supportsResource.data : demoSupports;
+    const institutions = institutionsResource.data || [];
+    const supports = supportsResource.data || [];
     const withCnpj = institutions.filter((item) => hasValue(item.cnpj)).length;
     const withChannel = institutions.filter(hasOfficialChannel).length;
     const ufs = new Set(institutions.map((item) => item.uf).filter(Boolean));
@@ -251,12 +201,11 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {usingDemoData && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-            Dados exibidos em modo demonstração. Não foi possível atualizar tudo agora.
+        {(institutionsResource.error || supportsResource.error) && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
+            {institutionsResource.error || supportsResource.error}
           </div>
         )}
-
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <MetricCard
             title="Instituicoes disponiveis"

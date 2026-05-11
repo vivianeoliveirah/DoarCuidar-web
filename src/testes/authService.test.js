@@ -1,11 +1,39 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "../services/api";
 import {
   AUTH_ERROR_MESSAGES,
   PASSWORD_RESET_UNAVAILABLE_MESSAGE,
   getAuthErrorFeedback,
+  loginUser,
 } from "../services/authService";
+
+function jsonResponse(body, init = {}) {
+  return new Response(JSON.stringify(body), {
+    status: init.status || 200,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+function createLocalStorageMock() {
+  const store = new Map();
+
+  return {
+    getItem: vi.fn((key) => store.get(key) || null),
+    removeItem: vi.fn((key) => store.delete(key)),
+    setItem: vi.fn((key, value) => store.set(key, String(value))),
+  };
+}
+
+beforeEach(() => {
+  vi.stubGlobal("localStorage", createLocalStorageMock());
+  vi.stubGlobal("window", { dispatchEvent: vi.fn() });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe("feedback de autenticação", () => {
   it("mostra mensagem amigável para login inválido", () => {
@@ -44,5 +72,22 @@ describe("feedback de autenticação", () => {
       title: "Sistema indisponível",
       message: AUTH_ERROR_MESSAGES.server,
     });
+  });
+  it("chama login na rota real /api/auth/login", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ user: { email: "teste@doarcuidar.com" }, token: "token" })
+    );
+
+    await expect(
+      loginUser({ email: " TESTE@DoarCuidar.com ", password: "senha" })
+    ).resolves.toMatchObject({ token: "token" });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend-doarcuidar.onrender.com/api/auth/login",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ email: "teste@doarcuidar.com", password: "senha" }),
+      })
+    );
   });
 });

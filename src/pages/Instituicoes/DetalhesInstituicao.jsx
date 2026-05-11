@@ -17,25 +17,6 @@ import Loader from "../../components/ui/Loader";
 import { useApiResource } from "../../hooks/useApiResource";
 import { api } from "../../services/api";
 
-const fallbackInstitutions = {
-  "fallback-amigos-do-bem": {
-    id: "fallback-amigos-do-bem",
-    nome: "AMIGOS DO BEM",
-    nome_fantasia: "AMIGOS DO BEM",
-    razao_social: "AMIGOS DO BEM INSTITUICAO NACIONAL CONTRA A FOME E A MISERIA",
-    cnpj: "05.108.918/0001-72",
-    uf: "SP",
-    status: "aprovado",
-    area_atuacao: "Assistencia social",
-    fonte_validacao: "Consulta pública de CNPJ",
-    descricao:
-      "Transforma vidas por meio de educacao, geracao de renda e projetos de desenvolvimento local para combater a fome e a miseria.",
-    email: "",
-    telefone: "",
-    site: "",
-  },
-};
-
 function getLastVerification(instituicao) {
   const date = instituicao.updated_at || instituicao.created_at;
   return date ? new Date(date).toLocaleDateString("pt-BR") : "Não informado";
@@ -48,7 +29,6 @@ function getInstitutionName(instituicao) {
 export default function DetalhesInstituicao() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const fallbackInstitution = fallbackInstitutions[id];
   const {
     data: apiInstituicao,
     error,
@@ -57,11 +37,10 @@ export default function DetalhesInstituicao() {
   } = useApiResource(() => api.getInstituicaoById(id), {
     initialData: null,
     deps: [id],
-    enabled: !fallbackInstitution,
   });
-  const instituicao = fallbackInstitution || apiInstituicao;
+  const instituicao = apiInstituicao;
 
-  if (loading && !fallbackInstitution) {
+  if (loading) {
     return (
       <Layout>
         <Loader text="Carregando instituição..." />
@@ -203,9 +182,9 @@ export default function DetalhesInstituicao() {
               type="button"
               variant="outline"
               className="mt-3 w-full"
-              onClick={() => navigate(fallbackInstitution ? "/instituicoes" : `/doar/${instituicao.id}`)}
+              onClick={() => navigate(`/doar/${instituicao.id}`)}
             >
-              {fallbackInstitution ? "Voltar para a busca" : "Registrar apoio no DoarCuidar"}
+              Registrar apoio no DoarCuidar
             </Button>
           </aside>
         </div>

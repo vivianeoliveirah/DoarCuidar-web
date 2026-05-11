@@ -1,7 +1,10 @@
 import { ApiError, clearApiCache, requestJson } from "./apiCore";
 
 const BACKEND_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-const API_PREFIX = "/api";
+const AUTH_ENDPOINTS = {
+  login: "/api/auth/login",
+  register: "/api/auth/register",
+};
 const AUTH_CHANGE_EVENT = "doarcuidar-auth-change";
 const PASSWORD_RESET_UNAVAILABLE_MESSAGE =
   "Enviaremos as instruções de recuperação para o e-mail informado.";
@@ -85,7 +88,7 @@ function persistBackendSession(data) {
 }
 
 function authRequest(path, body) {
-  return requestJson(BACKEND_URL, `${API_PREFIX}${path}`, {
+  return requestJson(BACKEND_URL, path, {
     method: "POST",
     body,
     cache: false,
@@ -144,7 +147,7 @@ export function isAdminUser(user = getSessionUser()) {
 }
 
 export async function loginUser({ email, password }) {
-  const data = await authRequest("/auth/login", {
+  const data = await authRequest(AUTH_ENDPOINTS.login, {
     email: normalizeEmail(email),
     password,
   });
@@ -153,7 +156,7 @@ export async function loginUser({ email, password }) {
 }
 
 export async function registerUser(data) {
-  return await authRequest("/auth/register", normalizeRegisterPayload(data));
+  return await authRequest(AUTH_ENDPOINTS.register, normalizeRegisterPayload(data));
 }
 
 export async function requestPasswordReset(email) {
