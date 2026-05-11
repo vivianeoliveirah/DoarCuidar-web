@@ -66,8 +66,9 @@ export default function BuscarInstituicoes() {
     loading,
     refreshing,
     refetch,
-  } = useApiResource(api.getInstituicoes, {
+  } = useApiResource(() => api.getInstituicoes(debouncedSearch, uf), {
     initialData: fallbackInstituicoes,
+    deps: [debouncedSearch, uf],
     select: asInstitutionList,
   });
 

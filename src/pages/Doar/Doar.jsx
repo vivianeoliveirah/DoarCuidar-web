@@ -52,6 +52,7 @@ export default function Doar() {
       setSubmitting(true);
       setSubmitError("");
       await api.postDoacao({
+        instituicao_id: instituicao.id,
         instituicao_nome: getInstitutionName(instituicao),
         valor: valorNumerico,
       });

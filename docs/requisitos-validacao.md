@@ -1,19 +1,20 @@
-# Validação de requisitos
+# Validacao de requisitos
 
-| Requisito | Status | Evidência no projeto |
+| Requisito | Status | Evidencia no projeto |
 | --- | --- | --- |
 | Framework web | Atendido | React + Vite em `package.json`, `src/main.jsx` e `vite.config.js`. |
-| Banco de dados | Atendido no escopo do produto | Backend configurado para API remota e documentação indicando PostgreSQL/Supabase. O frontend consome dados via `VITE_API_URL`. |
-| JavaScript | Atendido | Código em JavaScript/JSX em `src/`. |
-| Nuvem | Atendido | Frontend preparado para deploy e backend em Render (`VITE_API_URL=https://backend-doarcuidar.onrender.com`). |
-| Acessibilidade | Parcialmente atendido | Uso de HTML semântico, `aria-label`, foco visível, labels e componentes reutilizáveis. Ainda cabem testes automatizados de acessibilidade. |
-| Controle de versão | Atendido | Repositório Git com histórico e workflows. |
-| Integração contínua | Atendido | GitHub Actions em `.github/workflows/ci.yml` executando lint, testes e build. |
-| Testes | Parcialmente atendido | Vitest configurado e teste básico em `src/testes/basic.test.js`. Ainda faltam testes de componentes e fluxos principais. |
-| Uso/fornecimento de API | Atendido | Consumo da API do backend em `src/services/api.js` e APIs públicas de CNPJ em `src/services/cnpjService.js`. |
-| Análise de dados | Atendido | Dashboard com métricas de cobertura, qualidade dos dados, áreas de atuação e apoios registrados. |
-| IoT | Não atendido / não aplicável | Não há integração com sensores, dispositivos ou telemetria física no escopo atual do DoarCuidar Web. |
+| Backend | Atendido | Backend Node/Express em `backend/server.js`, com rotas REST em `backend/routes/`. |
+| Banco de dados | Atendido | Backend consulta Supabase PostgreSQL via REST usando `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`. |
+| JavaScript | Atendido | Codigo em JavaScript/JSX em `src/` e `backend/`. |
+| Nuvem | Atendido | Frontend preparado para Netlify via `VITE_API_URL`; backend preparado para deploy Node com CORS configuravel. |
+| Acessibilidade | Parcialmente atendido | Uso de HTML semantico, `aria-label`, foco visivel, labels e componentes reutilizaveis. |
+| Controle de versao | Atendido | Repositorio Git com historico e workflows. |
+| Integracao continua | Atendido | GitHub Actions em `.github/workflows/ci.yml` executando lint, testes e build. |
+| Testes | Parcialmente atendido | Vitest configurado e testes em `src/testes/`. |
+| Uso/fornecimento de API | Atendido | Frontend consome `src/services/api.js`; backend expoe REST e consulta Supabase em `backend/services/`. |
+| Analise de dados | Atendido | Dashboard com metricas de cobertura, qualidade dos dados, areas de atuacao e apoios registrados. |
+| IoT | Nao atendido / nao aplicavel | Nao ha integracao com sensores, dispositivos ou telemetria fisica no escopo atual. |
 
-## Observações
+## Observacoes
 
-O DoarCuidar Web não processa pagamentos. O fluxo atual ajuda a buscar instituições por nome, CNPJ e estado, visualizar detalhes e acessar canais oficiais. Apoios registrados no sistema são acompanhamento interno, não confirmação de transação financeira.
+O DoarCuidar Web nao processa pagamentos. O fluxo atual ajuda a buscar instituicoes por nome, CNPJ e estado, visualizar detalhes e acessar canais oficiais.

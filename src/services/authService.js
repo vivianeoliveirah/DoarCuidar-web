@@ -1,14 +1,9 @@
-import {
-  ApiError,
-  clearApiCache,
-  createFetchOptions,
-  handleResponse,
-} from "./api";
+import { ApiError, clearApiCache, requestJson } from "./apiCore";
 
-const BASE_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const BACKEND_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 const AUTH_CHANGE_EVENT = "doarcuidar-auth-change";
 const PASSWORD_RESET_UNAVAILABLE_MESSAGE =
-  "A recuperação de senha ainda não está disponível nesta versão do sistema.";
+  "Enviaremos as instruções de recuperação para o e-mail informado.";
 
 const AUTH_ERROR_MESSAGES = {
   emptyLogin: "Preencha seu e-mail e senha para continuar.",
@@ -20,7 +15,7 @@ const AUTH_ERROR_MESSAGES = {
   network:
     "Não foi possível conectar ao sistema. Verifique sua internet e tente novamente.",
   unavailable:
-    "Funcionalidade em desenvolvimento. Em breve você poderá recuperar sua senha por e-mail.",
+    "Autenticação indisponível. Verifique a configuração do backend.",
   fallback:
     "Algo deu errado ao processar sua solicitação. Tente novamente ou verifique suas informações.",
 };
@@ -52,33 +47,12 @@ function normalizeRegisterPayload(data) {
     email: normalizeEmail(data.email),
     password: String(data.password || data.senha || ""),
     role: data.role || "user",
+    telefone: data.telefone || "",
+    endereco: data.endereco || "",
+    cep: data.cep || "",
+    cidade: data.cidade || "",
+    uf: data.uf || "",
   };
-}
-
-async function authRequest(path, body) {
-  if (!BASE_URL) {
-    throw new ApiError(
-      "Autenticação por backend não configurada. Configure VITE_API_URL ou migre auth para Supabase Auth.",
-      "UNAVAILABLE",
-      501
-    );
-  }
-
-  try {
-    const { options } = createFetchOptions("POST", body);
-    const res = await fetch(`${BASE_URL}${path}`, options);
-    return await handleResponse(res, { method: "POST", path });
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-
-    if (error.name === "TypeError") {
-      throw new ApiError(AUTH_ERROR_MESSAGES.network, "NETWORK");
-    }
-
-    throw new ApiError(AUTH_ERROR_MESSAGES.fallback, "UNKNOWN");
-  }
 }
 
 function extractToken(data) {
@@ -88,8 +62,6 @@ function extractToken(data) {
     data?.access_token ||
     data?.jwt ||
     data?.session?.access_token ||
-    data?.data?.token ||
-    data?.data?.access_token ||
     null
   );
 }
@@ -111,6 +83,15 @@ function persistBackendSession(data) {
   return data;
 }
 
+function authRequest(path, body) {
+  return requestJson(BACKEND_URL, path, {
+    method: "POST",
+    body,
+    cache: false,
+    timeout: 12000,
+  });
+}
+
 export function getStoredToken() {
   const storedUser = getStoredUser();
   return (
@@ -120,8 +101,6 @@ export function getStoredToken() {
     storedUser?.access_token ||
     storedUser?.jwt ||
     storedUser?.session?.access_token ||
-    storedUser?.data?.token ||
-    storedUser?.data?.access_token ||
     null
   );
 }
@@ -164,7 +143,7 @@ export function isAdminUser(user = getSessionUser()) {
 }
 
 export async function loginUser({ email, password }) {
-  const data = await authRequest("/api/auth/login", {
+  const data = await authRequest("/auth/login", {
     email: normalizeEmail(email),
     password,
   });
@@ -173,11 +152,13 @@ export async function loginUser({ email, password }) {
 }
 
 export async function registerUser(data) {
-  return await authRequest("/api/auth/register", normalizeRegisterPayload(data));
+  return await authRequest("/auth/register", normalizeRegisterPayload(data));
 }
 
-export async function requestPasswordReset() {
-  throw new ApiError(PASSWORD_RESET_UNAVAILABLE_MESSAGE, "UNAVAILABLE", 501);
+export async function requestPasswordReset(email) {
+  return await authRequest("/auth/password-reset", {
+    email: normalizeEmail(email),
+  });
 }
 
 export function getAuthErrorFeedback(error, context = "default") {

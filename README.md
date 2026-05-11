@@ -1,371 +1,83 @@
-# <h1 align="center">💚 Projeto Integrador II — DoarCuidar</h1>
+# DoarCuidar Web
 
-<p align="center">
-  Plataforma digital de transparência e acessibilidade para instituições beneficentes.
-</p>
+Plataforma React/Vite para consulta de instituicoes beneficentes com backend Node/Express e banco Supabase PostgreSQL.
 
-<p align="center">
-  <a href="#-descrição-do-projeto">Descrição</a> •
-  <a href="#-sobre-o-projeto">Sobre</a> •
-  <a href="#-funcionalidades">Funcionalidades</a> •
-  <a href="#-arquitetura">Arquitetura</a> •
-  <a href="#-como-executar">Como executar</a> •
-  <a href="#-tecnologias">Tecnologias</a> •
-  <a href="#-dashboard-e-análise-de-dados">Dashboard</a> •
-  <a href="#-acessibilidade">Acessibilidade</a> •
-  <a href="#-estrutura-do-projeto">Estrutura</a> •
-  <a href="#-roteiro-e-status">Status</a> •
-  <a href="#-autores">Autores</a>
-</p>
-
----
-
-# 📄 Descrição do projeto
-
-O **DoarCuidar** é uma plataforma digital desenvolvida no Projeto Integrador II com foco em:
-
-- transparência digital;
-- acessibilidade;
-- confiança informacional;
-- impacto social;
-- visualização de dados;
-- visibilidade para instituições beneficentes.
-
-O sistema foi idealizado para conectar doadores a instituições confiáveis por meio de consultas organizadas, indicadores visuais e validação cadastral baseada em CNPJ.
-
-O projeto utiliza arquitetura desacoplada:
-
-- **Frontend:** React + Vite
-- **Backend:** FastAPI (Render)
-- **Banco de dados/autenticação:** Supabase
-- **Deploy:** Netlify + Render
-
----
-
-# 💻 Sobre o projeto
-
-O DoarCuidar foi criado para ajudar usuários a encontrar instituições beneficentes de forma mais segura, transparente e acessível.
-
-Muitas pequenas organizações possuem baixa visibilidade digital, dificultando o contato com possíveis doadores. Além disso, usuários frequentemente encontram dificuldades para verificar a confiabilidade de instituições em ambientes digitais.
-
-O projeto busca resolver esse problema por meio de:
-
-- busca organizada de instituições;
-- validação/simulação de consulta de CNPJ;
-- dashboards analíticos;
-- indicadores de impacto social;
-- experiência acessível e intuitiva;
-- transparência informacional.
-
-⚠️ O sistema NÃO realiza processamento financeiro.  
-Seu objetivo é atuar como intermediador informacional entre doadores e instituições.
-
----
-
-# ⚙️ Funcionalidades
-
-## 🔎 Instituições
-
-- [x] Busca de instituições por:
-  - nome
-  - palavra-chave
-  - UF
-  - CNPJ
-- [x] Listagem organizada em cards
-- [x] Página de detalhes da instituição
-- [x] Instituições em destaque
-
----
-
-## 👤 Usuários
-
-- [x] Cadastro de usuário
-- [x] Login
-- [x] Perfil do usuário
-- [x] Edição básica de dados
-
----
-
-## 📊 Dashboard e análise de dados
-
-- [x] Dashboard analítico
-- [x] Indicadores sociais
-- [x] Métricas visuais
-- [x] Cards estatísticos
-- [x] Estrutura para gráficos
-- [x] Indicadores de impacto social
-
----
-
-## 🔐 Segurança
-
-- [x] Estrutura para autenticação JWT
-- [x] Rotas protegidas
-- [x] Integração preparada para OAuth2
-- [x] Variáveis de ambiente
-
----
-
-## Acessibilidade
-
-- [x] Estrutura responsiva
-- [x] HTML semântico
-- [x] Labels e aria-attributes
-- [x] Navegação intuitiva
-- [x] Contraste visual consistente
-
----
-
-## Ambiente DEMO
-
-- [x] Dados fictícios para apresentação
-- [x] Fallback automático quando a API não estiver disponível
-- [x] Proteção contra respostas HTML inesperadas
-
----
-
-# Arquitetura
-
-O projeto utiliza arquitetura desacoplada:
+## Arquitetura
 
 ```txt
-Frontend (React/Vite)
-        ↓
-API REST (FastAPI / Render)
-        ↓
-Supabase Auth + PostgreSQL
+Frontend React/Vite
+  -> Backend Node/Express
+  -> Supabase PostgreSQL
+  -> Backend Node/Express
+  -> Frontend React/Vite
 ```
 
-Estrutura baseada em:
+O frontend nao conecta diretamente ao Supabase. Ele consome apenas a API do backend configurada em `VITE_API_URL`.
 
-- componentização;
-- separação de responsabilidades;
-- services;
-- hooks;
-- layouts reutilizáveis;
-- API REST;
-- persistência em nuvem.
+## Variaveis de ambiente
 
----
+Frontend, arquivo `.env` na raiz:
 
-# 🚀 Como executar
-
-## 1️⃣ Clonar o projeto
-
-```bash
-git clone https://github.com/<usuario>/<repositorio>.git
+```env
+VITE_API_URL=http://localhost:3001
 ```
 
----
+Backend, arquivo `backend/.env`:
 
-## 2️⃣ Frontend
+```env
+SUPABASE_URL=https://rdfuuxaxsqhjvhnxhrgw.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
+PORT=3001
+CORS_ORIGIN=http://localhost:5173
+```
+
+Nunca coloque `SUPABASE_SERVICE_ROLE_KEY` no frontend ou em variaveis `VITE_*`.
+
+## Como executar
+
+Instale dependencias:
 
 ```bash
-cd frontend-doarcuidar
 npm install
+```
+
+Inicie o backend:
+
+```bash
+npm run dev:backend
+```
+
+Inicie o frontend:
+
+```bash
 npm run dev
 ```
 
-Aplicação:
+## Endpoints principais
 
-```txt
-http://localhost:5173
-```
+- `GET /health`
+- `GET /instituicoes`
+- `GET /instituicoes?uf=SP`
+- `GET /instituicoes?nome=AMIGOS`
+- `GET /instituicoes/:id`
+- `POST /instituicoes`
+- `PATCH /instituicoes/:id/status`
+- `DELETE /instituicoes/:id`
+- `POST /auth/login`
+- `POST /auth/register`
+- `POST /auth/password-reset`
+- `GET /doacoes`
+- `POST /doacoes`
+- `GET /perfil`
 
----
+## Tecnologias
 
-# Variáveis de ambiente
+- React + Vite
+- Node + Express
+- Supabase PostgreSQL
+- Supabase Auth via backend
+- Netlify para frontend
 
-Crie os arquivos locais de ambiente a partir de exemplos como `.env.example`.
-Não publique valores reais de chaves, tokens, URLs de banco ou segredos no README.
+## Observacao
 
-## Frontend
-
-```env
-VITE_API_URL=https://sua-api.onrender.com
-```
-
----
-
-# 🛠 Tecnologias
-
-## Frontend
-
-- React 18
-- Vite
-- React Router DOM
-- Tailwind CSS
-- Lucide React
-
----
-
-## Backend / Dados
-
-- Python
-- FastAPI
-- Uvicorn
-- Supabase Auth
-- Supabase Database
-- PostgreSQL
-
----
-
-## Banco de dados
-
-- PostgreSQL
-- Supabase
-
----
-
-## Nuvem / Deploy
-
-- Netlify
-- Render
-- Supabase
-
----
-
-## Controle de versão
-
-- Git
-- GitHub
-
----
-
-## Integração contínua
-
-- GitHub Actions
-
----
-
-# 📊 Dashboard e análise de dados
-
-O sistema possui estrutura para dashboards analíticos com:
-
-- métricas sociais;
-- indicadores de instituições;
-- visualização de impacto;
-- análise de dados;
-- gráficos;
-- indicadores visuais.
-
-O objetivo é ampliar a transparência e facilitar a interpretação das informações pelos usuários.
-
----
-
-# Acessibilidade
-
-O projeto busca seguir princípios de acessibilidade digital conforme WCAG:
-
-- contraste adequado;
-- navegação intuitiva;
-- responsividade;
-- estrutura semântica;
-- elementos acessíveis;
-- foco em inclusão digital.
-
----
-
-# 📁 Estrutura do projeto
-
-```txt
-frontend/
- ├── src/
- │    ├── components/
- │    ├── pages/
- │    ├── layouts/
- │    ├── services/
- │    ├── hooks/
- │    ├── assets/
- │    └── routes/
- │
- ├── App.jsx
- ├── main.jsx
- └── vite.config.js
-
-backend/
- ├── app/
- │    ├── routes/
- │    ├── services/
- │    ├── models/
- │    ├── schemas/
- │    ├── database/
- │    └── core/
- │
- ├── run.py
- ├── requirements.txt
- └── .env
-```
-
----
-
-# 🧭 Roteiro e status
-
-## ✅ Implementado
-
-- [x] React + Vite
-- [x] FastAPI
-- [x] PostgreSQL/Supabase
-- [x] Dashboard analítico
-- [x] Busca de instituições
-- [x] Página de detalhes
-- [x] Estrutura de autenticação
-- [x] Layout responsivo
-- [x] Estrutura desacoplada
-- [x] Deploy preparado
-- [x] Variáveis de ambiente
-- [x] Integração frontend/backend
-- [x] Estrutura para acessibilidade
-
----
-
-## 🚧 Em desenvolvimento
-
-- [ ] Autenticação completa OAuth2
-- [ ] Testes automatizados
-- [ ] Integração oficial Receita Federal
-- [ ] Favoritos/donatárias persistentes
-- [ ] Dashboard com métricas reais
-- [ ] Melhorias avançadas de acessibilidade
-
----
-
-# 🌎 Contexto social
-
-O DoarCuidar busca ampliar a visibilidade de instituições beneficentes e fortalecer a confiança dos usuários em ambientes digitais de doação.
-
-O projeto foi pensado para organizações com baixa presença digital, facilitando o acesso da população a informações confiáveis sobre causas sociais.
-
----
-
-# 📚 Relevância acadêmica
-
-O projeto integra conhecimentos de:
-
-- desenvolvimento web;
-- arquitetura desacoplada;
-- APIs REST;
-- banco de dados;
-- acessibilidade digital;
-- cloud computing;
-- integração contínua;
-- análise de dados;
-- UX/UI;
-- engenharia de software.
-
----
-
-# 🦸 Autores
-
-Projeto desenvolvido pelos alunos:
-
-- Fábio
-- Ingrid
-- Jessica
-- Jose Edson Rodrigues
-- Keven
-- Viviane Oliveira Soares
-
----
-
-# 💚 DoarCuidar
+O DoarCuidar nao processa pagamentos. Os apoios registrados sao acompanhamento interno, nao confirmacao de transacao financeira.
