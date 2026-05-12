@@ -1,6 +1,6 @@
 import { requestJson } from "./apiCore";
+import { API_BASE_URL } from "./config";
 
-const BACKEND_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 const API_ENDPOINTS = {
   instituicoes: "/api/instituicoes",
   doacoes: "/api/doacoes",
@@ -19,7 +19,7 @@ function buildInstituicoesPath(query = "", uf = "") {
 }
 
 function backendRequest(path, options = {}) {
-  return requestJson(BACKEND_URL, path, options);
+  return requestJson(API_BASE_URL, path, options);
 }
 
 function isUnsupportedRead(error) {

@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError, api, clearApiCache, getErrorMessage, handleResponse } from "../services/api";
+import {
+  API_BASE_URL,
+  DEFAULT_API_URL,
+  normalizeApiUrl,
+  resolveApiBaseUrl,
+} from "../services/config";
 
 function jsonResponse(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -66,6 +72,13 @@ describe("tratamento de respostas da API", () => {
       "Não conseguimos acessar o sistema no momento. Tente novamente em instantes."
     );
   });
+  it("usa fallback seguro quando VITE_API_URL nao estiver configurada", () => {
+    expect(resolveApiBaseUrl()).toBe(API_BASE_URL);
+    expect(resolveApiBaseUrl("")).toBe(DEFAULT_API_URL);
+    expect(resolveApiBaseUrl(undefined)).toBe(DEFAULT_API_URL);
+    expect(normalizeApiUrl("https://exemplo.com/")).toBe("https://exemplo.com");
+  });
+
   it("chama instituicoes na rota real /api/instituicoes", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       jsonResponse({ data: [] })

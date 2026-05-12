@@ -1,6 +1,6 @@
 import { ApiError, clearApiCache, requestJson } from "./apiCore";
+import { API_BASE_URL } from "./config";
 
-const BACKEND_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 const AUTH_ENDPOINTS = {
   login: "/api/auth/login",
   register: "/api/auth/register",
@@ -99,7 +99,7 @@ function persistBackendSession(data) {
 }
 
 function authRequest(path, body) {
-  return requestJson(BACKEND_URL, path, {
+  return requestJson(API_BASE_URL, path, {
     method: "POST",
     body,
     cache: false,
