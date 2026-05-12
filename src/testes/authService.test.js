@@ -6,6 +6,7 @@ import {
   PASSWORD_RESET_UNAVAILABLE_MESSAGE,
   getAuthErrorFeedback,
   loginUser,
+  registerUser,
 } from "../services/authService";
 
 function jsonResponse(body, init = {}) {
@@ -118,5 +119,39 @@ describe("feedback de autenticação", () => {
       statusCode: 400,
     });
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("chama cadastro na rota real /api/auth/register com payload canonico", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ user: { email: "novo@doarcuidar.com", nome: "Novo Doador" } }, { status: 201 })
+    );
+
+    await expect(
+      registerUser({
+        nome: " Novo Doador ",
+        email: " NOVO@DoarCuidar.com ",
+        senha: "segredo123",
+        telefone: "11999999999",
+      })
+    ).resolves.toMatchObject({ user: { email: "novo@doarcuidar.com" } });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend-doarcuidar.onrender.com/api/auth/register",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          nome: "Novo Doador",
+          email: "novo@doarcuidar.com",
+          password: "segredo123",
+          role: "user",
+          telefone: "11999999999",
+          endereco: "",
+          cep: "",
+          cidade: "",
+          uf: "",
+        }),
+      })
+    );
   });
 });
