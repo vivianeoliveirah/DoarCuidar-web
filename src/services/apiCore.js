@@ -167,17 +167,29 @@ async function handleResponse(res, context = {}) {
     const detailMessage = Array.isArray(data.detail)
       ? data.detail.map((item) => item?.msg || item?.message || item).join("; ")
       : data.detail;
+    const errorDetails = {
+      ...context,
+      ...(data.details && typeof data.details === "object" ? data.details : {}),
+      details: data.details,
+      error_code: data.error_code || data.code || data.details?.error_code,
+      response: data,
+    };
 
     throw new ApiError(
       data.error || data.message || detailMessage || `Erro HTTP ${res.status}`,
       "HTTP",
       res.status,
-      context
+      errorDetails
     );
   }
 
   if (data.success === false) {
-    throw new ApiError(data.error || data.message || "Erro na requisição", "HTTP", 400, context);
+    throw new ApiError(data.error || data.message || "Erro na requisição", "HTTP", 400, {
+      ...context,
+      details: data.details,
+      error_code: data.error_code || data.code || data.details?.error_code,
+      response: data,
+    });
   }
 
   return data;

@@ -61,8 +61,8 @@ function normalizeRegisterPayload(data) {
 }
 
 function normalizeLoginPayload(data = {}) {
-  const email = normalizeEmail(data.email || data.usuario || data.login);
-  const password = String(data.password || data.senha || "");
+  const email = normalizeEmail(data.email);
+  const password = String(data.password || "");
 
   if (!email || !password) {
     throw new ApiError(AUTH_ERROR_MESSAGES.emptyLogin, "INVALID_INPUT", 400);
@@ -73,24 +73,46 @@ function normalizeLoginPayload(data = {}) {
 
 function extractToken(data) {
   return (
+    data?.data?.access_token ||
     data?.token ||
     data?.accessToken ||
     data?.access_token ||
     data?.jwt ||
+    data?.data?.session?.access_token ||
     data?.session?.access_token ||
+    null
+  );
+}
+
+function extractRefreshToken(data) {
+  return (
+    data?.data?.refresh_token ||
+    data?.refreshToken ||
+    data?.refresh_token ||
+    data?.data?.session?.refresh_token ||
+    data?.session?.refresh_token ||
     null
   );
 }
 
 function persistBackendSession(data) {
   const token = extractToken(data);
+  const refreshToken = extractRefreshToken(data);
 
   localStorage.setItem("user", JSON.stringify(data));
 
   if (token) {
     localStorage.setItem("token", token);
+    localStorage.setItem("access_token", token);
   } else {
     localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
+  }
+
+  if (refreshToken) {
+    localStorage.setItem("refresh_token", refreshToken);
+  } else {
+    localStorage.removeItem("refresh_token");
   }
 
   clearApiCache();
@@ -111,11 +133,14 @@ function authRequest(path, body) {
 export function getStoredToken() {
   const storedUser = getStoredUser();
   return (
+    localStorage.getItem("access_token") ||
     localStorage.getItem("token") ||
+    storedUser?.data?.access_token ||
     storedUser?.token ||
     storedUser?.accessToken ||
     storedUser?.access_token ||
     storedUser?.jwt ||
+    storedUser?.data?.session?.access_token ||
     storedUser?.session?.access_token ||
     null
   );
@@ -138,7 +163,7 @@ export function getStoredUser() {
 
 export function getSessionUser() {
   const storedUser = getStoredUser();
-  return storedUser?.user || storedUser;
+  return storedUser?.usuario || storedUser?.user || storedUser?.data?.usuario || storedUser;
 }
 
 export function isAdminUser(user = getSessionUser()) {
@@ -164,6 +189,16 @@ export async function loginUser(credentials) {
   return persistBackendSession(data);
 }
 
+export function logAuthError(error, context = "auth") {
+  console.error("[DoarCuidar Auth]", {
+    context,
+    status: error?.statusCode ?? null,
+    message: error?.message ?? null,
+    error_code: error?.details?.error_code ?? error?.details?.code ?? null,
+    details: error?.details ?? null,
+  });
+}
+
 export async function registerUser(data) {
   return await authRequest(AUTH_ENDPOINTS.register, normalizeRegisterPayload(data));
 }
@@ -187,7 +222,7 @@ export function getAuthErrorFeedback(error, context = "default") {
     return {
       type: "error",
       title: "Não foi possível entrar",
-      message: AUTH_ERROR_MESSAGES.invalidLogin,
+      message: error?.message || AUTH_ERROR_MESSAGES.invalidLogin,
     };
   }
 
@@ -236,6 +271,8 @@ export function getAuthErrorFeedback(error, context = "default") {
 export function logoutUser() {
   localStorage.removeItem("user");
   localStorage.removeItem("token");
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
   clearApiCache();
   dispatchAuthChange();
 }

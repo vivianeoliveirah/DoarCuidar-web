@@ -11,6 +11,7 @@ import FeedbackMessage from "../../components/ui/FeedbackMessage";
 import {
   AUTH_ERROR_MESSAGES,
   getAuthErrorFeedback,
+  logAuthError,
   loginUser,
 } from "../../services/authService";
 
@@ -18,7 +19,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
@@ -26,7 +27,7 @@ export default function Login() {
     event.preventDefault();
     const normalizedEmail = email.trim();
 
-    if (!normalizedEmail || !senha) {
+    if (!normalizedEmail || !password) {
       setFeedback({
         type: "error",
         title: "Dados incompletos",
@@ -38,7 +39,7 @@ export default function Login() {
     try {
       setLoading(true);
       setFeedback(null);
-      await loginUser({ email: normalizedEmail, password: senha });
+      await loginUser({ email: normalizedEmail, password });
       toast.success("Login realizado com sucesso");
       const from = location.state?.from;
       navigate(
@@ -46,6 +47,7 @@ export default function Login() {
         { replace: true }
       );
     } catch (error) {
+      logAuthError(error, "login");
       setFeedback(getAuthErrorFeedback(error, "login"));
     } finally {
       setLoading(false);
@@ -74,8 +76,8 @@ export default function Login() {
             <div className="space-y-1">
               <CampoSenha
                 label="Sua senha"
-                value={senha}
-                onChange={(event) => setSenha(event.target.value)}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="Digite sua senha"
                 aria-invalid={feedback?.type === "error"}
               />

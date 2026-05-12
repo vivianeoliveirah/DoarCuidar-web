@@ -39,14 +39,14 @@ afterEach(() => {
 describe("feedback de autenticação", () => {
   it("mostra mensagem amigável para login inválido", () => {
     const feedback = getAuthErrorFeedback(
-      new ApiError("Credenciais inválidas", "HTTP", 401),
+      new ApiError("Credenciais inválidas do backend", "HTTP", 401),
       "login"
     );
 
     expect(feedback).toEqual({
       type: "error",
       title: "Não foi possível entrar",
-      message: AUTH_ERROR_MESSAGES.invalidLogin,
+      message: "Credenciais inválidas do backend",
     });
   });
 
@@ -78,46 +78,70 @@ describe("feedback de autenticação", () => {
 
   it("chama login na rota real /api/auth/login", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      jsonResponse({ user: { email: "teste@doarcuidar.com" }, token: "token" })
+      jsonResponse({
+        success: true,
+        message: "Login bem-sucedido",
+        data: {
+          session: {
+            access_token: "access-token",
+            refresh_token: "refresh-token",
+          },
+          access_token: "access-token",
+          refresh_token: "refresh-token",
+          usuario: {
+            id: "user-id",
+            email: "teste@teste.com",
+          },
+        },
+      })
     );
 
     await expect(
-      loginUser({ email: " TESTE@DoarCuidar.com ", password: "senha" })
-    ).resolves.toMatchObject({ token: "token" });
+      loginUser({ email: " teste@teste.com ", password: "12345678" })
+    ).resolves.toMatchObject({
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+      usuario: { email: "teste@teste.com" },
+    });
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://backend-doarcuidar.onrender.com/api/auth/login",
       expect.objectContaining({
         method: "POST",
-        headers: expect.objectContaining({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ email: "teste@doarcuidar.com", password: "senha" }),
+        headers: expect.objectContaining({
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({ email: "teste@teste.com", password: "12345678" }),
       })
     );
+
+    const [, options] = fetchMock.mock.calls[0];
+    expect(JSON.parse(options.body)).toEqual({
+      email: "teste@teste.com",
+      password: "12345678",
+    });
+    expect(localStorage.setItem).toHaveBeenCalledWith("access_token", "access-token");
+    expect(localStorage.setItem).toHaveBeenCalledWith("refresh_token", "refresh-token");
   });
 
-  it("normaliza aliases usuario/senha antes de chamar o backend", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      jsonResponse({ user: { email: "alias@doarcuidar.com" }, token: "token" })
-    );
-
-    await expect(
-      loginUser({ usuario: " Alias@DoarCuidar.com ", senha: "segredo" })
-    ).resolves.toMatchObject({ token: "token" });
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      "https://backend-doarcuidar.onrender.com/api/auth/login",
-      expect.objectContaining({
-        method: "POST",
-        headers: expect.objectContaining({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ email: "alias@doarcuidar.com", password: "segredo" }),
-      })
-    );
-  });
-
-  it("bloqueia login sem senha antes de enviar payload incompleto", async () => {
+  it("bloqueia login sem password antes de enviar payload incompleto", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
 
     await expect(loginUser({ email: "teste@doarcuidar.com" })).rejects.toMatchObject({
+      name: "ApiError",
+      type: "INVALID_INPUT",
+      statusCode: 400,
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("nao aceita usuario/senha no contrato novo de login", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+
+    await expect(
+      loginUser({ usuario: "teste@teste.com", senha: "12345678" })
+    ).rejects.toMatchObject({
       name: "ApiError",
       type: "INVALID_INPUT",
       statusCode: 400,
