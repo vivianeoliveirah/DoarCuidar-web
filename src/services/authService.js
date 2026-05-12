@@ -59,6 +59,17 @@ function normalizeRegisterPayload(data) {
   };
 }
 
+function normalizeLoginPayload(data = {}) {
+  const email = normalizeEmail(data.email || data.usuario || data.login);
+  const password = String(data.password || data.senha || "");
+
+  if (!email || !password) {
+    throw new ApiError(AUTH_ERROR_MESSAGES.emptyLogin, "INVALID_INPUT", 400);
+  }
+
+  return { email, password };
+}
+
 function extractToken(data) {
   return (
     data?.token ||
@@ -146,11 +157,8 @@ export function isAdminUser(user = getSessionUser()) {
   return role === "admin" || user.is_admin === true || tokenPayload?.is_admin === true;
 }
 
-export async function loginUser({ email, password }) {
-  const data = await authRequest(AUTH_ENDPOINTS.login, {
-    email: normalizeEmail(email),
-    password,
-  });
+export async function loginUser(credentials) {
+  const data = await authRequest(AUTH_ENDPOINTS.login, normalizeLoginPayload(credentials));
 
   return persistBackendSession(data);
 }

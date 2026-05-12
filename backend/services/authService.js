@@ -1,7 +1,25 @@
 import { supabaseAuth } from "./supabaseRest.js";
+import { HttpError } from "../lib/httpError.js";
 
 function normalizeEmail(email) {
   return String(email || "").trim().toLowerCase();
+}
+
+function normalizeLoginPayload(payload = {}) {
+  const email = normalizeEmail(payload.email || payload.usuario || payload.login);
+  const password = String(payload.password || payload.senha || "");
+
+  if (!email || !password) {
+    throw new HttpError("Informe e-mail e senha para entrar.", 400, {
+      required: ["email", "password"],
+      acceptedAliases: {
+        email: ["email", "usuario", "login"],
+        password: ["password", "senha"],
+      },
+    });
+  }
+
+  return { email, password };
 }
 
 function normalizeUser(user) {
@@ -21,13 +39,12 @@ function normalizeUser(user) {
   };
 }
 
-export async function login({ email, password }) {
+export async function login(payload = {}) {
+  const credentials = normalizeLoginPayload(payload);
+
   const data = await supabaseAuth("/token?grant_type=password", {
     method: "POST",
-    body: JSON.stringify({
-      email: normalizeEmail(email),
-      password,
-    }),
+    body: JSON.stringify(credentials),
   });
 
   return {

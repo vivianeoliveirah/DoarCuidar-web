@@ -90,4 +90,33 @@ describe("feedback de autenticação", () => {
       })
     );
   });
+
+  it("normaliza aliases usuario/senha antes de chamar o backend", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ user: { email: "alias@doarcuidar.com" }, token: "token" })
+    );
+
+    await expect(
+      loginUser({ usuario: " Alias@DoarCuidar.com ", senha: "segredo" })
+    ).resolves.toMatchObject({ token: "token" });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend-doarcuidar.onrender.com/api/auth/login",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ email: "alias@doarcuidar.com", password: "segredo" }),
+      })
+    );
+  });
+
+  it("bloqueia login sem senha antes de enviar payload incompleto", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+
+    await expect(loginUser({ email: "teste@doarcuidar.com" })).rejects.toMatchObject({
+      name: "ApiError",
+      type: "INVALID_INPUT",
+      statusCode: 400,
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 });
