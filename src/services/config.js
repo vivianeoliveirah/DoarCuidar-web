@@ -1,7 +1,7 @@
 const DEFAULT_API_URL = "https://backend-doarcuidar.onrender.com";
 
 function normalizeApiUrl(value) {
-  return String(value || "").trim().replace(/\/$/, "");
+  return String(value || "").trim().replace(/\/$/, "").replace(/\/api$/, "");
 }
 
 function getEnvApiUrl() {

@@ -3,10 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../services/api";
 import {
   AUTH_ERROR_MESSAGES,
-  PASSWORD_RESET_UNAVAILABLE_MESSAGE,
   getAuthErrorFeedback,
   loginUser,
   registerUser,
+  requestPasswordReset,
 } from "../services/authService";
 
 function jsonResponse(body, init = {}) {
@@ -50,19 +50,6 @@ describe("feedback de autenticação", () => {
     });
   });
 
-  it("trata recuperação de senha indisponível como aviso do protótipo", () => {
-    const feedback = getAuthErrorFeedback(
-      new ApiError(PASSWORD_RESET_UNAVAILABLE_MESSAGE, "UNAVAILABLE", 501),
-      "password-reset"
-    );
-
-    expect(feedback).toEqual({
-      type: "warning",
-      title: PASSWORD_RESET_UNAVAILABLE_MESSAGE,
-      message: AUTH_ERROR_MESSAGES.unavailable,
-    });
-  });
-
   it("trata erro de servidor sem quebrar a tela", () => {
     const feedback = getAuthErrorFeedback(
       new ApiError("Erro HTTP 500", "HTTP", 500)
@@ -74,6 +61,21 @@ describe("feedback de autenticação", () => {
       message: AUTH_ERROR_MESSAGES.server,
     });
   });
+
+  it("nao mostra autenticação indisponível quando a API estiver temporariamente inacessível", () => {
+    const feedback = getAuthErrorFeedback(
+      new ApiError("API não configurada.", "UNAVAILABLE"),
+      "password-reset"
+    );
+
+    expect(feedback).toEqual({
+      type: "warning",
+      title: "Não conseguimos enviar as instruções",
+      message: AUTH_ERROR_MESSAGES.unavailable,
+    });
+    expect(feedback.message).not.toContain("Autenticação indisponível");
+  });
+
   it("chama login na rota real /api/auth/login", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       jsonResponse({ user: { email: "teste@doarcuidar.com" }, token: "token" })
@@ -87,6 +89,7 @@ describe("feedback de autenticação", () => {
       "https://backend-doarcuidar.onrender.com/api/auth/login",
       expect.objectContaining({
         method: "POST",
+        headers: expect.objectContaining({ "Content-Type": "application/json" }),
         body: JSON.stringify({ email: "teste@doarcuidar.com", password: "senha" }),
       })
     );
@@ -105,6 +108,7 @@ describe("feedback de autenticação", () => {
       "https://backend-doarcuidar.onrender.com/api/auth/login",
       expect.objectContaining({
         method: "POST",
+        headers: expect.objectContaining({ "Content-Type": "application/json" }),
         body: JSON.stringify({ email: "alias@doarcuidar.com", password: "segredo" }),
       })
     );
@@ -151,6 +155,74 @@ describe("feedback de autenticação", () => {
           cidade: "",
           uf: "",
         }),
+      })
+    );
+  });
+
+  it("normaliza aliases no cadastro antes de chamar o backend", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ user: { email: "alias@doarcuidar.com", nome: "Alias Doador" } }, { status: 201 })
+    );
+
+    await expect(
+      registerUser({
+        username: " Alias Doador ",
+        usuario: " Alias@DoarCuidar.com ",
+        senha: "segredo123",
+      })
+    ).resolves.toMatchObject({ user: { email: "alias@doarcuidar.com" } });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend-doarcuidar.onrender.com/api/auth/register",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          nome: "Alias Doador",
+          email: "alias@doarcuidar.com",
+          password: "segredo123",
+          role: "user",
+          telefone: "",
+          endereco: "",
+          cep: "",
+          cidade: "",
+          uf: "",
+        }),
+      })
+    );
+  });
+
+  it("chama recuperacao de senha na rota real /api/auth/password-reset", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ ok: true })
+    );
+
+    await expect(
+      requestPasswordReset({ email: " RESET@DoarCuidar.com " })
+    ).resolves.toEqual({ ok: true });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend-doarcuidar.onrender.com/api/auth/password-reset",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ email: "reset@doarcuidar.com" }),
+      })
+    );
+  });
+
+  it("normaliza alias usuario na recuperacao de senha", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ ok: true })
+    );
+
+    await expect(
+      requestPasswordReset({ usuario: " Alias@DoarCuidar.com " })
+    ).resolves.toEqual({ ok: true });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend-doarcuidar.onrender.com/api/auth/password-reset",
+      expect.objectContaining({
+        body: JSON.stringify({ email: "alias@doarcuidar.com" }),
       })
     );
   });

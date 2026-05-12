@@ -4,6 +4,7 @@ import { API_BASE_URL } from "./config";
 const AUTH_ENDPOINTS = {
   login: "/api/auth/login",
   register: "/api/auth/register",
+  passwordReset: "/api/auth/password-reset",
 };
 const AUTH_CHANGE_EVENT = "doarcuidar-auth-change";
 const PASSWORD_RESET_UNAVAILABLE_MESSAGE =
@@ -19,7 +20,7 @@ const AUTH_ERROR_MESSAGES = {
   network:
     "Não foi possível conectar ao sistema. Verifique sua internet e tente novamente.",
   unavailable:
-    "Autenticação indisponível. Verifique a configuração do backend.",
+    "Não foi possível conectar ao servidor de autenticação. Tente novamente em instantes.",
   fallback:
     "Algo deu errado ao processar sua solicitação. Tente novamente ou verifique suas informações.",
 };
@@ -47,8 +48,8 @@ function normalizeEmail(email) {
 
 function normalizeRegisterPayload(data) {
   return {
-    nome: String(data.nome || data.name || "").trim(),
-    email: normalizeEmail(data.email),
+    nome: String(data.nome || data.username || data.name || "").trim(),
+    email: normalizeEmail(data.email || data.usuario || data.login),
     password: String(data.password || data.senha || ""),
     role: data.role || "user",
     telefone: data.telefone || "",
@@ -168,18 +169,17 @@ export async function registerUser(data) {
 }
 
 export async function requestPasswordReset(email) {
-  const value = typeof email === "object" ? email?.email : email;
+  const value =
+    typeof email === "object"
+      ? email?.email || email?.usuario || email?.login
+      : email;
   const normalizedEmail = normalizeEmail(value);
 
   if (!normalizedEmail) {
     throw new ApiError(AUTH_ERROR_MESSAGES.emptyLogin, "INVALID_INPUT", 400);
   }
 
-  throw new ApiError(
-    "Recuperação de senha indisponível no backend atual.",
-    "UNAVAILABLE",
-    501
-  );
+  return await authRequest(AUTH_ENDPOINTS.passwordReset, { email: normalizedEmail });
 }
 
 export function getAuthErrorFeedback(error, context = "default") {
@@ -194,7 +194,10 @@ export function getAuthErrorFeedback(error, context = "default") {
   if (error?.type === "UNAVAILABLE" || error?.statusCode === 501) {
     return {
       type: "warning",
-      title: context === "password-reset" ? PASSWORD_RESET_UNAVAILABLE_MESSAGE : "Autenticação não configurada",
+      title:
+        context === "password-reset"
+          ? "Não conseguimos enviar as instruções"
+          : "Não conseguimos conectar ao servidor",
       message: AUTH_ERROR_MESSAGES.unavailable,
     };
   }

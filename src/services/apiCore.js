@@ -113,7 +113,10 @@ function getStoredAuthToken(user = getStoredAuthUser()) {
 function getDefaultHeaders() {
   const user = getStoredAuthUser();
   const token = getStoredAuthToken(user);
-  const headers = { "Content-Type": "application/json" };
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
 
   if (token) headers.Authorization = `Bearer ${token}`;
   if (user?.id || user?.user?.id) headers["user-id"] = user.id || user.user.id;

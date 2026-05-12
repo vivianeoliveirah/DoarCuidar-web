@@ -77,6 +77,7 @@ describe("tratamento de respostas da API", () => {
     expect(resolveApiBaseUrl("")).toBe(DEFAULT_API_URL);
     expect(resolveApiBaseUrl(undefined)).toBe(DEFAULT_API_URL);
     expect(normalizeApiUrl("https://exemplo.com/")).toBe("https://exemplo.com");
+    expect(normalizeApiUrl("https://exemplo.com/api")).toBe("https://exemplo.com");
   });
 
   it("chama instituicoes na rota real /api/instituicoes", async () => {
@@ -88,7 +89,13 @@ describe("tratamento de respostas da API", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://backend-doarcuidar.onrender.com/api/instituicoes?nome=amigos&uf=SP",
-      expect.objectContaining({ method: "GET" })
+      expect.objectContaining({
+        method: "GET",
+        headers: expect.objectContaining({
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        }),
+      })
     );
   });
 });
