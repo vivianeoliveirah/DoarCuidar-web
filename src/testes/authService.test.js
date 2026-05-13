@@ -79,19 +79,11 @@ describe("feedback de autenticação", () => {
   it("chama login na rota real /api/auth/login", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       jsonResponse({
-        success: true,
-        message: "Login bem-sucedido",
-        data: {
-          session: {
-            access_token: "access-token",
-            refresh_token: "refresh-token",
-          },
-          access_token: "access-token",
-          refresh_token: "refresh-token",
-          usuario: {
-            id: "user-id",
-            email: "teste@teste.com",
-          },
+        access_token: "access-token",
+        refresh_token: "refresh-token",
+        user: {
+          id: "user-id",
+          email: "teste@teste.com",
         },
       })
     );
@@ -101,7 +93,7 @@ describe("feedback de autenticação", () => {
     ).resolves.toMatchObject({
       access_token: "access-token",
       refresh_token: "refresh-token",
-      usuario: { email: "teste@teste.com" },
+      user: { email: "teste@teste.com" },
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -123,6 +115,10 @@ describe("feedback de autenticação", () => {
     });
     expect(localStorage.setItem).toHaveBeenCalledWith("access_token", "access-token");
     expect(localStorage.setItem).toHaveBeenCalledWith("refresh_token", "refresh-token");
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      "user",
+      JSON.stringify({ id: "user-id", email: "teste@teste.com" })
+    );
   });
 
   it("bloqueia login sem password antes de enviar payload incompleto", async () => {

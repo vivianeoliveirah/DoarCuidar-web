@@ -97,17 +97,8 @@ function getStoredAuthUser() {
 }
 
 function getStoredAuthToken(user = getStoredAuthUser()) {
-  return (
-    localStorage.getItem("token") ||
-    user?.token ||
-    user?.accessToken ||
-    user?.access_token ||
-    user?.jwt ||
-    user?.session?.access_token ||
-    user?.data?.token ||
-    user?.data?.access_token ||
-    null
-  );
+  void user;
+  return localStorage.getItem("access_token") || null;
 }
 
 function getDefaultHeaders() {

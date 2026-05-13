@@ -72,40 +72,27 @@ function normalizeLoginPayload(data = {}) {
 }
 
 function extractToken(data) {
-  return (
-    data?.data?.access_token ||
-    data?.token ||
-    data?.accessToken ||
-    data?.access_token ||
-    data?.jwt ||
-    data?.data?.session?.access_token ||
-    data?.session?.access_token ||
-    null
-  );
+  return data?.access_token || null;
 }
 
 function extractRefreshToken(data) {
-  return (
-    data?.data?.refresh_token ||
-    data?.refreshToken ||
-    data?.refresh_token ||
-    data?.data?.session?.refresh_token ||
-    data?.session?.refresh_token ||
-    null
-  );
+  return data?.refresh_token || null;
 }
 
 function persistBackendSession(data) {
   const token = extractToken(data);
   const refreshToken = extractRefreshToken(data);
+  const user = data?.user || null;
 
-  localStorage.setItem("user", JSON.stringify(data));
+  if (user) {
+    localStorage.setItem("user", JSON.stringify(user));
+  } else {
+    localStorage.removeItem("user");
+  }
 
   if (token) {
-    localStorage.setItem("token", token);
     localStorage.setItem("access_token", token);
   } else {
-    localStorage.removeItem("token");
     localStorage.removeItem("access_token");
   }
 
@@ -126,24 +113,13 @@ function authRequest(path, body) {
     method: "POST",
     body,
     cache: false,
+    normalize: false,
     timeout: 12000,
   });
 }
 
 export function getStoredToken() {
-  const storedUser = getStoredUser();
-  return (
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    storedUser?.data?.access_token ||
-    storedUser?.token ||
-    storedUser?.accessToken ||
-    storedUser?.access_token ||
-    storedUser?.jwt ||
-    storedUser?.data?.session?.access_token ||
-    storedUser?.session?.access_token ||
-    null
-  );
+  return localStorage.getItem("access_token") || null;
 }
 
 export function getStoredUser() {
@@ -162,8 +138,7 @@ export function getStoredUser() {
 }
 
 export function getSessionUser() {
-  const storedUser = getStoredUser();
-  return storedUser?.usuario || storedUser?.user || storedUser?.data?.usuario || storedUser;
+  return getStoredUser();
 }
 
 export function isAdminUser(user = getSessionUser()) {
@@ -270,7 +245,6 @@ export function getAuthErrorFeedback(error, context = "default") {
 
 export function logoutUser() {
   localStorage.removeItem("user");
-  localStorage.removeItem("token");
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   clearApiCache();
