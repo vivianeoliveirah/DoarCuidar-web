@@ -42,6 +42,32 @@ describe("tratamento de respostas da API", () => {
     });
   });
 
+  it("consome respostas JSON com response.json sem usar response.text", async () => {
+    const response = {
+      ok: true,
+      status: 200,
+      headers: {
+        get: vi.fn((header) =>
+          header === "content-type" ? "application/json" : null
+        ),
+      },
+      json: vi.fn().mockResolvedValue({
+        access_token: "access-token",
+        refresh_token: "refresh-token",
+        user: { email: "teste@teste.com" },
+      }),
+      text: vi.fn(),
+    };
+
+    await expect(handleResponse(response)).resolves.toEqual({
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+      user: { email: "teste@teste.com" },
+    });
+    expect(response.json).toHaveBeenCalledOnce();
+    expect(response.text).not.toHaveBeenCalled();
+  });
+
   it("usa a mensagem do backend em erro HTTP", async () => {
     await expect(
       handleResponse(jsonResponse({ message: "Dados inválidos" }, { status: 400 }))

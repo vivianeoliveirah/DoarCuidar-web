@@ -129,15 +129,7 @@ function createFetchOptions(method = "GET", body = null, signal, headers = getDe
 async function handleResponse(res, context = {}) {
   const contentType = res.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
-  let text;
-
-  try {
-    text = await res.text();
-  } catch {
-    throw new ApiError("Erro ao ler resposta do servidor", "NETWORK", null, context);
-  }
-
-  if (!text) {
+  if (res.status === 204 || res.headers.get("content-length") === "0") {
     if (res.ok) return null;
     throw new ApiError(`Erro HTTP ${res.status}`, "HTTP", res.status, context);
   }
@@ -149,7 +141,7 @@ async function handleResponse(res, context = {}) {
 
   let data;
   try {
-    data = JSON.parse(text);
+    data = await res.json();
   } catch {
     throw new ApiError("Resposta inválida do servidor", "PARSE", res.status, context);
   }
