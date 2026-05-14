@@ -97,7 +97,7 @@ describe("feedback de autenticação", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://backend-doarcuidar.onrender.com/api/auth/login",
+      "https://doarcuidar-1.onrender.com/api/auth/login",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({
@@ -160,7 +160,7 @@ describe("feedback de autenticação", () => {
     ).resolves.toMatchObject({ user: { email: "novo@doarcuidar.com" } });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://backend-doarcuidar.onrender.com/api/auth/register",
+      "https://doarcuidar-1.onrender.com/api/auth/register",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({ "Content-Type": "application/json" }),
@@ -193,7 +193,7 @@ describe("feedback de autenticação", () => {
     ).resolves.toMatchObject({ user: { email: "alias@doarcuidar.com" } });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://backend-doarcuidar.onrender.com/api/auth/register",
+      "https://doarcuidar-1.onrender.com/api/auth/register",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -211,7 +211,7 @@ describe("feedback de autenticação", () => {
     );
   });
 
-  it("chama recuperacao de senha na rota real /api/auth/password-reset", async () => {
+  it("chama recuperacao de senha na rota real /api/auth/forgot-password", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       jsonResponse({ ok: true })
     );
@@ -221,7 +221,7 @@ describe("feedback de autenticação", () => {
     ).resolves.toEqual({ ok: true });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://backend-doarcuidar.onrender.com/api/auth/password-reset",
+      "https://doarcuidar-1.onrender.com/api/auth/forgot-password",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({ "Content-Type": "application/json" }),
@@ -240,7 +240,7 @@ describe("feedback de autenticação", () => {
     ).resolves.toEqual({ ok: true });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://backend-doarcuidar.onrender.com/api/auth/password-reset",
+      "https://doarcuidar-1.onrender.com/api/auth/forgot-password",
       expect.objectContaining({
         body: JSON.stringify({ email: "alias@doarcuidar.com" }),
       })

@@ -114,7 +114,7 @@ describe("tratamento de respostas da API", () => {
     await expect(api.getInstituicoes("amigos", "sp")).resolves.toEqual([]);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://backend-doarcuidar.onrender.com/api/instituicoes?nome=amigos&uf=SP",
+      "https://doarcuidar-1.onrender.com/api/instituicoes?nome=amigos&uf=SP",
       expect.objectContaining({
         method: "GET",
         headers: expect.objectContaining({

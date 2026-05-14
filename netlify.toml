@@ -4,7 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "22"
-  VITE_API_URL = "https://backend-doarcuidar.onrender.com"
+  VITE_API_URL = "https://doarcuidar-1.onrender.com"
 
 [[redirects]]
   from = "/*"

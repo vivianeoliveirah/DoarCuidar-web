@@ -1,4 +1,4 @@
-const DEFAULT_API_URL = "https://backend-doarcuidar.onrender.com";
+const DEFAULT_API_URL = "https://doarcuidar-1.onrender.com";
 
 function normalizeApiUrl(value) {
   return String(value || "").trim().replace(/\/$/, "").replace(/\/api$/, "");

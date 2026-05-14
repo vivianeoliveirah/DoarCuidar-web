@@ -1,15 +1,12 @@
 # DoarCuidar Web
 
-Plataforma React/Vite para consulta de instituicoes beneficentes com backend Node/Express e banco Supabase PostgreSQL.
+Frontend React/Vite para consulta de instituicoes beneficentes via API remota do DoarCuidar.
 
 ## Arquitetura
 
 ```txt
 Frontend React/Vite
-  -> Backend Node/Express
-  -> Supabase PostgreSQL
-  -> Backend Node/Express
-  -> Frontend React/Vite
+  -> API remota DoarCuidar
 ```
 
 O frontend nao conecta diretamente ao Supabase. Ele consome apenas a API do backend configurada em `VITE_API_URL`.
@@ -19,16 +16,7 @@ O frontend nao conecta diretamente ao Supabase. Ele consome apenas a API do back
 Frontend, arquivo `.env` na raiz:
 
 ```env
-VITE_API_URL=https://backend-doarcuidar.onrender.com
-```
-
-Backend, arquivo `backend/.env`:
-
-```env
-SUPABASE_URL=https://rdfuuxaxsqhjvhnxhrgw.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
-PORT=3001
-CORS_ORIGIN=http://localhost:5173
+VITE_API_URL=https://doarcuidar-1.onrender.com
 ```
 
 Nunca coloque `SUPABASE_SERVICE_ROLE_KEY` no frontend ou em variaveis `VITE_*`.
@@ -39,12 +27,6 @@ Instale dependencias:
 
 ```bash
 npm install
-```
-
-Inicie o backend:
-
-```bash
-npm run dev:backend
 ```
 
 Inicie o frontend:
@@ -64,7 +46,7 @@ npm run dev
 - `DELETE /api/instituicoes/:id`
 - `POST /api/auth/login`
 - `POST /api/auth/register`
-- `POST /api/auth/password-reset`
+- `POST /api/auth/forgot-password`
 - `GET /api/doacoes`
 - `POST /api/doacoes`
 - `GET /api/perfil`

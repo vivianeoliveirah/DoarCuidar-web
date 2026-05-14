@@ -4,7 +4,7 @@ import { API_BASE_URL } from "./config";
 const AUTH_ENDPOINTS = {
   login: "/api/auth/login",
   register: "/api/auth/register",
-  passwordReset: "/api/auth/password-reset",
+  passwordReset: "/api/auth/forgot-password",
 };
 const AUTH_CHANGE_EVENT = "doarcuidar-auth-change";
 const PASSWORD_RESET_UNAVAILABLE_MESSAGE =
