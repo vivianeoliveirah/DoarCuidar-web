@@ -51,12 +51,6 @@ function normalizeRegisterPayload(data) {
     nome: String(data.nome || data.username || data.name || "").trim(),
     email: normalizeEmail(data.email || data.usuario || data.login),
     password: String(data.password || data.senha || ""),
-    role: data.role || "user",
-    telefone: data.telefone || "",
-    endereco: data.endereco || "",
-    cep: data.cep || "",
-    cidade: data.cidade || "",
-    uf: data.uf || "",
   };
 }
 
@@ -72,17 +66,17 @@ function normalizeLoginPayload(data = {}) {
 }
 
 function extractToken(data) {
-  return data?.access_token || null;
+  return data?.access_token || data?.data?.access_token || null;
 }
 
 function extractRefreshToken(data) {
-  return data?.refresh_token || null;
+  return data?.refresh_token || data?.data?.refresh_token || null;
 }
 
 function persistBackendSession(data) {
   const token = extractToken(data);
   const refreshToken = extractRefreshToken(data);
-  const user = data?.user || null;
+  const user = data?.user || data?.data?.user || null;
 
   if (user) {
     localStorage.setItem("user", JSON.stringify(user));

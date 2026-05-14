@@ -168,12 +168,6 @@ describe("feedback de autenticação", () => {
           nome: "Novo Doador",
           email: "novo@doarcuidar.com",
           password: "segredo123",
-          role: "user",
-          telefone: "11999999999",
-          endereco: "",
-          cep: "",
-          cidade: "",
-          uf: "",
         }),
       })
     );
@@ -200,14 +194,48 @@ describe("feedback de autenticação", () => {
           nome: "Alias Doador",
           email: "alias@doarcuidar.com",
           password: "segredo123",
-          role: "user",
-          telefone: "",
-          endereco: "",
-          cep: "",
-          cidade: "",
-          uf: "",
         }),
       })
+    );
+  });
+
+  it("persiste sessao quando o backend retorna envelope FastAPI", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        success: true,
+        message: "Login realizado com sucesso",
+        data: {
+          access_token: "access-token",
+          refresh_token: "refresh-token",
+          user: {
+            id: "user-id",
+            email: "teste@teste.com",
+          },
+        },
+      })
+    );
+
+    await expect(
+      loginUser({ email: " teste@teste.com ", password: "12345678" })
+    ).resolves.toMatchObject({
+      data: {
+        access_token: "access-token",
+        refresh_token: "refresh-token",
+        user: { email: "teste@teste.com" },
+      },
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://doarcuidar-1.onrender.com/api/auth/login",
+      expect.objectContaining({
+        method: "POST",
+      })
+    );
+    expect(localStorage.setItem).toHaveBeenCalledWith("access_token", "access-token");
+    expect(localStorage.setItem).toHaveBeenCalledWith("refresh_token", "refresh-token");
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      "user",
+      JSON.stringify({ id: "user-id", email: "teste@teste.com" })
     );
   });
 
