@@ -38,6 +38,10 @@ function asList(response) {
   return [];
 }
 
+function asDashboardData(response) {
+  return response?.data || response || {};
+}
+
 function hasValue(value) {
   return value !== undefined && value !== null && String(value).trim() !== "";
 }
@@ -133,12 +137,20 @@ export default function Dashboard() {
   const supportsResource = useApiResource(api.getDoacoes, {
     initialData: [],
     select: asList,
+    enabled: false,
+  });
+  const dashboardResource = useApiResource(api.getDashboard, {
+    initialData: {},
+    select: asDashboardData,
   });
 
 
   const dashboard = useMemo(() => {
     const institutions = institutionsResource.data || [];
-    const supports = supportsResource.data || [];
+    const remoteDashboard = dashboardResource.data || {};
+    const supports = Array.isArray(remoteDashboard.ultimas_doacoes)
+      ? remoteDashboard.ultimas_doacoes
+      : supportsResource.data || [];
     const withCnpj = institutions.filter((item) => hasValue(item.cnpj)).length;
     const withChannel = institutions.filter(hasOfficialChannel).length;
     const ufs = new Set(institutions.map((item) => item.uf).filter(Boolean));
@@ -146,6 +158,7 @@ export default function Dashboard() {
     return {
       institutions,
       supports,
+      supportCount: Number(remoteDashboard.doacoes_registradas ?? supports.length),
       withCnpj,
       withChannel,
       ufCount: ufs.size,
@@ -159,16 +172,16 @@ export default function Dashboard() {
         .sort((a, b) => getSupportDate(b) - getSupportDate(a))
         .slice(0, 6),
     };
-  }, [institutionsResource.data, supportsResource.data]);
+  }, [dashboardResource.data, institutionsResource.data, supportsResource.data]);
 
   const loading =
-    (institutionsResource.loading || supportsResource.loading) &&
+    (institutionsResource.loading || dashboardResource.loading) &&
     !dashboard.institutions.length;
-  const refreshing = institutionsResource.refreshing || supportsResource.refreshing;
+  const refreshing = institutionsResource.refreshing || dashboardResource.refreshing;
 
   const refetchAll = () => {
     institutionsResource.refetch();
-    supportsResource.refetch();
+    dashboardResource.refetch();
   };
 
   return (
@@ -201,9 +214,9 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {(institutionsResource.error || supportsResource.error) && (
+        {(institutionsResource.error || dashboardResource.error) && (
           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
-            {institutionsResource.error || supportsResource.error}
+            {institutionsResource.error || dashboardResource.error}
           </div>
         )}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -237,7 +250,7 @@ export default function Dashboard() {
           />
           <MetricCard
             title="Apoios registrados"
-            value={dashboard.supports.length}
+            value={dashboard.supportCount}
             description="Registros de acompanhamento, sem valor financeiro consolidado."
             icon={HeartHandshake}
             tone="emerald"

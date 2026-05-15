@@ -25,9 +25,21 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
 });
 
 function normalizeProfile(response) {
+  const doacoes = Array.isArray(response?.doacoes)
+    ? response.doacoes
+    : Array.isArray(response?.historico)
+      ? response.historico
+      : Array.isArray(response?.doacoes?.historico)
+        ? response.doacoes.historico
+        : [];
+
   return {
-    user: response?.user || getSessionUser(),
-    doacoes: Array.isArray(response?.doacoes) ? response.doacoes : [],
+    user: response?.user || response?.usuario || getSessionUser(),
+    doacoes,
+    totalApoios: response?.total_apoios ?? response?.doacoes?.total_apoios ?? doacoes.length,
+    valorTotal: Number(response?.valor_total ?? response?.doacoes?.valor_total ?? 0),
+    instituicaoMaisApoiada:
+      response?.instituicao_mais_apoiada || response?.doacoes?.instituicao_mais_apoiada || null,
   };
 }
 
@@ -49,9 +61,12 @@ export default function Perfil() {
 
   const user = profile?.user;
   const doacoes = useMemo(() => profile?.doacoes || [], [profile?.doacoes]);
+  const valorTotalPerfil = profile?.valorTotal;
+  const instituicaoMaisApoiada = profile?.instituicaoMaisApoiada;
 
   const summary = useMemo(() => {
-    const totalDoado = doacoes.reduce((acc, item) => acc + Number(item.valor || 0), 0);
+    const totalDoado =
+      valorTotalPerfil || doacoes.reduce((acc, item) => acc + Number(item.valor || 0), 0);
     const porOng = new Map();
 
     doacoes.forEach((item) => {
@@ -65,10 +80,14 @@ export default function Perfil() {
 
     return {
       ranking,
-      topOng: ranking[0],
+      topOng:
+        ranking[0] ||
+        (instituicaoMaisApoiada
+          ? { nome: instituicaoMaisApoiada, total: totalDoado }
+          : null),
       totalDoado,
     };
-  }, [doacoes]);
+  }, [doacoes, instituicaoMaisApoiada, valorTotalPerfil]);
 
   const sair = () => {
     logoutUser();

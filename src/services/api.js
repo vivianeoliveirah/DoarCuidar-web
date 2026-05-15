@@ -4,6 +4,7 @@ import { API_BASE_URL } from "./config";
 const API_ENDPOINTS = {
   instituicoes: "/api/instituicoes",
   doacoes: "/api/doacoes",
+  dashboard: "/api/dashboard",
   perfil: "/api/perfil",
 };
 
@@ -73,6 +74,12 @@ export const api = {
       if (isUnsupportedRead(error)) return [];
       throw error;
     }
+  },
+
+  async getDashboard() {
+    return await backendRequest(API_ENDPOINTS.dashboard, {
+      timeout: 12000,
+    });
   },
 
   async getPerfil() {

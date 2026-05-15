@@ -110,7 +110,6 @@ function getDefaultHeaders() {
   };
 
   if (token) headers.Authorization = `Bearer ${token}`;
-  if (user?.id || user?.user?.id) headers["user-id"] = user.id || user.user.id;
 
   return headers;
 }

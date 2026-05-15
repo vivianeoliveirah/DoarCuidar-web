@@ -124,4 +124,63 @@ describe("tratamento de respostas da API", () => {
       })
     );
   });
+
+  it("envia Authorization Bearer e nao envia user-id legado no POST de apoio", async () => {
+    localStorage.setItem("access_token", "access-token");
+    localStorage.setItem("user", JSON.stringify({ id: "user-id", email: "teste@teste.com" }));
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        success: true,
+        data: {
+          id: "apoio-id",
+          user_id: "user-id",
+          instituicao_nome: "Casa Teste",
+          valor: "50.00",
+          created_at: "2026-05-14T12:00:00Z",
+        },
+      }, { status: 201 })
+    );
+
+    await expect(
+      api.postDoacao({ instituicao_nome: "Casa Teste", valor: 50 })
+    ).resolves.toMatchObject({
+      id: "apoio-id",
+      user_id: "user-id",
+      instituicao_nome: "Casa Teste",
+    });
+
+    const [, options] = fetchMock.mock.calls[0];
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://doarcuidar-1.onrender.com/api/doacoes",
+      expect.objectContaining({ method: "POST" })
+    );
+    expect(options.headers.Authorization).toBe("Bearer access-token");
+    expect(options.headers["user-id"]).toBeUndefined();
+    expect(JSON.parse(options.body)).toEqual({
+      instituicao_nome: "Casa Teste",
+      valor: 50,
+    });
+  });
+
+  it("consulta dashboard publico sem depender de /api/doacoes autenticado", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        success: true,
+        data: {
+          doacoes_registradas: 2,
+          ultimas_doacoes: [{ id: "1", instituicao_nome: "Casa Teste" }],
+        },
+      })
+    );
+
+    await expect(api.getDashboard()).resolves.toMatchObject({
+      doacoes_registradas: 2,
+      ultimas_doacoes: [{ id: "1", instituicao_nome: "Casa Teste" }],
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://doarcuidar-1.onrender.com/api/dashboard",
+      expect.objectContaining({ method: "GET" })
+    );
+  });
 });
