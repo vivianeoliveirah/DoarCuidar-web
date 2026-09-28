@@ -18,6 +18,7 @@ const Doar = lazy(() => import("./pages/Doar/Doar"));
 const Perfil = lazy(() => import("./pages/Perfil/Perfil"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const Transparencia = lazy(() => import("./pages/Transparencia/Transparencia"));
+const AnaliseOscs = lazy(() => import("./pages/AnaliseOscs/AnaliseOscs"));
 
 function NotFound() {
   return (
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="/cadastro-instituicao" element={<Navigate to="/instituicoes" replace />} />
           <Route path="/instituicoes" element={<BuscarInstituicoes />} />
           <Route path="/transparencia" element={<Transparencia />} />
+          <Route path="/analise-oscs" element={<AnaliseOscs />} />
           <Route path="/buscar" element={<Navigate to="/instituicoes" replace />} />
           <Route path="/detalhes/:id" element={<DetalhesInstituicao />} />
 

@@ -6,6 +6,7 @@ const API_ENDPOINTS = {
   doacoes: "/api/doacoes",
   dashboard: "/api/dashboard",
   perfil: "/api/perfil",
+  analyticsOsc: "/api/analytics/osc",
 };
 
 function buildInstituicoesPath(query = "", uf = "") {
@@ -80,6 +81,48 @@ export const api = {
     return await backendRequest(API_ENDPOINTS.dashboard, {
       timeout: 12000,
     });
+  },
+
+  async getOscResumo() {
+    return await backendRequest(`${API_ENDPOINTS.analyticsOsc}/resumo`);
+  },
+
+  async getOscEstados() {
+    return await backendRequest(`${API_ENDPOINTS.analyticsOsc}/estados`);
+  },
+
+  async getOscAtividades(limit = 10) {
+    const safeLimit = Math.min(100, Math.max(1, Number(limit) || 10));
+    return await backendRequest(`${API_ENDPOINTS.analyticsOsc}/atividades?limit=${safeLimit}`);
+  },
+
+  async getOscNaturezas() {
+    return await backendRequest(`${API_ENDPOINTS.analyticsOsc}/naturezas`);
+  },
+
+  async getOscClusters() {
+    return await backendRequest(`${API_ENDPOINTS.analyticsOsc}/clusters`);
+  },
+
+  async getOscCluster(clusterId) {
+    return await backendRequest(`${API_ENDPOINTS.analyticsOsc}/clusters/${clusterId}`);
+  },
+
+  async getOscModelo() {
+    return await backendRequest(`${API_ENDPOINTS.analyticsOsc}/modelo`);
+  },
+
+  async getOscAnalytics() {
+    const [resumo, estados, atividades, naturezas, clusters, modelo] = await Promise.all([
+      api.getOscResumo(),
+      api.getOscEstados(),
+      api.getOscAtividades(10),
+      api.getOscNaturezas(),
+      api.getOscClusters(),
+      api.getOscModelo(),
+    ]);
+
+    return { resumo, estados, atividades, naturezas, clusters, modelo };
   },
 
   async getPerfil() {

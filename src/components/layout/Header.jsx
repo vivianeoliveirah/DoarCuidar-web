@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Heart,
   HeartHandshake,
+  BarChart3,
   FileCheck2,
   Home,
   LayoutDashboard,
@@ -102,6 +103,7 @@ export default function Header() {
       { to: "/", icon: Home, label: "Home" },
       { to: "/instituicoes", icon: Search, label: "Instituições" },
       { to: "/transparencia", icon: FileCheck2, label: "Transparencia" },
+      { to: "/analise-oscs", icon: BarChart3, label: "Análise das OSCs" },
       { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
       ...(user ? [{ to: "/perfil", icon: User, label: "Perfil" }] : []),
     ],
@@ -203,6 +205,13 @@ export default function Header() {
               className="hidden min-h-10 items-center justify-center rounded-full px-4 text-sm font-bold text-slate-600 transition hover:bg-slate-50 hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 sm:inline-flex"
             >
               Instituições
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/analise-oscs")}
+              className="hidden min-h-10 items-center justify-center rounded-full px-4 text-sm font-bold text-slate-600 transition hover:bg-slate-50 hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 md:inline-flex"
+            >
+              Análise das OSCs
             </button>
             <button
               type="button"
