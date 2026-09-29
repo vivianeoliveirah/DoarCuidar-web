@@ -36,6 +36,7 @@ import Panel from "../../components/dashboard/Panel";
 import Layout from "../../components/layout/Layout";
 import { useApiResource } from "../../hooks/useApiResource";
 import { api, getErrorMessage } from "../../services/api";
+import { getActivityAxisLabel, getMatrixBranchLabel } from "./presentation";
 
 const EMPTY_ANALYTICS = {
   resumo: null,
@@ -60,11 +61,6 @@ function formatNumber(value) {
 
 function formatPercent(value) {
   return `${decimalFormatter.format(Number(value) || 0)}%`;
-}
-
-function shortenLabel(value, size = 30) {
-  const text = String(value || "");
-  return text.length > size ? `${text.slice(0, size - 1)}…` : text;
 }
 
 function AnalyticsTooltip({ active, payload, label }) {
@@ -266,9 +262,9 @@ function ActivitiesChart({ atividades }) {
       title="Atividades econômicas predominantes"
       description="As atividades mais frequentes entre as OSCs presentes no conjunto analisado."
     >
-      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr] xl:items-center">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.25fr_0.75fr] xl:items-center">
         <div
-          className="h-[30rem] min-w-0"
+          className="h-[32rem] min-w-0"
           role="img"
           aria-label="Gráfico das dez atividades econômicas predominantes"
         >
@@ -283,10 +279,10 @@ function ActivitiesChart({ atividades }) {
               <YAxis
                 type="category"
                 dataKey="atividade"
-                width={180}
+                width={158}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => shortenLabel(value, 27)}
+                tickFormatter={getActivityAxisLabel}
                 tick={{ fontSize: 11, fill: "#475569" }}
               />
               <Tooltip content={<AnalyticsTooltip />} />
@@ -331,9 +327,9 @@ function NaturesChart({ naturezas }) {
       title="Natureza jurídica"
       description="Composição jurídica das organizações presentes nos dados analisados."
     >
-      <div className="grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-center">
+      <div className="flex min-w-0 flex-col gap-5">
         <div
-          className="h-72"
+          className="mx-auto h-80 w-full max-w-md"
           role="img"
           aria-label="Gráfico da distribuição por natureza jurídica"
         >
@@ -343,8 +339,8 @@ function NaturesChart({ naturezas }) {
                 data={naturezas}
                 dataKey="quantidade"
                 nameKey="natureza_juridica"
-                innerRadius={62}
-                outerRadius={100}
+                innerRadius={76}
+                outerRadius={124}
                 paddingAngle={3}
                 isAnimationActive={false}
               >
@@ -360,20 +356,28 @@ function NaturesChart({ naturezas }) {
           </ResponsiveContainer>
         </div>
 
-        <ul className="space-y-3">
+        <ul className="grid min-w-0 gap-x-5 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
           {naturezas.map((item, index) => (
-            <li key={item.natureza_juridica} className="flex items-start gap-3">
+            <li
+              key={item.natureza_juridica}
+              className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 border-t border-slate-100 py-3"
+            >
               <span
                 className="mt-1.5 h-3 w-3 shrink-0 rounded-sm"
                 style={{ backgroundColor: NATURE_COLORS[index % NATURE_COLORS.length] }}
                 aria-hidden="true"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-slate-900">{item.natureza_juridica}</p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {formatNumber(item.quantidade)} OSCs · {formatPercent(item.percentual_total)}
+                <p className="text-sm font-bold leading-5 text-slate-900">
+                  {item.natureza_juridica}
+                </p>
+                <p className="mt-1 text-xs font-medium text-slate-500">
+                  {formatNumber(item.quantidade)} OSCs
                 </p>
               </div>
+              <span className="whitespace-nowrap text-sm font-extrabold text-slate-700">
+                {formatPercent(item.percentual_total)}
+              </span>
             </li>
           ))}
         </ul>
@@ -479,7 +483,7 @@ function Profiles({ clusters, onSelectProfile }) {
   );
 }
 
-function DetailList({ title, items = [] }) {
+function DetailList({ title, items = [], formatCategory = (value) => value }) {
   return (
     <section>
       <h3 className="text-sm font-extrabold text-slate-950">{title}</h3>
@@ -491,7 +495,7 @@ function DetailList({ title, items = [] }) {
               className="flex items-start justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5"
             >
               <span className="text-sm font-medium leading-5 text-slate-700">
-                {item.categoria}
+                {formatCategory(item.categoria)}
               </span>
               <span className="whitespace-nowrap text-xs font-bold text-emerald-700">
                 {formatPercent(item.percentual_cluster)}
@@ -582,7 +586,11 @@ function ProfileDialog({ state, onClose, onRetry }) {
                   items={profile.naturezas_juridicas_predominantes}
                 />
                 <DetailList title="Principais estados" items={profile.estados_predominantes} />
-                <DetailList title="Matriz e filial" items={profile.matriz_filial} />
+                <DetailList
+                  title="Matriz e filial"
+                  items={profile.matriz_filial}
+                  formatCategory={getMatrixBranchLabel}
+                />
               </div>
             </>
           )}
@@ -741,7 +749,7 @@ export function AnaliseOscsContent({
           <>
             <Overview resumo={resumo} />
             {estados.length ? <StatesChart estados={estados} /> : null}
-            <div className="grid min-w-0 gap-6 xl:grid-cols-[1.45fr_0.55fr]">
+            <div className="grid min-w-0 gap-6 xl:grid-cols-[1.35fr_0.65fr]">
               {atividades.length ? <ActivitiesChart atividades={atividades} /> : null}
               {naturezas.length ? <NaturesChart naturezas={naturezas} /> : null}
             </div>

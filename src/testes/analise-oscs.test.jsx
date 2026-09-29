@@ -4,6 +4,10 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AnaliseOscsContent } from "../pages/AnaliseOscs/AnaliseOscs";
+import {
+  getActivityAxisLabel,
+  getMatrixBranchLabel,
+} from "../pages/AnaliseOscs/presentation";
 import { api, clearApiCache } from "../services/api";
 
 const summary = {
@@ -42,7 +46,8 @@ function buildCluster(id) {
       { categoria: "SÃO PAULO", quantidade: 10, percentual_cluster: 20 },
     ],
     matriz_filial: [
-      { categoria: "Matriz", quantidade: 10, percentual_cluster: 90 },
+      { categoria: "1", quantidade: 9, percentual_cluster: 90 },
+      { categoria: "0", quantidade: 1, percentual_cluster: 10 },
     ],
   };
 }
@@ -139,6 +144,19 @@ describe("integração da API analítica", () => {
 });
 
 describe("página Análise das OSCs", () => {
+  it("resume os rótulos do eixo sem alterar a descrição de origem", () => {
+    const atividade = "Atividades de associações de defesa de direitos sociais";
+
+    expect(getActivityAxisLabel(atividade)).toBe("Defesa de direitos sociais");
+    expect(atividade).toBe("Atividades de associações de defesa de direitos sociais");
+  });
+
+  it("apresenta os códigos de matriz e filial com rótulos semânticos", () => {
+    expect(getMatrixBranchLabel("1")).toBe("Matriz");
+    expect(getMatrixBranchLabel("0")).toBe("Filial");
+    expect(getMatrixBranchLabel("Matriz")).toBe("Matriz");
+  });
+
   it("renderiza o resumo formatado e os seis perfis retornados", () => {
     const html = renderContent({ data: analyticsData });
 
@@ -178,6 +196,8 @@ describe("página Análise das OSCs", () => {
     expect(html).toContain("Principais atividades");
     expect(html).toContain("Principais naturezas jurídicas");
     expect(html).toContain("Matriz e filial");
+    expect(html).toContain(">Matriz<");
+    expect(html).toContain(">Filial<");
   });
 
   it("apresenta o aviso metodológico obrigatório", () => {
