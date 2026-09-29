@@ -186,7 +186,7 @@ describe("recuperação de senha", () => {
     expect(screen.queryByText("Login de destino")).toBeNull();
   });
 
-  it("envia uma única vez, informa sucesso e redireciona ao login", async () => {
+  it("envia uma única vez e redireciona ao login após o sucesso", async () => {
     let finishRequest;
     const resetPasswordFn = vi.fn(
       () =>
@@ -204,11 +204,16 @@ describe("recuperação de senha", () => {
     fireEvent.submit(form);
 
     expect(resetPasswordFn).toHaveBeenCalledTimes(1);
+    expect(resetPasswordFn).toHaveBeenCalledWith({
+      password: "segredo1",
+      accessToken: "recovery-token",
+    });
     expect(screen.getByRole("button", { name: "Salvando..." }).disabled).toBe(true);
+    expect(window.location.hash).toBe("");
 
     await act(async () => finishRequest({ ok: true }));
-    expect(await screen.findByText("Senha redefinida")).toBeTruthy();
     expect(await screen.findByText("Login de destino")).toBeTruthy();
+    expect(screen.queryByText("Redefinir senha")).toBeNull();
   });
 });
 
