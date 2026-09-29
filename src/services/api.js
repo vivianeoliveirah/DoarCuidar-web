@@ -5,6 +5,7 @@ const API_ENDPOINTS = {
   instituicoes: "/api/instituicoes",
   doacoes: "/api/doacoes",
   dashboard: "/api/dashboard",
+  personalDashboard: "/api/dashboard/me",
   perfil: "/api/perfil",
   analyticsOsc: "/api/analytics/osc",
 };
@@ -79,6 +80,12 @@ export const api = {
 
   async getDashboard() {
     return await backendRequest(API_ENDPOINTS.dashboard, {
+      timeout: 12000,
+    });
+  },
+
+  async getPersonalDashboard() {
+    return await backendRequest(API_ENDPOINTS.personalDashboard, {
       timeout: 12000,
     });
   },

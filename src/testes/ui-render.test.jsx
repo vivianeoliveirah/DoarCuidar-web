@@ -38,14 +38,15 @@ describe("renderizacao acessivel das telas principais", () => {
     expect(html).toContain("type=\"password\"");
   });
 
-  it("Dashboard renderiza fallback demonstrativo sem depender da API", () => {
+  it("Dashboard renderiza somente a estrutura do painel pessoal", () => {
     const html = renderRoute(<Dashboard />, "/dashboard");
 
-    expect(html).toContain("Painel DoarCuidar");
-    expect(html).toContain("Instituições disponíveis");
+    expect(html).toContain("Meu Painel");
+    expect(html).toContain("Instituições apoiadas");
+    expect(html).toContain("Estados alcançados");
     expect(html).toContain("Apoios registrados");
-    expect(html).toContain("completude dos dados disponíveis");
-    expect(html).not.toContain("Próximos dados úteis");
+    expect(html).not.toContain("Instituições disponíveis");
+    expect(html).not.toContain("Com CNPJ");
   });
 
   it("Instituicoes renderiza busca e estado inicial de resultados", () => {

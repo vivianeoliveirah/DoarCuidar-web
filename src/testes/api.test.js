@@ -163,25 +163,37 @@ describe("tratamento de respostas da API", () => {
     });
   });
 
-  it("consulta dashboard publico sem depender de /api/doacoes autenticado", async () => {
+  it("consulta o painel pessoal com Bearer e sem enviar user_id", async () => {
+    localStorage.setItem("access_token", "access-token");
+    localStorage.setItem("user", JSON.stringify({ id: "user-id", email: "teste@teste.com" }));
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       jsonResponse({
-        success: true,
-        data: {
-          doacoes_registradas: 2,
-          ultimas_doacoes: [{ id: "1", instituicao_nome: "Casa Teste" }],
+        resumo: {
+          apoios_registrados: 2,
+          instituicoes_apoiadas: 1,
+          estados_alcancados: 1,
         },
+        ultimos_apoios: [{ id: "1", instituicao_nome: "Casa Teste" }],
+        evolucao_mensal: [],
+        instituicoes_apoiadas_detalhes: [],
       })
     );
 
-    await expect(api.getDashboard()).resolves.toMatchObject({
-      doacoes_registradas: 2,
-      ultimas_doacoes: [{ id: "1", instituicao_nome: "Casa Teste" }],
+    await expect(api.getPersonalDashboard()).resolves.toMatchObject({
+      resumo: { apoios_registrados: 2 },
+      ultimos_apoios: [{ id: "1", instituicao_nome: "Casa Teste" }],
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://backend-doarcuidar-1.onrender.com/api/dashboard",
-      expect.objectContaining({ method: "GET" })
+      "https://backend-doarcuidar-1.onrender.com/api/dashboard/me",
+      expect.objectContaining({
+        method: "GET",
+        headers: expect.objectContaining({ Authorization: "Bearer access-token" }),
+      })
     );
+    const [url, options] = fetchMock.mock.calls[0];
+    expect(url).not.toContain("user_id");
+    expect(options.body).toBeUndefined();
+    expect(options.headers["user-id"]).toBeUndefined();
   });
 });

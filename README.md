@@ -52,11 +52,11 @@ Na página `/redefinir-senha`, o token temporário é capturado do callback, rem
 | Detalhes da instituição | `/detalhes/:id` | Público |
 | Registro de apoio/doação | `/doar/:id` | Protegido |
 | Perfil | `/perfil` | Protegido |
-| Painel | `/dashboard` | Público |
+| Painel pessoal | `/dashboard` | Protegido |
 | Transparência | `/transparencia` | Público |
 | Análise das OSCs | `/analise-oscs` | Público |
 
-A rota `/painel` redireciona para `/dashboard`. Os nomes técnicos de arquivos e rotas permanecem inalterados.
+A rota `/painel` redireciona para `/dashboard`. O Painel usa `GET /api/dashboard/me` como fonte autenticada dos dados pessoais; a identidade é determinada pelo backend a partir do JWT. Os nomes técnicos de arquivos e rotas permanecem inalterados.
 
 ## Análise das OSCs
 
