@@ -1,4 +1,4 @@
-import { createElement, memo, useEffect, useMemo, useState } from "react";
+import { createElement, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Heart,
@@ -81,6 +81,9 @@ export default function Header() {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileMenuButtonRef = useRef(null);
+  const mobileMenuRef = useRef(null);
+  const mobileCloseButtonRef = useRef(null);
   const isHome = location.pathname === "/";
 
   useEffect(() => {
@@ -98,13 +101,55 @@ export default function Header() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const returnTarget = mobileMenuButtonRef.current;
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => {
+      mobileCloseButtonRef.current?.focus();
+    });
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+      const focusable = mobileMenuRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      returnTarget?.focus();
+    };
+  }, [mobileOpen]);
+
   const navLinks = useMemo(
     () => [
-      { to: "/", icon: Home, label: "Home" },
+      { to: "/", icon: Home, label: "Início" },
       { to: "/instituicoes", icon: Search, label: "Instituições" },
-      { to: "/transparencia", icon: FileCheck2, label: "Transparencia" },
+      { to: "/transparencia", icon: FileCheck2, label: "Transparência" },
       { to: "/analise-oscs", icon: BarChart3, label: "Análise das OSCs" },
-      { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/dashboard", icon: LayoutDashboard, label: "Painel" },
       ...(user ? [{ to: "/perfil", icon: User, label: "Perfil" }] : []),
     ],
     [user]
@@ -217,9 +262,9 @@ export default function Header() {
               type="button"
               onClick={() => navigate("/dashboard")}
               className="inline-flex min-h-10 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 px-4 text-sm font-bold text-emerald-700 transition hover:border-emerald-200 hover:bg-emerald-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
-              aria-label="Abrir dashboard"
+              aria-label="Abrir painel"
             >
-              Dashboard
+              Painel
             </button>
           </div>
         </div>
@@ -238,26 +283,45 @@ export default function Header() {
           <Brand />
 
           <button
+            ref={mobileMenuButtonRef}
             type="button"
-            onClick={() => setMobileOpen((prev) => !prev)}
+            onClick={() => setMobileOpen(true)}
             className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
             aria-expanded={mobileOpen}
             aria-controls="mobile-sidebar"
-            aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
+            aria-label="Abrir menu"
           >
-            {mobileOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
+            <Menu size={20} aria-hidden="true" />
           </button>
         </div>
       </header>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/50 lg:hidden">
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/50 lg:hidden"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setMobileOpen(false);
+          }}
+        >
           <aside
+            ref={mobileMenuRef}
             id="mobile-sidebar"
-            className="h-full w-[min(20rem,85vw)] bg-slate-950 p-5 text-white shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            className="relative h-full w-[min(20rem,85vw)] bg-slate-950 p-5 text-white shadow-2xl"
             aria-label="Menu mobile"
           >
-            {sidebar}
+            <button
+              ref={mobileCloseButtonRef}
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+              aria-label="Fechar menu"
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
+            <div className="h-full">{sidebar}</div>
           </aside>
         </div>
       )}

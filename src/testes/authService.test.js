@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "../services/api";
@@ -7,6 +9,7 @@ import {
   loginUser,
   registerUser,
   requestPasswordReset,
+  resetPassword,
 } from "../services/authService";
 
 function jsonResponse(body, init = {}) {
@@ -97,7 +100,7 @@ describe("feedback de autenticação", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://doarcuidar-1.onrender.com/api/auth/login",
+      "https://backend-doarcuidar-1.onrender.com/api/auth/login",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({
@@ -160,7 +163,7 @@ describe("feedback de autenticação", () => {
     ).resolves.toMatchObject({ user: { email: "novo@doarcuidar.com" } });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://doarcuidar-1.onrender.com/api/auth/register",
+      "https://backend-doarcuidar-1.onrender.com/api/auth/register",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({ "Content-Type": "application/json" }),
@@ -187,7 +190,7 @@ describe("feedback de autenticação", () => {
     ).resolves.toMatchObject({ user: { email: "alias@doarcuidar.com" } });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://doarcuidar-1.onrender.com/api/auth/register",
+      "https://backend-doarcuidar-1.onrender.com/api/auth/register",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -226,7 +229,7 @@ describe("feedback de autenticação", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://doarcuidar-1.onrender.com/api/auth/login",
+      "https://backend-doarcuidar-1.onrender.com/api/auth/login",
       expect.objectContaining({
         method: "POST",
       })
@@ -249,7 +252,7 @@ describe("feedback de autenticação", () => {
     ).resolves.toEqual({ ok: true });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://doarcuidar-1.onrender.com/api/auth/forgot-password",
+      "https://backend-doarcuidar-1.onrender.com/api/auth/forgot-password",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({ "Content-Type": "application/json" }),
@@ -258,6 +261,37 @@ describe("feedback de autenticação", () => {
     );
   });
 
+
+  it("envia a nova senha com o Bearer de recuperação explícito", async () => {
+    localStorage.setItem("access_token", "token-normal-da-sessao");
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ ok: true })
+    );
+
+    await expect(
+      resetPassword({
+        password: "nova-senha-segura",
+        accessToken: "recovery-access-token",
+      })
+    ).resolves.toEqual({ ok: true });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend-doarcuidar-1.onrender.com/api/auth/reset-password",
+      expect.objectContaining({
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer recovery-access-token",
+        },
+        body: JSON.stringify({ password: "nova-senha-segura" }),
+      })
+    );
+    expect(localStorage.setItem).not.toHaveBeenCalledWith(
+      expect.any(String),
+      "recovery-access-token"
+    );
+  });
   it("normaliza alias usuario na recuperacao de senha", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       jsonResponse({ ok: true })
@@ -268,10 +302,25 @@ describe("feedback de autenticação", () => {
     ).resolves.toEqual({ ok: true });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://doarcuidar-1.onrender.com/api/auth/forgot-password",
+      "https://backend-doarcuidar-1.onrender.com/api/auth/forgot-password",
       expect.objectContaining({
         body: JSON.stringify({ email: "alias@doarcuidar.com" }),
       })
     );
   });
-});
+
+  it("não depende do SDK do Supabase no fluxo de redefinição", () => {
+    const packageJson = JSON.parse(
+      readFileSync(new URL("../../package.json", import.meta.url), "utf8")
+    );
+    const resetPageSource = readFileSync(
+      new URL("../pages/Login/RedefinirSenha.jsx", import.meta.url),
+      "utf8"
+    );
+
+    expect(packageJson.dependencies?.["@supabase/supabase-js"]).toBeUndefined();
+    expect(resetPageSource).not.toContain("@supabase/supabase-js");
+    expect(resetPageSource).not.toContain("supabaseClient");
+    expect(resetPageSource).not.toContain(".from(");
+    expect(resetPageSource).not.toContain("updateUser");
+  });});

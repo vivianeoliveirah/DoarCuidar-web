@@ -5,6 +5,7 @@ const AUTH_ENDPOINTS = {
   login: "/api/auth/login",
   register: "/api/auth/register",
   passwordReset: "/api/auth/forgot-password",
+  passwordResetConfirmation: "/api/auth/reset-password",
 };
 const AUTH_CHANGE_EVENT = "doarcuidar-auth-change";
 const PASSWORD_RESET_UNAVAILABLE_MESSAGE =
@@ -184,6 +185,28 @@ export async function requestPasswordReset(email) {
   }
 
   return await authRequest(AUTH_ENDPOINTS.passwordReset, { email: normalizedEmail });
+}
+
+export async function resetPassword({ password, accessToken }) {
+  const normalizedPassword = String(password || "");
+  const recoveryAccessToken = String(accessToken || "").trim();
+
+  if (!normalizedPassword || !recoveryAccessToken) {
+    throw new ApiError(AUTH_ERROR_MESSAGES.validation, "INVALID_INPUT", 400);
+  }
+
+  return await requestJson(API_BASE_URL, AUTH_ENDPOINTS.passwordResetConfirmation, {
+    method: "POST",
+    body: { password: normalizedPassword },
+    cache: false,
+    normalize: false,
+    timeout: 12000,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + recoveryAccessToken,
+    },
+  });
 }
 
 export function getAuthErrorFeedback(error, context = "default") {

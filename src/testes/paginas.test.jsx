@@ -37,7 +37,7 @@ describe("renderização básica das páginas principais", () => {
   it("renderiza a busca de instituições com filtros e estado inicial", () => {
     const html = renderPage(<BuscarInstituicoes />, "/instituicoes");
 
-    expect(html).toContain("Buscar Institui");
+    expect(html).toContain("Buscar instituições");
     expect(html).toContain("Nome ou CNPJ");
     expect(html).toContain("Estado (UF)");
     expect(html).toContain("Atualizar lista");

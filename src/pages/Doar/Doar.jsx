@@ -96,15 +96,15 @@ export default function Doar() {
       <div className="mx-auto max-w-xl px-4">
         <Breadcrumb
           items={[
-            { label: "Buscar Instituições", href: "/instituicoes" },
+            { label: "Buscar instituições", href: "/instituicoes" },
             { label: instituicao.nome, href: `/detalhes/${id}` },
-            { label: "Doar" },
+            { label: "Registrar apoio" },
           ]}
         />
 
         <FormCard
           title="Registrar apoio"
-          subtitle={`Este registro fica no seu histórico. O pagamento deve ser feito pelos canais oficiais de: ${instituicao.nome}`}
+          subtitle={`Este registro fica no seu histórico. O pagamento deve ser feito pelos canais oficiais de ${instituicao.nome}.`}
         >
           <form onSubmit={handleDoar} className="space-y-6">
             <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
@@ -117,7 +117,7 @@ export default function Doar() {
             <InputTexto
               label="Valor do apoio (R$)"
               type="number"
-              placeholder="Ex: 50.00"
+              placeholder="Ex.: 50,00"
               value={valor}
               onChange={(event) => setValor(event.target.value)}
               required

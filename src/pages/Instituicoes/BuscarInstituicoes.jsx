@@ -58,7 +58,7 @@ export default function BuscarInstituicoes() {
               Rede DoarCuidar
             </p>
             <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
-              Buscar Instituições
+              Buscar instituições
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
               Encontre causas reais, filtre por estado e escolha uma instituição para apoiar com confiança.
@@ -80,7 +80,7 @@ export default function BuscarInstituicoes() {
           <InputTexto
             label="Nome ou CNPJ"
             name="q"
-            placeholder="Ex: Instituto..."
+            placeholder="Ex.: Instituto..."
             aria-label="Buscar instituição por nome ou CNPJ"
             value={busca}
             onChange={(event) => setBusca(event.target.value)}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -297,7 +297,7 @@ function ActivitiesChart({ atividades }) {
           </ResponsiveContainer>
         </div>
 
-        <ol className="space-y-2" aria-label="Ranking completo das atividades econômicas">
+        <ol className="space-y-2" aria-label="Lista completa das atividades econômicas">
           {atividades.map((item) => (
             <li
               key={item.atividade}
@@ -465,7 +465,7 @@ function Profiles({ clusters, onSelectProfile }) {
 
               <button
                 type="button"
-                onClick={() => onSelectProfile(cluster)}
+                onClick={(event) => onSelectProfile(cluster, event.currentTarget)}
                 className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 pt-2 pb-2 text-sm font-bold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-600"
                 aria-label={`Ver detalhes do perfil ${index + 1}`}
               >
@@ -510,7 +510,55 @@ function DetailList({ title, items = [], formatCategory = (value) => value }) {
   );
 }
 
-function ProfileDialog({ state, onClose, onRetry }) {
+export function ProfileDialog({ state, onClose, onRetry, returnFocusRef }) {
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!state.open) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const returnTarget = returnFocusRef?.current || document.activeElement;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      returnTarget?.focus?.();
+    };
+  }, [state.open, returnFocusRef]);
+
   if (!state.open) return null;
   const profile = state.data;
 
@@ -521,6 +569,7 @@ function ProfileDialog({ state, onClose, onRetry }) {
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="profile-dialog-title"
@@ -536,6 +585,7 @@ function ProfileDialog({ state, onClose, onRetry }) {
             </h2>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-50"
@@ -615,7 +665,7 @@ function Methodology({ modelo }) {
     ["Dimensões", formatNumber(modelo.numero_dimensoes)],
     ["Silhouette de referência", decimalFormatter.format(modelo.silhouette_score)],
     ["ARI de estabilidade", decimalFormatter.format(modelo.estabilidade_ari)],
-    ["Random state", modelo.seed],
+    ["Semente do modelo", modelo.seed],
   ];
 
   return (
@@ -630,8 +680,8 @@ function Methodology({ modelo }) {
           </h2>
           <p className="mt-4 text-sm leading-7 text-slate-300">
             O processo combina preparação, exploração e agrupamento dos dados públicos.
-            As métricas abaixo descrevem o comportamento técnico do modelo e não são
-            medidas de precisão ou qualidade institucional.
+            As métricas abaixo descrevem o comportamento técnico do modelo e não
+            avaliam as organizações analisadas.
           </p>
         </div>
 
@@ -683,6 +733,7 @@ export function AnaliseOscsContent({
   profileDetail = { open: false, loading: false, error: "", data: null },
   onCloseProfile = () => {},
   onRetryProfile = () => {},
+  profileTriggerRef,
 }) {
   const resumo = data.resumo;
   const estados = Array.isArray(data.estados) ? data.estados : [];
@@ -781,6 +832,7 @@ export function AnaliseOscsContent({
         state={profileDetail}
         onClose={onCloseProfile}
         onRetry={onRetryProfile}
+        returnFocusRef={profileTriggerRef}
       />
     </Layout>
   );
@@ -796,10 +848,12 @@ export default function AnaliseOscs() {
     error: "",
     data: null,
   });
+  const profileTriggerRef = useRef(null);
 
   const selectedClusterId = profileDetail.data?.cluster_id;
 
-  const loadProfile = async (cluster) => {
+  const loadProfile = async (cluster, trigger) => {
+    if (trigger) profileTriggerRef.current = trigger;
     setProfileDetail({ open: true, loading: true, error: "", data: cluster });
     try {
       const detail = await api.getOscCluster(cluster.cluster_id);
@@ -812,18 +866,6 @@ export default function AnaliseOscs() {
       }));
     }
   };
-
-  useEffect(() => {
-    if (!profileDetail.open) return undefined;
-
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        setProfileDetail({ open: false, loading: false, error: "", data: null });
-      }
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [profileDetail.open]);
 
   const retryProfile = () => {
     const cluster = resource.data?.clusters?.find(
@@ -844,6 +886,7 @@ export default function AnaliseOscs() {
       onCloseProfile: () =>
         setProfileDetail({ open: false, loading: false, error: "", data: null }),
       onRetryProfile: retryProfile,
+      profileTriggerRef,
     }),
     // The handlers intentionally track the current resource and selected profile state.
     // eslint-disable-next-line react-hooks/exhaustive-deps

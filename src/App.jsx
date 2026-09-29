@@ -7,6 +7,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 const Home = lazy(() => import("./pages/Home/Home"));
 const Login = lazy(() => import("./pages/Login/Login"));
 const RecuperarSenha = lazy(() => import("./pages/Login/RecuperarSenha"));
+const RedefinirSenha = lazy(() => import("./pages/Login/RedefinirSenha"));
 const CadastroUsuario = lazy(() => import("./pages/Cadastro/CadastroUsuario"));
 const BuscarInstituicoes = lazy(() =>
   import("./pages/Instituicoes/BuscarInstituicoes")
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenha />} />
           <Route path="/cadastro" element={<CadastroUsuario />} />
           <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
           <Route path="/cadastro-instituicao" element={<Navigate to="/instituicoes" replace />} />

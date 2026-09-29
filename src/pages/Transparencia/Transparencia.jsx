@@ -99,7 +99,7 @@ export default function Transparencia() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-14" aria-label="Etapas de verificacao institucional">
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-14" aria-label="Etapas de verificação institucional">
         <div className="max-w-3xl">
           <p className="text-sm font-bold uppercase tracking-[0.14em] text-emerald-700">
             Processo de verificação

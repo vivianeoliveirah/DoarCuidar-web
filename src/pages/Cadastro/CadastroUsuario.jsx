@@ -9,10 +9,7 @@ import FormCard from "../../components/ui/FormCard";
 import InputTexto from "../../components/ui/InputTexto";
 import CampoSenha from "../../components/ui/CampoSenha";
 import Button from "../../components/ui/Button";
-import SelectUF from "../../components/ui/SelectUF";
 import FeedbackMessage from "../../components/ui/FeedbackMessage";
-
-import { buscarCEP } from "../../services/cepService";
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -28,11 +25,6 @@ export default function CadastroUsuario() {
     email: "",
     senha: "",
     confirmarSenha: "",
-    telefone: "",
-    endereco: "",
-    cep: "",
-    cidade: "",
-    uf: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -45,24 +37,6 @@ export default function CadastroUsuario() {
     }));
   };
 
-  // ✅ CORRETO: fora do submit
-  const handleBuscarCEP = async () => {
-    try {
-      const data = await buscarCEP(form.cep);
-
-      setForm((prev) => ({
-        ...prev,
-        endereco: data.logradouro,
-        cidade: data.localidade,
-        uf: data.uf,
-      }));
-
-    } catch (error) {
-      const mensagem = getErrorMessage(error);
-      toast.error(mensagem);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFeedback(null);
@@ -70,7 +44,7 @@ export default function CadastroUsuario() {
     if (!form.nome.trim() || !form.email.trim() || !form.senha) {
       setFeedback({
         type: "error",
-        title: "Dados obrigatÃ³rios",
+        title: "Dados obrigatórios",
         message: "Informe nome, e-mail e senha para criar sua conta.",
       });
       return;
@@ -79,8 +53,8 @@ export default function CadastroUsuario() {
     if (!isValidEmail(form.email)) {
       setFeedback({
         type: "warning",
-        title: "E-mail invÃ¡lido",
-        message: "Digite um e-mail vÃ¡lido antes de continuar.",
+        title: "E-mail inválido",
+        message: "Digite um e-mail válido antes de continuar.",
       });
       return;
     }
@@ -110,11 +84,6 @@ export default function CadastroUsuario() {
         nome: form.nome,
         email: form.email,
         password: form.senha,
-        telefone: form.telefone,
-        endereco: form.endereco,
-        cep: form.cep,
-        cidade: form.cidade,
-        uf: form.uf,
       });
 
       toast.success("Conta criada com sucesso 🎉");
@@ -150,41 +119,6 @@ export default function CadastroUsuario() {
           <div className="grid md:grid-cols-2 gap-4">
             <CampoSenha label="Senha" value={form.senha} onChange={handleChange("senha")} required />
             <CampoSenha label="Confirmar senha" value={form.confirmarSenha} onChange={handleChange("confirmarSenha")} required />
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <InputTexto label="Telefone" value={form.telefone} onChange={handleChange("telefone")} />
-            <InputTexto label="Endereço" value={form.endereco} onChange={handleChange("endereco")} />
-          </div>
-
-          {/* CEP */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-            <div className="md:col-span-2">
-              <InputTexto
-                label="CEP"
-                value={form.cep}
-                onChange={handleChange("cep")}
-                placeholder="00000-000"
-              />
-            </div>
-
-            <div className="flex items-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBuscarCEP}
-                className="w-full h-11"
-              >
-                Buscar CEP
-              </Button>
-            </div>
-
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <InputTexto label="Cidade" value={form.cidade} onChange={handleChange("cidade")} />
-            <SelectUF value={form.uf} onChange={handleChange("uf")} />
           </div>
 
           <FeedbackMessage feedback={feedback} />

@@ -99,6 +99,7 @@ describe("tratamento de respostas da API", () => {
     );
   });
   it("usa fallback seguro quando VITE_API_URL nao estiver configurada", () => {
+    expect(DEFAULT_API_URL).toBe("https://backend-doarcuidar-1.onrender.com");
     expect(resolveApiBaseUrl()).toBe(API_BASE_URL);
     expect(resolveApiBaseUrl("")).toBe(DEFAULT_API_URL);
     expect(resolveApiBaseUrl(undefined)).toBe(DEFAULT_API_URL);
@@ -114,7 +115,7 @@ describe("tratamento de respostas da API", () => {
     await expect(api.getInstituicoes("amigos", "sp")).resolves.toEqual([]);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://doarcuidar-1.onrender.com/api/instituicoes?nome=amigos&uf=SP",
+      "https://backend-doarcuidar-1.onrender.com/api/instituicoes?nome=amigos&uf=SP",
       expect.objectContaining({
         method: "GET",
         headers: expect.objectContaining({
@@ -151,7 +152,7 @@ describe("tratamento de respostas da API", () => {
 
     const [, options] = fetchMock.mock.calls[0];
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://doarcuidar-1.onrender.com/api/doacoes",
+      "https://backend-doarcuidar-1.onrender.com/api/doacoes",
       expect.objectContaining({ method: "POST" })
     );
     expect(options.headers.Authorization).toBe("Bearer access-token");
@@ -179,7 +180,7 @@ describe("tratamento de respostas da API", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://doarcuidar-1.onrender.com/api/dashboard",
+      "https://backend-doarcuidar-1.onrender.com/api/dashboard",
       expect.objectContaining({ method: "GET" })
     );
   });

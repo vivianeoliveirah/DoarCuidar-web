@@ -123,7 +123,7 @@ export default function AdminDashboard() {
           <div>
             <p className="text-sm font-semibold text-emerald-700">Administração</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-              Dashboard Administrativo
+              Painel administrativo
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
               Gerencie instituições, acompanhe aprovações e mantenha a qualidade da rede DoarCuidar.
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
                 action={
                   <span className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
                     <ShieldCheck size={16} aria-hidden="true" />
-                    Acesso admin
+                    Acesso administrativo
                   </span>
                 }
               >

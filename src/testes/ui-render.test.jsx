@@ -37,8 +37,8 @@ describe("renderizacao acessivel das telas principais", () => {
   it("Dashboard renderiza fallback demonstrativo sem depender da API", () => {
     const html = renderRoute(<Dashboard />, "/dashboard");
 
-    expect(html).toContain("Dashboard DoarCuidar");
-    expect(html).toContain("Instituicoes disponiveis");
+    expect(html).toContain("Painel DoarCuidar");
+    expect(html).toContain("Instituições disponíveis");
     expect(html).toContain("Apoios registrados");
   });
 

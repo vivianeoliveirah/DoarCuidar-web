@@ -4,7 +4,7 @@ import { BarChart3, CheckCircle2, HeartHandshake, ShieldCheck } from "lucide-rea
 const benefits = [
   "Instituições organizadas por dados cadastrais e localização.",
   "Histórico de apoios acessível para acompanhamento do doador.",
-  "Indicadores visuais para entender cobertura e qualidade dos dados.",
+  "Indicadores visuais para entender cobertura e completude dos dados.",
   "Fluxo simples para buscar, comparar e acessar canais oficiais.",
 ];
 
@@ -35,7 +35,7 @@ export default function DarkBenefitsSection() {
           <div className="rounded-[1.5rem] bg-slate-900 p-5 ring-1 ring-white/10">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
-                <p className="text-sm font-semibold text-emerald-400">Dashboard DoarCuidar</p>
+                <p className="text-sm font-semibold text-emerald-400">Painel DoarCuidar</p>
                 <h3 className="mt-1 text-xl font-bold">Transparência dos dados</h3>
               </div>
               <ShieldCheck className="text-emerald-400" aria-hidden="true" />

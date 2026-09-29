@@ -51,7 +51,7 @@ function hasOfficialChannel(institution) {
 }
 
 function getInstitutionName(institution) {
-  return institution.nome_fantasia || institution.nome || institution.razao_social || "Instituicao";
+  return institution.nome_fantasia || institution.nome || institution.razao_social || "Instituição";
 }
 
 function getSupportDate(support) {
@@ -109,7 +109,7 @@ function buildQualityData(institutions) {
   return [
     { name: "CNPJ", value: withCnpj, percent: percent(withCnpj, total) },
     { name: "UF", value: withUf, percent: percent(withUf, total) },
-    { name: "Descricao", value: withDescription, percent: percent(withDescription, total) },
+    { name: "Descrição", value: withDescription, percent: percent(withDescription, total) },
     { name: "Canal oficial", value: withChannel, percent: percent(withChannel, total) },
   ];
 }
@@ -189,9 +189,9 @@ export default function Dashboard() {
       <section className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
         <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-950/5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-emerald-700">Painel de transparencia</p>
+            <p className="text-sm font-semibold text-emerald-700">Painel de transparência</p>
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
-              Dashboard DoarCuidar
+              Painel DoarCuidar
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
               Indicadores sobre busca, cobertura e qualidade dos dados institucionais.
@@ -221,7 +221,7 @@ export default function Dashboard() {
         )}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <MetricCard
-            title="Instituicoes disponiveis"
+            title="Instituições disponíveis"
             value={dashboard.institutions.length}
             description="Registros retornados pela API para consulta pública."
             icon={Building2}
@@ -279,7 +279,7 @@ export default function Dashboard() {
                     <XAxis dataKey="uf" tickLine={false} axisLine={false} />
                     <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar name="Instituicoes" dataKey="total" fill="#059669" radius={[8, 8, 0, 0]} />
+                    <Bar name="Instituições" dataKey="total" fill="#059669" radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -348,8 +348,8 @@ export default function Dashboard() {
             </Panel>
 
             <Panel
-              title="Instituicoes recentes"
-              description="Ultimos registros disponiveis para consulta."
+              title="Instituições recentes"
+              description="Últimos registros disponíveis para consulta."
             >
               <div className="space-y-3">
                 {dashboard.recentInstitutions.map((item) => (
@@ -372,7 +372,7 @@ export default function Dashboard() {
 
             <Panel
               title="Apoios registrados"
-              description="Historico de acompanhamento, sem confirmar pagamento real."
+              description="Histórico de acompanhamento, sem confirmar pagamento real."
             >
               {dashboard.recentSupports.length === 0 ? (
                 <p className="text-sm text-slate-500">Nenhum apoio registrado ainda.</p>
@@ -400,13 +400,13 @@ export default function Dashboard() {
             </Panel>
 
             <Panel
-              title="Proximos dados uteis"
+              title="Próximos dados úteis"
               description="Boas métricas para evoluir o produto sem depender de valor doado."
               className="xl:col-span-2"
             >
               <div className="grid gap-3 md:grid-cols-3">
                 {[
-                  "Instituicoes favoritadas por usuario.",
+                  "Instituições favoritadas por usuário.",
                   "Termos e estados mais pesquisados.",
                   "Quantidade de acessos aos canais oficiais.",
                 ].map((item) => (

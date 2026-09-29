@@ -9,13 +9,13 @@ const steps = [
   },
   {
     icon: Heart,
-    title: "Doe",
+    title: "Apoie",
     text: "Escolha uma causa confiável e siga para o fluxo de contribuição.",
   },
   {
     icon: CheckCircle,
     title: "Transforme",
-    text: "Acompanhe dados de impacto e transparência no painel analítico.",
+    text: "Acompanhe seus registros de apoio e consulte indicadores de transparência no painel analítico.",
   },
 ];
 

@@ -80,7 +80,7 @@ export default function DetalhesInstituicao() {
       <div className="mx-auto max-w-7xl px-4">
         <Breadcrumb
           items={[
-            { label: "Buscar Instituições", href: "/instituicoes" },
+            { label: "Buscar instituições", href: "/instituicoes" },
             { label: nome },
           ]}
         />
@@ -135,7 +135,7 @@ export default function DetalhesInstituicao() {
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Email oficial</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">E-mail oficial</p>
                   <p className="mt-2 flex items-center gap-2 text-sm text-slate-700">
                     <Mail size={16} aria-hidden="true" />
                     {instituicao.email || "Não informado"}

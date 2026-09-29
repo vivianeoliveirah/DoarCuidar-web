@@ -108,7 +108,7 @@ export default function Perfil() {
         <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 text-white sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-emerald-100">Área do doador</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight">Meu Perfil</h1>
+            <h1 className="mt-1 text-3xl font-bold tracking-tight">Meu perfil</h1>
           </div>
 
           <button
@@ -140,7 +140,7 @@ export default function Perfil() {
             </div>
 
             <h2 className="text-xl font-bold text-slate-950">{user?.nome || "Doador"}</h2>
-            <p className="mt-1 text-sm text-slate-500">{user?.email || "Email não informado"}</p>
+            <p className="mt-1 text-sm text-slate-500">{user?.email || "E-mail não informado"}</p>
 
             <div className="mt-6 space-y-4 border-t border-slate-100 pt-6 text-left">
               <p className="flex items-center gap-3 text-sm text-slate-600">

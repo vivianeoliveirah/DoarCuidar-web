@@ -30,7 +30,7 @@ export default function CadastroInstituicao() {
   function montarDescricaoCNPJ(data, descricaoAtual) {
     const partes = [
       data.cnae_fiscal_descricao,
-      data.situacao_cadastral ? `SituaÃ§Ã£o cadastral: ${data.situacao_cadastral}.` : null,
+      data.situacao_cadastral ? `Situação cadastral: ${data.situacao_cadastral}.` : null,
       data.municipio && data.uf ? `Localizada em ${data.municipio}/${data.uf}.` : null,
       data.descricao_porte ? `Porte: ${data.descricao_porte}.` : null,
     ].filter(Boolean);
@@ -136,17 +136,17 @@ export default function CadastroInstituicao() {
     <Layout className="py-12 bg-slate-50">
 
       <FormCard
-        title="Cadastrar Instituição"
+        title="Cadastrar instituição"
         subtitle="Sua ONG passará por análise antes de aparecer na plataforma."
       >
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
           <InputTexto
-            label="Nome da Instituição"
+            label="Nome da instituição"
             value={form.nome}
             onChange={handleChange("nome")}
-            placeholder="Ex: Instituto Esperança"
+            placeholder="Ex.: Instituto Esperança"
             required
           />
 
@@ -182,7 +182,7 @@ export default function CadastroInstituicao() {
           />
 
           <InputTexto
-            label="E-mail de Contato"
+            label="E-mail de contato"
             type="email"
             value={form.email}
             onChange={handleChange("email")}
@@ -192,7 +192,7 @@ export default function CadastroInstituicao() {
 
           <div>
             <label htmlFor={DESCRIPTION_ID} className="block text-sm font-medium text-slate-700 mb-1">
-              Descrição das Atividades
+              Descrição das atividades
             </label>
 
             <textarea
