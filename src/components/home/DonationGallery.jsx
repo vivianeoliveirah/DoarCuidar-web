@@ -83,7 +83,7 @@ export default function DonationGallery({ instituicoes = [] }) {
                   <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 ring-1 ring-emerald-100">
                       <ShieldCheck size={13} aria-hidden="true" />
-                      CNPJ verificado
+                      CNPJ consultado
                     </span>
                     <span className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-slate-700 ring-1 ring-slate-200">
                       Dados institucionais

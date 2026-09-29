@@ -1,7 +1,7 @@
 export default function ChartSkeleton() {
   return (
-    <div role="status" aria-live="polite" aria-label="Carregando dados do dashboard">
-      <span className="sr-only">Carregando dados do dashboard...</span>
+    <div role="status" aria-live="polite" aria-label="Carregando dados do painel">
+      <span className="sr-only">Carregando dados do painel...</span>
       <div className="h-80 animate-pulse rounded-2xl bg-slate-100 p-6" aria-hidden="true">
         <div className="mb-8 h-4 w-40 rounded-full bg-slate-200" />
         <div className="flex h-56 items-end gap-3">

@@ -4,18 +4,18 @@ import { CheckCircle, Heart, Search } from "lucide-react";
 const steps = [
   {
     icon: Search,
-    title: "Explore",
-    text: "Busque instituições por nome, estado ou CNPJ e compare informações essenciais.",
+    title: "Encontre",
+    text: "Busque instituições por nome, CNPJ ou estado.",
   },
   {
     icon: Heart,
-    title: "Apoie",
-    text: "Escolha uma causa confiável e siga para o fluxo de contribuição.",
+    title: "Conheça",
+    text: "Consulte informações institucionais e canais oficiais antes de decidir.",
   },
   {
     icon: CheckCircle,
-    title: "Transforme",
-    text: "Acompanhe seus registros de apoio e consulte indicadores de transparência no painel analítico.",
+    title: "Acompanhe",
+    text: "Registre seus apoios e consulte seu histórico no painel.",
   },
 ];
 

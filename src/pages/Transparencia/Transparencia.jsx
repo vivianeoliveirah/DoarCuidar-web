@@ -18,7 +18,7 @@ const validationSteps = [
   },
   {
     title: "Consulta em bases públicas",
-    text: "O protótipo consulta fontes públicas, como BrasilAPI e CNPJ.ws, para exibir informações institucionais.",
+    text: "A plataforma consulta fontes públicas, como BrasilAPI e CNPJ.ws, para exibir informações institucionais.",
     icon: Database,
   },
   {
@@ -52,7 +52,7 @@ export default function Transparencia() {
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_0.72fr] lg:items-center lg:py-16">
           <div>
             <p className="inline-flex rounded-full border border-emerald-100 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-700 shadow-sm">
-              Transparência e validação
+              Transparência e informação
             </p>
             <h1 className="mt-6 max-w-4xl text-4xl font-black leading-tight text-slate-950 sm:text-5xl">
               Como o DoarCuidar ajuda na escolha de uma instituição.
@@ -79,8 +79,8 @@ export default function Transparencia() {
                 <Scale size={22} aria-hidden="true" />
               </span>
               <div>
-                <p className="text-sm font-bold text-slate-950">Modelo do protótipo</p>
-                <p className="text-sm text-slate-500">Busca, detalhes e decisão</p>
+                <p className="text-sm font-bold text-slate-950">Informações para decidir</p>
+                <p className="text-sm text-slate-500">Busca, consulta e canais oficiais</p>
               </div>
             </div>
 
@@ -99,10 +99,10 @@ export default function Transparencia() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-14" aria-label="Etapas de verificação institucional">
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-14" aria-label="Etapas de apresentação das informações">
         <div className="max-w-3xl">
           <p className="text-sm font-bold uppercase tracking-[0.14em] text-emerald-700">
-            Processo de verificação
+            Como as informações são apresentadas
           </p>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950">
             Da busca até a decisão de apoiar.
@@ -139,7 +139,7 @@ export default function Transparencia() {
               Metodologia dos dados
             </p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950">
-              O que a validação confirma e o que ela não confirma.
+              O que os dados informam — e quais são seus limites
             </h2>
             <div className="mt-5 space-y-4 text-sm leading-7 text-slate-600">
               <p>
@@ -159,7 +159,7 @@ export default function Transparencia() {
           <aside className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-950">
             <div className="flex items-center gap-3 font-bold">
               <AlertTriangle size={22} aria-hidden="true" />
-              Limitações do protótipo
+              Limites das informações
             </div>
             <p className="mt-4 text-sm leading-7">
               O DoarCuidar não processa pagamentos, não substitui auditoria jurídica

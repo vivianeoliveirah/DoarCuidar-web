@@ -55,7 +55,7 @@ export default function HeroSection() {
         <div className="mt-7 flex flex-col items-center justify-center gap-3 text-sm font-semibold text-slate-700 sm:flex-row sm:gap-8">
           <span className="inline-flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
-            Dados verificados
+            Dados para consulta
           </span>
           <span className="inline-flex items-center gap-2">
             <Users className="h-4 w-4 text-emerald-600" aria-hidden="true" />

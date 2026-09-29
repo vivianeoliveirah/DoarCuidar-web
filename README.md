@@ -1,426 +1,194 @@
-# <h1 align="center">💚 Projeto Integrador III — DoarCuidar</h1>
+# DoarCuidar
 
-<p align="center">
-  Plataforma digital de transparência e acessibilidade para instituições beneficentes.
-</p>
+Frontend do DoarCuidar, plataforma web para consulta de organizações da sociedade civil, registro informativo de apoio e visualização de dados públicos.
 
-<p align="center">
-  <a href="#-descrição-do-projeto">Descrição</a> •
-  <a href="#-sobre-o-projeto">Sobre</a> •
-  <a href="#-funcionalidades">Funcionalidades</a> •
-  <a href="#-arquitetura">Arquitetura</a> •
-  <a href="#-como-executar">Como executar</a> •
-  <a href="#-tecnologias">Tecnologias</a> •
-  <a href="#-dashboard-e-análise-de-dados">Dashboard</a> •
-  <a href="#-acessibilidade">Acessibilidade</a> •
-  <a href="#-estrutura-do-projeto">Estrutura</a> •
-  <a href="#-roteiro-e-status">Status</a> •
-  <a href="#-autores">Autores</a>
-</p>
+Projeto desenvolvido no contexto do Projeto Integrador IV.
 
----
+- Frontend em produção: https://doarcuidar-web.viviany-oliveira.workers.dev
+- Backend em produção: https://backend-doarcuidar-1.onrender.com
 
-# 📄 Descrição do projeto
+> O DoarCuidar não processa pagamentos ou transações financeiras. O registro de apoio/doação possui finalidade informativa.
 
-O **DoarCuidar** é uma plataforma digital desenvolvida no Projeto Integrador III com foco em:
+## Arquitetura
 
-- transparência digital;
-- acessibilidade;
-- confiança informacional;
-- impacto social;
-- visualização de dados;
-- visibilidade para instituições beneficentes.
+A aplicação utiliza uma arquitetura desacoplada:
 
-O sistema foi idealizado para conectar doadores a instituições confiáveis por meio de consultas organizadas, indicadores visuais e validação cadastral baseada em CNPJ.
-
-O projeto utiliza arquitetura desacoplada:
-
-- **Frontend:** React + Vite
-- **Backend:** FastAPI (Python)
-- **Banco de dados:** PostgreSQL/Supabase
-- **Deploy:** Vercel + Render
-
----
-
-# Sobre o projeto
-
-O DoarCuidar foi criado para ajudar usuários a encontrar instituições beneficentes de forma mais segura, transparente e acessível.
-
-Muitas pequenas organizações possuem baixa visibilidade digital, dificultando o contato com possíveis doadores. Além disso, usuários frequentemente encontram dificuldades para verificar a confiabilidade de instituições em ambientes digitais.
-
-O projeto busca resolver esse problema por meio de:
-
-- busca organizada de instituições;
-- validação/simulação de consulta de CNPJ;
-- dashboards analíticos;
-- indicadores de impacto social;
-- experiência acessível e intuitiva;
-- transparência informacional.
-
-⚠️ O sistema NÃO realiza processamento financeiro.  
-Seu objetivo é atuar como intermediador informacional entre doadores e instituições.
-
----
-
-# Funcionalidades
-
-## 🔎 Instituições
-
-- [x] Busca de instituições por:
-  - nome
-  - palavra-chave
-  - UF
-  - CNPJ
-- [x] Listagem organizada em cards
-- [x] Página de detalhes da instituição
-- [x] Instituições em destaque
-
----
-
-## 👤 Usuários
-
-- [x] Cadastro de usuário
-- [x] Login
-- [x] Perfil do usuário
-- [x] Edição básica de dados
-
----
-
-## 📊 Dashboard e análise de dados
-
-- [x] Dashboard analítico
-- [x] Indicadores sociais
-- [x] Métricas visuais
-- [x] Cards estatísticos
-- [x] Estrutura para gráficos
-- [x] Indicadores de impacto social
-
----
-
-## 🔐 Segurança
-
-- [x] Estrutura para autenticação JWT
-- [x] Rotas protegidas
-- [x] Integração preparada para OAuth2
-- [x] Variáveis de ambiente
-
----
-
-## Acessibilidade
-
-- [x] Estrutura responsiva
-- [x] HTML semântico
-- [x] Labels e aria-attributes
-- [x] Navegação intuitiva
-- [x] Contraste visual consistente
-
----
-
-## Ambiente DEMO
-
-- [x] Dados fictícios para apresentação
-- [x] Fallback automático quando a API não estiver disponível
-- [x] Proteção contra respostas HTML inesperadas
-
----
-
-# Arquitetura
-
-O projeto utiliza arquitetura desacoplada:
-
-```txt
-Frontend (React/Vite)
-        ↓
-API REST (FastAPI)
-        ↓
-PostgreSQL / Supabase
+```text
+React
+  -> API REST FastAPI
+    -> Supabase
 ```
 
-Estrutura baseada em:
+O frontend não acessa o Supabase diretamente. Autenticação, persistência, consultas e operações administrativas passam pelo backend FastAPI.
 
-- componentização;
-- separação de responsabilidades;
-- services;
-- hooks;
-- layouts reutilizáveis;
-- API REST;
-- persistência em nuvem.
+Nenhuma chave ou credencial do Supabase deve ser adicionada ao frontend. Toda configuração privilegiada do Supabase pertence exclusivamente ao ambiente do backend.
 
----
+## Recuperação de senha
 
-# 🚀 Como executar
-
-## 1️⃣ Clonar o projeto
-
-```bash
-git clone https://github.com/<usuario>/<repositorio>.git
+```text
+React: /recuperar-senha
+  -> POST /api/auth/forgot-password
+    -> FastAPI
+      -> Supabase Auth envia o e-mail
+        -> callback para /redefinir-senha
+          -> frontend captura o recovery access token somente em memória
+            -> POST /api/auth/reset-password
+              -> FastAPI
+                -> Supabase Auth atualiza a senha
 ```
 
----
+Na página `/redefinir-senha`, o token temporário é capturado do callback, removido da URL com `history.replaceState` e enviado explicitamente ao backend no cabeçalho `Authorization`. Ele não é salvo em `localStorage` nem em `sessionStorage`.
 
-## 2️⃣ Frontend
+## Funcionalidades e rotas
+
+| Funcionalidade | Rota | Acesso |
+| --- | --- | --- |
+| Início | `/` | Público |
+| Login | `/login` | Público |
+| Cadastro | `/cadastro` | Público |
+| Recuperação de senha | `/recuperar-senha` | Público |
+| Redefinição de senha | `/redefinir-senha` | Público, por callback |
+| Instituições | `/instituicoes` | Público |
+| Detalhes da instituição | `/detalhes/:id` | Público |
+| Registro de apoio/doação | `/doar/:id` | Protegido |
+| Perfil | `/perfil` | Protegido |
+| Painel | `/dashboard` | Público |
+| Transparência | `/transparencia` | Público |
+| Análise das OSCs | `/analise-oscs` | Público |
+
+A rota `/painel` redireciona para `/dashboard`. Os nomes técnicos de arquivos e rotas permanecem inalterados.
+
+## Análise das OSCs
+
+A área apresenta uma análise de dados em escala baseada no conjunto público do Mapa das OSCs/IPEA.
+
+O Projeto Integrador IV utiliza aprendizagem de máquina não supervisionada com o algoritmo `MiniBatchKMeans` para identificar seis perfis estruturais. A interface gráfica permite explorar distribuições geográficas, atividades econômicas, naturezas jurídicas e a composição dos perfis.
+
+Dados preservados na análise:
+
+- 618.136 OSCs válidas;
+- 27 UFs;
+- 5.292 municípios;
+- 388 atividades econômicas;
+- 4 naturezas jurídicas;
+- 6 perfis estruturais.
+
+Os perfis são agrupamentos descritivos de características estruturais. Eles não são score, ranking ou avaliação de qualidade, confiabilidade, transparência, impacto, risco ou legitimidade das organizações.
+
+## Tecnologias
+
+### Aplicação
+
+- React 19 e React DOM;
+- Vite 7;
+- React Router DOM 7;
+- Recharts;
+- Tailwind CSS 4;
+- Lucide React;
+- React Hot Toast.
+
+### Desenvolvimento e qualidade
+
+- ESLint;
+- Vitest;
+- Testing Library;
+- jsdom;
+- PostCSS e Autoprefixer.
+
+As versões exatas estão registradas em `package.json` e `package-lock.json`.
+
+## Configuração
+
+Requisitos:
+
+- Node.js 22;
+- npm.
+
+Instale as dependências:
 
 ```bash
-cd frontend-doarcuidar
 npm install
+```
+
+Crie ou ajuste o arquivo `.env` do frontend:
+
+```env
+VITE_API_URL=https://backend-doarcuidar-1.onrender.com
+```
+
+`VITE_API_URL` é a única configuração necessária para apontar o frontend para a API. Não adicione URLs, chaves ou credenciais do Supabase aos arquivos de ambiente do frontend.
+
+Quando `VITE_API_URL` não está definida, a aplicação utiliza `https://backend-doarcuidar-1.onrender.com` como endereço padrão.
+
+## Execução local
+
+```bash
 npm run dev
 ```
 
-Aplicação:
+Por padrão: `http://localhost:5173`.
 
-```txt
-http://localhost:5173
-```
-
----
-
-## 3️⃣ Backend
+Comandos de qualidade e produção:
 
 ```bash
-cd backend-doarcuidar
-python -m venv venv
+npm test
+npm run lint
+npm run build
+npm run preview
 ```
 
-### Ativar ambiente virtual
+## Produção
 
-#### Windows (Git Bash)
+O frontend atual é uma aplicação estática hospedada no Cloudflare Workers:
 
-```bash
-source venv/Scripts/activate
+https://doarcuidar-web.viviany-oliveira.workers.dev
+
+O build é gerado pelo Vite no diretório `dist` com `npm run build`.
+
+A API FastAPI está hospedada no Render:
+
+https://backend-doarcuidar-1.onrender.com
+
+## Estrutura principal
+
+```text
+DoarCuidar-web/
+|-- public/
+|-- src/
+|   |-- assets/
+|   |-- components/
+|   |-- hooks/
+|   |-- pages/
+|   |-- routes/
+|   |-- services/
+|   |-- testes/
+|   |-- App.jsx
+|   |-- index.css
+|   `-- main.jsx
+|-- index.html
+|-- package.json
+|-- postcss.config.js
+|-- tailwind.config.js
+`-- vite.config.js
 ```
 
----
+## Segurança
 
-### Instalar dependências
+- O navegador se comunica com o backend FastAPI, não diretamente com o Supabase.
+- Credenciais privilegiadas permanecem exclusivamente no backend.
+- O recovery access token é temporário, mantido apenas em memória e removido da URL.
+- Exemplos de configuração não contêm chaves, tokens, senhas ou segredos reais.
+- Rotas que exigem autenticação utilizam proteção no frontend e validação pelo backend.
 
-```bash
-python -m pip install -r requirements.txt
-```
+## Acessibilidade
 
----
+A interface utiliza HTML semântico, labels, atributos ARIA, navegação por teclado, gerenciamento de foco em menus e modais, contraste visual e layouts responsivos.
 
-### Executar backend
+## Autores
 
-```bash
-python run.py
-```
-
-ou
-
-```bash
-uvicorn app.main:app --reload
-```
-
-Producao no Render:
-
-```bash
-gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
-```
-
----
-
-# Variáveis de ambiente
-
-## Frontend (.env)
-
-```env
-VITE_API_URL="https://sua-api.onrender.com"
-```
-
-O frontend deve chamar o backend para login, cadastro, instituicoes e doacoes. Nao exponha chaves do Supabase no Netlify para esses fluxos.
-
----
-
-## Backend (.env)
-
-```env
-ENV=production
-DEBUG=False
-TESTING=False
-SUPABASE_URL="https://seu-projeto.supabase.co"
-SUPABASE_SERVICE_ROLE_KEY="sua-chave-service-role-no-backend"
-CORS_ORIGINS="https://doarcuidar-web.netlify.app,http://localhost:5173"
-```
-
----
-
-# 🛠 Tecnologias
-
-## Frontend
-
-- React 18
-- Vite
-- React Router DOM
-- Tailwind CSS
-- Lucide React
-
----
-
-## Backend
-
-- Python
-- FastAPI
-- Uvicorn
-- Supabase Python client
-- PostgreSQL
-- Supabase
-
----
-
-## Banco de dados
-
-- PostgreSQL
-- Supabase
-
----
-
-## Nuvem / Deploy
-
-- Vercel
-- Render
-
----
-
-## Controle de versão
-
-- Git
-- GitHub
-
----
-
-## Integração contínua
-
-- GitHub Actions
-
----
-
-# 📊 Dashboard e análise de dados
-
-O sistema possui estrutura para dashboards analíticos com:
-
-- métricas sociais;
-- indicadores de instituições;
-- visualização de impacto;
-- análise de dados;
-- gráficos;
-- indicadores visuais.
-
-O objetivo é ampliar a transparência e facilitar a interpretação das informações pelos usuários.
-
----
-
-# Acessibilidade
-
-O projeto busca seguir princípios de acessibilidade digital conforme WCAG:
-
-- contraste adequado;
-- navegação intuitiva;
-- responsividade;
-- estrutura semântica;
-- elementos acessíveis;
-- foco em inclusão digital.
-
----
-
-# 📁 Estrutura do projeto
-
-```txt
-frontend/
- ├── src/
- │    ├── components/
- │    ├── pages/
- │    ├── layouts/
- │    ├── services/
- │    ├── hooks/
- │    ├── assets/
- │    └── routes/
- │
- ├── App.jsx
- ├── main.jsx
- └── vite.config.js
-
-backend/
- ├── app/
- │    ├── routes/
- │    ├── services/
- │    ├── models/
- │    ├── schemas/
- │    ├── database/
- │    └── core/
- │
- ├── run.py
- ├── requirements.txt
- └── .env
-```
-
----
-
-# Roteiro e status
-
-## ✅ Implementado
-
-- [x] React + Vite
-- [x] FastAPI
-- [x] PostgreSQL/Supabase
-- [x] Dashboard analítico
-- [x] Busca de instituições
-- [x] Página de detalhes
-- [x] Estrutura de autenticação
-- [x] Layout responsivo
-- [x] Estrutura desacoplada
-- [x] Deploy preparado
-- [x] Variáveis de ambiente
-- [x] Integração frontend/backend
-- [x] Estrutura para acessibilidade
-
----
-
-## 🚧 Em desenvolvimento
-
-- [ ] Autenticação completa OAuth2
-- [ ] Testes automatizados
-- [ ] Integração oficial Receita Federal
-- [ ] Favoritos/donatárias persistentes
-- [ ] Melhorias avançadas de acessibilidade
-
----
-
-# Contexto social
-
-O DoarCuidar busca ampliar a visibilidade de instituições beneficentes e fortalecer a confiança dos usuários em ambientes digitais de doação.
-
-O projeto foi pensado para organizações com baixa presença digital, facilitando o acesso da população a informações confiáveis sobre causas sociais.
-
----
-
-# Relevância acadêmica
-
-O projeto integra conhecimentos de:
-
-- desenvolvimento web;
-- arquitetura desacoplada;
-- APIs REST;
-- banco de dados;
-- acessibilidade digital;
-- cloud computing;
-- integração contínua;
-- análise de dados;
-- UX/UI;
-- engenharia de software.
-
----
-
-# 🦸 Autores
-
-Projeto desenvolvido pelos alunos:
-
-- Fábio
-- Ingrid
-- Jessica
-- Jose Edson Rodrigues
-- Keven
-- Viviane Oliveira Soares
-
----
-
-# 💚 DoarCuidar
+- Fábio;
+- Ingrid;
+- Jessica;
+- Jose Edson Rodrigues;
+- Keven;
+- Viviane Oliveira Soares.

@@ -156,7 +156,7 @@ export default function BuscarInstituicoes() {
 
                 <div className="mb-4 flex flex-wrap gap-2 text-xs font-semibold">
                   <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 ring-1 ring-emerald-100">
-                    CNPJ verificado
+                    CNPJ consultado
                   </span>
                   <span className="rounded-full bg-slate-50 px-2.5 py-1 text-slate-700 ring-1 ring-slate-200">
                     Dados institucionais

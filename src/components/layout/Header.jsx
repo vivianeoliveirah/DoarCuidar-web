@@ -203,18 +203,43 @@ export default function Header() {
       </nav>
 
       <div className="mt-auto space-y-3 border-t border-white/10 pt-5">
-        <button
-          type="button"
-          onClick={() => {
-            setMobileOpen(false);
-            navigate("/instituicoes");
-          }}
-          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-          aria-label="Buscar instituições"
-        >
-          <HeartHandshake size={18} aria-hidden="true" />
-          Buscar instituições
-        </button>
+        {user ? (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                navigate("/dashboard#doacoes");
+              }}
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+              aria-label="Consultar meu histórico"
+            >
+              <HeartHandshake size={18} aria-hidden="true" />
+              Consultar meu histórico
+            </button>
+            <p className="px-2 text-xs leading-5 text-slate-400">
+              Consulte seus apoios registrados no painel.
+            </p>
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                navigate("/login");
+              }}
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+              aria-label="Entrar na minha conta"
+            >
+              <LogIn size={18} aria-hidden="true" />
+              Entrar na minha conta
+            </button>
+            <p className="px-2 text-xs leading-5 text-slate-400">
+              Entre para registrar seus apoios e consultar seu histórico.
+            </p>
+          </>
+        )}
 
         {user && (
           <button
@@ -226,12 +251,6 @@ export default function Header() {
             <LogOut size={18} aria-hidden="true" />
             Sair
           </button>
-        )}
-
-        {!user && (
-          <p className="px-2 text-xs leading-5 text-slate-400">
-            Entre para registrar apoios e acompanhar seu histórico.
-          </p>
         )}
       </div>
     </div>

@@ -432,7 +432,7 @@ function Profiles({ clusters, onSelectProfile }) {
                   <Layers3 size={20} />
                 </span>
                 <span className="font-mono text-xs font-bold text-slate-400">
-                  Perfil {String(index + 1).padStart(2, "0")}
+                  Perfil estrutural {index + 1}
                 </span>
               </div>
 
@@ -709,14 +709,6 @@ function Methodology({ modelo }) {
               </div>
             ))}
           </dl>
-          <div className="mt-5">
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-              Limitações metodológicas
-            </p>
-            <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-300">
-              {modelo.limitacoes?.map((item) => <li key={item}>• {item}</li>)}
-            </ul>
-          </div>
         </details>
       </div>
     </section>
@@ -816,9 +808,9 @@ export function AnaliseOscsContent({
           <div className="mx-auto flex max-w-7xl items-start gap-4 px-4 py-7 sm:px-6">
             <Sparkles className="mt-0.5 h-6 w-6 shrink-0 text-amber-700" aria-hidden="true" />
             <div>
-              <h2 className="font-extrabold text-amber-950">Aviso metodológico</h2>
+              <h2 className="font-extrabold text-amber-950">Sobre os perfis identificados</h2>
               <p className="mt-2 max-w-5xl text-sm leading-7 text-amber-950">
-                Os perfis apresentados representam padrões estruturais identificados nos
+                Os perfis representam padrões estruturais encontrados nos
                 dados públicos analisados. Eles não constituem avaliação de qualidade,
                 confiabilidade, transparência, impacto social ou legitimidade das
                 organizações.

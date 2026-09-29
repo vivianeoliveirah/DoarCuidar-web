@@ -9,15 +9,13 @@ export default function PurposeQuoteSection() {
             <HeartHandshake size={21} strokeWidth={1.8} aria-hidden="true" />
           </div>
 
-          <blockquote className="mx-auto mt-5 max-w-3xl">
-            <p className="text-balance text-base font-medium leading-8 text-slate-800 sm:text-lg sm:leading-8">
-              “Perguntam-te que parte devem gastar (em caridade). Dize-lhes: Toda a caridade que fizerdes, deve ser para os pais, parentes, órfãos, necessitados e viajantes (desamparados). E sabei que todo o bem que fizerdes, Allah dele tomará consciência.”
-            </p>
-
-            <footer className="mt-5 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-emerald-700 sm:text-xs">
-              — 2ª Surata Al Bácara (A Vaca), 215
-            </footer>
-          </blockquote>
+          <h2 className="mt-5 text-balance text-2xl font-extrabold text-slate-950 sm:text-3xl">
+            Apoiar começa por conhecer.
+          </h2>
+          <p className="mx-auto mt-3 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
+            Encontre instituições, consulte informações públicas e escolha como
+            contribuir por meio dos canais oficiais.
+          </p>
         </div>
       </div>
     </section>

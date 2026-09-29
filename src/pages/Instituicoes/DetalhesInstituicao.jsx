@@ -71,8 +71,8 @@ export default function DetalhesInstituicao() {
     ["Cidade/UF", `${instituicao.cidade || instituicao.municipio || "-"} / ${instituicao.uf || "-"}`],
     ["Base de consulta", instituicao.fonte_validacao || "Consulta pública de CNPJ"],
     ["Área de atuação", instituicao.area_atuacao || instituicao.categoria || "Social"],
-    ["Última verificação", getLastVerification(instituicao)],
-    ["Fonte da validação", instituicao.fonte_validacao || "Consulta pública de CNPJ"],
+    ["Última atualização", getLastVerification(instituicao)],
+    ["Fonte dos dados", instituicao.fonte_validacao || "Consulta pública de CNPJ"],
   ];
 
   return (
@@ -95,7 +95,7 @@ export default function DetalhesInstituicao() {
 
                 <div>
                   <p className="text-sm font-medium text-slate-500">
-                    Perfil institucional verificado
+                    Informações institucionais
                   </p>
                   <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
                     {nome}
@@ -107,7 +107,7 @@ export default function DetalhesInstituicao() {
                     </span>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
                       <ShieldCheck size={16} aria-hidden="true" />
-                      CNPJ verificado
+                      CNPJ consultado
                     </span>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
                       Dados institucionais

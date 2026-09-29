@@ -18,7 +18,7 @@ import {
   HeartHandshake,
   MapPinned,
   RefreshCw,
-  SearchCheck,
+
 } from "lucide-react";
 
 import ChartSkeleton from "../../components/dashboard/ChartSkeleton";
@@ -194,7 +194,7 @@ export default function Dashboard() {
               Painel DoarCuidar
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Indicadores sobre busca, cobertura e qualidade dos dados institucionais.
+              Indicadores sobre instituições, cobertura e completude dos dados disponíveis.
               O painel não mede dinheiro arrecadado, porque o DoarCuidar não processa pagamentos.
             </p>
           </div>
@@ -203,7 +203,7 @@ export default function Dashboard() {
             type="button"
             onClick={refetchAll}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-            aria-label="Atualizar dados do dashboard"
+            aria-label="Atualizar dados do painel"
           >
             <RefreshCw
               size={16}
@@ -311,12 +311,12 @@ export default function Dashboard() {
             </Panel>
 
             <Panel
-              title="Qualidade dos dados"
+              title="Completude dos dados"
               description="Campos essenciais para a pessoa decidir com mais contexto."
               className="xl:col-span-2"
             >
               <div className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
-                <div className="h-72" aria-label="Gráfico de qualidade dos dados">
+                <div className="h-72" aria-label="Gráfico de completude dos dados">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={dashboard.qualityData} layout="vertical" margin={{ left: 24, right: 12 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
@@ -397,25 +397,6 @@ export default function Dashboard() {
                   })}
                 </div>
               )}
-            </Panel>
-
-            <Panel
-              title="Próximos dados úteis"
-              description="Boas métricas para evoluir o produto sem depender de valor doado."
-              className="xl:col-span-2"
-            >
-              <div className="grid gap-3 md:grid-cols-3">
-                {[
-                  "Instituições favoritadas por usuário.",
-                  "Termos e estados mais pesquisados.",
-                  "Quantidade de acessos aos canais oficiais.",
-                ].map((item) => (
-                  <div key={item} className="rounded-2xl bg-slate-50 p-4">
-                    <SearchCheck className="h-5 w-5 text-emerald-600" aria-hidden="true" />
-                    <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">{item}</p>
-                  </div>
-                ))}
-              </div>
             </Panel>
           </div>
         )}

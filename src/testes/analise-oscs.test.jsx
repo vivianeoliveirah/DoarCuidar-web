@@ -164,6 +164,9 @@ describe("página Análise das OSCs", () => {
     expect(html).toContain("618.136");
     expect(html).toContain("5.292");
     expect((html.match(/Ver composição/g) || [])).toHaveLength(6);
+    expect(html).toContain("Perfil estrutural 1");
+    expect(html).toContain("Perfil estrutural 6");
+    expect(html).not.toContain("Perfil 01");
   });
 
   it("renderiza o estado de carregamento", () => {
@@ -200,11 +203,24 @@ describe("página Análise das OSCs", () => {
     expect(html).toContain(">Filial<");
   });
 
-  it("apresenta o aviso metodológico obrigatório", () => {
+  it("preserva a metodologia e apresenta um único aviso principal", () => {
     const html = renderContent({ data: analyticsData });
 
-    expect(html).toContain("Aviso metodológico");
+    expect(html).toContain("Dados públicos");
+    expect(html).toContain("Tratamento dos dados");
+    expect(html).toContain("Análise exploratória");
+    expect(html).toContain("Aprendizagem não supervisionada");
+    expect(html).toContain("MiniBatchKMeans");
+    expect(html).toContain("Número de perfis (K)");
+    expect(html).toContain("618.136");
+    expect(html).toContain("69");
+    expect(html).toContain("Silhouette de referência");
+    expect(html).toContain("ARI de estabilidade");
+    expect(html).toContain("Semente do modelo");
+    expect(html).toContain("42");
+    expect((html.match(/Sobre os perfis identificados/g) || [])).toHaveLength(1);
     expect(html).toContain("não constituem avaliação de qualidade");
     expect(html).toContain("impacto social ou legitimidade");
+    expect(html).not.toContain("Limitações metodológicas");
   });
 });

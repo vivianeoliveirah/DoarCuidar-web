@@ -52,6 +52,6 @@ describe("acessibilidade dos componentes base", () => {
     expect(loader).toContain('role="status"');
     expect(loader).toContain("Carregando página...");
     expect(skeleton).toContain('role="status"');
-    expect(skeleton).toContain("Carregando dados do dashboard");
+    expect(skeleton).toContain("Carregando dados do painel");
   });
 });

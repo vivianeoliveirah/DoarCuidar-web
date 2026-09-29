@@ -5,6 +5,7 @@ import HeroSection from "../../components/home/HeroSection";
 import DonationGallery from "../../components/home/DonationGallery";
 import ComoFunciona from "../../components/home/ComoFunciona";
 import TransparencySection from "../../components/transparencia/TransparencySection";
+import PurposeQuoteSection from "../../components/transparencia/PurposeQuoteSection";
 import { useApiResource } from "../../hooks/useApiResource";
 import { api } from "../../services/api";
 
@@ -38,6 +39,7 @@ export default function Home() {
       <HeroSection />
       <DonationGallery instituicoes={destaques} />
       <TransparencySection />
+      <PurposeQuoteSection />
       <div id="conhecer-projeto">
         <ComoFunciona />
       </div>

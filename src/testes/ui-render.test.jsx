@@ -22,6 +22,10 @@ describe("renderizacao acessivel das telas principais", () => {
     expect(html).toContain("id=\"conteudo-principal\"");
     expect(html).toContain("<h1");
     expect(html).toContain("DoarCuidar");
+    expect(html).toContain("Apoiar começa por conhecer.");
+    expect(html).toContain("Busque instituições por nome, CNPJ ou estado.");
+    expect(html).toContain("Consulte informações institucionais e canais oficiais antes de decidir.");
+    expect(html).toContain("Registre seus apoios e consulte seu histórico no painel.");
   });
 
   it("Login renderiza campos rotulados e acao principal", () => {
@@ -40,6 +44,8 @@ describe("renderizacao acessivel das telas principais", () => {
     expect(html).toContain("Painel DoarCuidar");
     expect(html).toContain("Instituições disponíveis");
     expect(html).toContain("Apoios registrados");
+    expect(html).toContain("completude dos dados disponíveis");
+    expect(html).not.toContain("Próximos dados úteis");
   });
 
   it("Instituicoes renderiza busca e estado inicial de resultados", () => {

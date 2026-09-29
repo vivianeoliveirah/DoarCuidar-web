@@ -221,6 +221,14 @@ describe("menu móvel", () => {
     );
   }
 
+  it("oferece acesso à conta no CTA inferior para visitantes", () => {
+    renderHeader();
+
+    expect(screen.getByRole("button", { name: "Entrar na minha conta" })).toBeTruthy();
+    expect(
+      screen.getByText("Entre para registrar seus apoios e consultar seu histórico.")
+    ).toBeTruthy();
+  });
   it("abre com foco no X, fecha pelo X e também fecha com Escape", async () => {
     const user = userEvent.setup();
     renderHeader();
